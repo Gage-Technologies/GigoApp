@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import JourneyHomeHeader from '../components/JourneyHomeHeader';
 
 const Home = () => {
-    // Simulation of some states and data
     const [loading, setLoading] = useState(true);
     const [projects, setProjects] = useState([]);
 
-    // Simulate fetching data
+    // Simulated journey state data
+    const [startedJourney, setStartedJourney] = useState(false);
+    const [completedJourneyTasks, setCompletedJourneyTasks] = useState(5);
+    const [completedJourneyUnits, setCompletedJourneyUnits] = useState(3);
+    const [detourCount, setDetourCount] = useState(1);
+    const [incompletedJourneyTasks, setIncompletedJourneyTasks] = useState(2);
+
+    // Simulate fetching project data
     useEffect(() => {
         setTimeout(() => {
             setProjects([{ id: 1, title: "Project 1", description: "Description 1" }]);
@@ -16,18 +23,25 @@ const Home = () => {
 
     return (
         <ScrollView style={styles.container}>
+            <JourneyHomeHeader
+                startedJourney={startedJourney}
+                completedJourneyTasks={completedJourneyTasks}
+                completedJourneyUnits={completedJourneyUnits}
+                detourCount={detourCount}
+                incompletedJourneyTasks={incompletedJourneyTasks}
+            />
             <Text style={styles.header}>Welcome to GigoApp!</Text>
             <Button title="Click Me" onPress={() => Alert.alert('Button Clicked!')} />
-            {
-                loading ?
-                <Text>Loading projects...</Text> :
+            {loading ? (
+                <Text>Loading projects...</Text>
+            ) : (
                 projects.map(project => (
                     <View key={project.id} style={styles.card}>
                         <Text style={styles.cardTitle}>{project.title}</Text>
                         <Text>{project.description}</Text>
                     </View>
                 ))
-            }
+            )}
         </ScrollView>
     );
 };

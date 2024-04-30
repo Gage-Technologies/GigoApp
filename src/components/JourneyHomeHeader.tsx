@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import JourneyIcon from '../icons/JourneyIcon';
+import CompassIcon from '../icons/CompassIcon';
 
 const JourneyHomeHeader = ({ startedJourney, completedJourneyTasks, completedJourneyUnits, detourCount, incompletedJourneyTasks }) => {
     const theme = useTheme(); // This assumes you have theme setup
@@ -24,7 +24,7 @@ const JourneyHomeHeader = ({ startedJourney, completedJourneyTasks, completedJou
                         Embark on your Coding Journey
                     </Text>
                     <View style={{ alignItems: 'center', marginVertical: 16 }}>
-                        <JourneyIcon style={{ width: 200, height: 200 }} />
+                        <CompassIcon style={{ width: 200, height: 200 }} />
                     </View>
                     <TouchableOpacity style={[styles.button, {backgroundColor: theme.colors.buttonColor}]}>
                         <Text style={[styles.buttonText, {color: theme.colors.onButton}]}>Start Your Journey</Text>

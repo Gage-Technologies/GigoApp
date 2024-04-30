@@ -2,58 +2,42 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import CompassIcon from '../icons/CompassIcon';
+import AwesomeButton from "react-native-really-awesome-button";
 
-const JourneyHomeHeader = ({ startedJourney, completedJourneyTasks, completedJourneyUnits, detourCount, incompletedJourneyTasks }) => {
-    const theme = useTheme(); // This assumes you have theme setup
+
+const JourneyHomeHeader = ({ startedJourney }) => {
+    const theme = useTheme();
 
     return (
-        <View style={[styles.container, {padding: 16}]}>
-            {startedJourney ? (
-                <>
-                    <View style={[styles.statBox, {backgroundColor: theme.colors.primary}]}>
-                        <Text style={[styles.statValue, {color: theme.colors.onPrimary}]}>{completedJourneyTasks}</Text>
-                        <Text style={[styles.statLabel, {color: theme.colors.onPrimary}]}>Completed Stops</Text>
-                    </View>
-                    <TouchableOpacity style={[styles.button, {backgroundColor: theme.colors.buttonColor}]}>
-                        <Text style={[styles.buttonText, {color: theme.colors.onButton}]}>Continue Your Journey</Text>
-                    </TouchableOpacity>
-                </>
-            ) : (
-                <>
-                    <Text style={[styles.header, {color: theme.colors.text}]}>
-                        Embark on your Coding Journey
-                    </Text>
-                    <View style={{ alignItems: 'center', marginVertical: 16 }}>
-                        <CompassIcon style={{ width: 200, height: 200 }} />
-                    </View>
-                    <TouchableOpacity style={[styles.button, {backgroundColor: theme.colors.buttonColor}]}>
-                        <Text style={[styles.buttonText, {color: theme.colors.onButton}]}>Start Your Journey</Text>
-                    </TouchableOpacity>
-                </>
-            )}
+        <View style={[styles.container, {backgroundColor: theme.colors.background}]}>
+            <Text style={[styles.header, {color: theme.colors.text}]}>
+                Embark on your Coding Journey
+            </Text>
+            <View style={styles.iconContainer}>
+                <CompassIcon style={{ width: 200, height: 200 }} />
+            </View>
+            <AwesomeButton
+                stretch
+                height={80}
+                backgroundColor={theme.colors.primary}
+                backgroundDarker={theme.colors.primaryDark}
+                textColor={theme.colors.onPrimary}
+                borderRadius={12}
+                onPress={() => console.log("Navigate to main journey")}
+            >
+                Start Your Journey
+            </AwesomeButton>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-    },
-    statBox: {
-        margin: 10,
-        padding: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: 30,
-        borderWidth: 3,
-    },
-    statValue: {
-        fontSize: 24,
-        fontWeight: 'bold',
-    },
-    statLabel: {
-        fontSize: 18,
+        padding: 16,
+        paddingHorizontal: 20,
     },
     header: {
         fontSize: 24,
@@ -61,15 +45,10 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         marginBottom: 20,
     },
-    button: {
-        marginTop: 20,
-        padding: 10,
-        borderRadius: 12,
-        width: '80%' // Adjust width as needed
-    },
-    buttonText: {
-        fontSize: 18,
-        textAlign: 'center'
+    iconContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 20,
     }
 });
 

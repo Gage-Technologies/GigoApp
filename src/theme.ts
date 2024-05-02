@@ -1,25 +1,6 @@
-// theme.ts
 import { DefaultTheme } from 'react-native-paper';
 
-const createFontFamily = (fontFamily: string) => ({
-    regular: {
-        fontFamily: fontFamily,
-        fontWeight: 'normal',
-    },
-    medium: {
-        fontFamily: fontFamily,
-        fontWeight: '500',
-    },
-    light: {
-        fontFamily: fontFamily,
-        fontWeight: '300',
-    },
-    thin: {
-        fontFamily: fontFamily,
-        fontWeight: '100',
-    },
-});
-
+// Define base colors used throughout the theme
 const baseColors = {
     primary: '#29C18C',
     primaryVariant: '#1c8762',
@@ -40,47 +21,24 @@ const baseColors = {
     notification: '#FFFCAB',
 };
 
-export const theme: typeof DefaultTheme = {
+const typography = {
+    h1: {
+        fontFamily: 'Poppins-Medium',
+        fontWeight: '600',
+        fontSize: 72,
+        lineHeight: 95,
+    },
+};
+
+export const theme = {
     ...DefaultTheme,
     colors: {
         ...DefaultTheme.colors,
-        primary: baseColors.primary,
-        accent: baseColors.secondary,
-        background: baseColors.background,
-        surface: baseColors.surface,
-        error: baseColors.error,
-        text: baseColors.text,
-        onBackground: baseColors.onBackground,
-        onSurface: baseColors.onSurface,
-        disabled: baseColors.disabled,
-        placeholder: baseColors.placeholder,
-        backdrop: baseColors.backdrop,
-        notification: baseColors.notification,
+        ...baseColors,
     },
-    fonts: createFontFamily("Poppins"),
+    fonts: {
+        ...DefaultTheme.fonts,
+        ...typography,
+    },
     roundness: 10,
-};
-
-theme.fonts = {
-    ...theme.fonts,
-    regular: {
-        ...theme.fonts.regular,
-        fontFamily: 'Poppins',
-        fontWeight: 'normal',
-    },
-    medium: {
-        ...theme.fonts.medium,
-        fontFamily: 'Poppins',
-        fontWeight: '500',
-    },
-    light: {
-        ...theme.fonts.light,
-        fontFamily: 'Poppins',
-        fontWeight: '300',
-    },
-    thin: {
-        ...theme.fonts.thin,
-        fontFamily: 'Poppins',
-        fontWeight: '100',
-    },
 };

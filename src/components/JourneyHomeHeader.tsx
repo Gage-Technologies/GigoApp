@@ -4,21 +4,26 @@ import { useTheme } from 'react-native-paper';
 import CompassIcon from '../icons/CompassIcon';
 import AwesomeButton from "react-native-really-awesome-button";
 
-const { width } = Dimensions.get('window'); // Get the screen width for responsive button sizing
+const { width } = Dimensions.get('window');
 
 const JourneyHomeHeader = ({ startedJourney }) => {
-    const theme = useTheme(); // Assuming theme setup in react-native-paper
+    const theme = useTheme();
 
     return (
         <View style={styles.outerContainer}>
-            <Text style={[styles.header, {color: theme.colors.text}]}>
+            <Text style={[styles.header, {
+                color: theme.colors.text,
+                fontFamily: theme.fonts.h1.fontFamily,
+                fontWeight: theme.fonts.h1.fontWeight,
+                fontSize: 46,
+            }]}>
                 Embark on your Coding Journey
             </Text>
             <View style={styles.iconContainer}>
                 <CompassIcon style={{ width: 200, height: 200 }} />
             </View>
             <AwesomeButton
-                width={width * 0.8} // Control the width to be 80% of the screen width
+                width={width * 0.8}
                 height={80}
                 backgroundColor={theme.colors.primary}
                 backgroundDarker={theme.colors.primaryDark}
@@ -45,8 +50,6 @@ const styles = StyleSheet.create({
         marginTop: 0,
     },
     header: {
-        fontSize: 38,
-        fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: 20,
     },

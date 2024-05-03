@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme, TextInput, Button } from 'react-native-paper';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, Alert, ScrollView } from 'react-native';
 import loginImage from "../components/img/login_background_cropped.jpg";
 import googleLogo from "../components/Icons/login/google_g.png"
 import googleName from "../components/Icons/login/google-logo-white.png";
 import githubName from "../components/Icons/login/gh_name_light.png";
 import { SvgXml } from 'react-native-svg';
-import GigoCircleIcon from "../components/Icons/GigoCircleLogo.tsx";
-import GigoCircleLogo from "../components/GigoCircleLogo.svg";
-import Geolocation from 'react-native-geolocation-service';
 import { useNavigation } from '@react-navigation/native';
 
-
+const screenWidth = Dimensions.get('window').width;
+const imageWidth = screenWidth * 0.10; // 15% of the screen width
 const { width, height } = Dimensions.get('window')
+
 
 const githubLogo = `
 <svg width="100%" height="100%" viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
@@ -69,13 +68,14 @@ const finalGigoLogo = `
 </svg>
 `
 
-
-const screenWidth = Dimensions.get('window').width;
-const imageWidth = screenWidth * 0.10; // 15% of the screen width
-
-
-const Login = () => {
+const CreateNewAccount = () => {
     const theme = useTheme();
+
+    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [external, setExternal] = React.useState(false)
+    const [confirmPass, setConfirmPass] = useState('');
     const navigation = useNavigation();
 
     const styles = StyleSheet.create({
@@ -113,7 +113,8 @@ const Login = () => {
         signInWith: {
             marginVertical: 20,
             fontSize: 16,
-            color: "white"
+            color: "white",
+            alignSelf: "center"
         },
         socialLogin: {
             flexDirection: 'row',
@@ -214,185 +215,131 @@ const Login = () => {
                 externalSubText: {
                     fontSize: 14,
                     marginTop: 20,
-                }
-    });
-    // Assuming the use of hooks for state management
-    const [username, setUsername] = React.useState('');
-    const [password, setPassword] = React.useState('');
-    const [loading, setLoading] = React.useState(false);
-    const [external, setExternal] = React.useState(false)
-    const [externalLogin, setExternalLogin] = React.useState("")
-    const [externalToken, setExternalToken] = React.useState("")
-    const [showPass, setShowPass] = React.useState(false)
-    const [ghConfirm, setGhConfirm] = React.useState(false)
-
-    // Dummy functions for demonstration
-    const loginFunction = async () => {
-        setLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            setLoading(false);
-            console.log('Login successful');
-        }, 2000);
-    };
-
-    const onSuccessGoogle = async (usr: any) => {
-        setExternal(true);
-        setExternalToken(usr.access_token);
-        setExternalLogin("Google");
-    };
-
-    const onSuccessGithub = async (gh: any) => {
-        // Assuming you have a method to get the current position
-        Geolocation.getCurrentPosition(
-            position => {
-                const payload = {
-                    host: 'YourAppIdentifier', // No window.location in React Native
-                    event: 'LoginStart', // Adjust with your actual event
-                    timespent: 0,
-                    path: 'CurrentScreenOrPath', // Adjust according to your navigation logic
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    metadata: {"auth_provider": "github"},
-                };
-                trackEvent(payload);
-            },
-            error => {
-                console.log(error);
-                // Handle location error
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-        );
-
-        setExternal(true);
-        setExternalToken(gh["code"]);
-        setExternalLogin("Github");
-        setLoading(true);
-
-        try {
-            let response = await fetch('/api/auth/loginWithGithub', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    external_auth: gh["code"],
-                })
-            });
-            let res = await response.json();
-
-            if (res["auth"] === false) {
-                Alert.alert("Incorrect credentials, please try again");
-                setLoading(false);
-                return;
-            }
-
-            setGhConfirm(true);
-        } catch (error) {
-            console.error('Error logging in:', error);
-            Alert.alert("Login failed, please try again later");
-        } finally {
-            setLoading(false);
-        }
-    };
+                    footerText: {
+                        fontSize: 16,
+                        marginTop: 20,
+                        color: "white"
+                    },
+    });
 
     const RenderExternal = ({ navigation, setPassword, showPass, password, loading, externalLogin, googleSignIn, githubConfirm, forwardPath }) => {
         const width = Dimensions.get('window').width; // Get window width to adjust styles dynamically
 
         return (
-            <View style={styles.externalContainer}>
-                <View style={styles.externalBox}>
-                    <Text style={styles.externalHeader}>Enter Password</Text>
-                    <TextInput
-                        style={styles.externalInput}
-                        onChangeText={setPassword}
-                        value={password}
-                        placeholder="Password"
-                        secureTextEntry={!showPass}
-                        onSubmitEditing={() => {
-                            externalLogin === "Google" ? googleSignIn() : githubConfirm();
-                        }}
-                    />
-                    {loading ? (
-                        <View style={styles.externalButton}>
-                            <ActivityIndicator size="small" color="#0000ff" />
-                            <Text style={styles.externalButtonText}>Login</Text>
-                        </View>
-                    ) : (
-                        <TouchableOpacity style={styles.externalButton} onPress={() => {
-                            externalLogin === "Google" ? googleSignIn() : githubConfirm();
-                        }}>
-                            <Ionicons name="send" size={20} color="white" />
-                            <Text style={styles.externalButtonText}>Login</Text>
-                        </TouchableOpacity>
-                    )}
-                    <Text style={styles.externalSubText}>
-                        Haven't linked your account yet?
-                    </Text>
-                    <Button
-                        title="sign up"
-                        onPress={() => navigation.navigate('SignUp', { forward: encodeURIComponent(forwardPath || "") })}
-                    />
-                </View>
-            </View>
+                <ScrollView contentContainerStyle={styles.container}>
+                    <View style={styles.formContainer}>
+                        <Text style={styles.header}>Create a Password</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Password"
+                            secureTextEntry={!showPass}
+                            value={password}
+                            onChangeText={setPassword}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Confirm Password"
+                            secureTextEntry={!showPass}
+                            value={confirmPass}
+                            onChangeText={setConfirmPass}
+                        />
+                        <Button
+                            title="Create Account"
+                            onPress={handleCreateAccount}
+                            disabled={loading}
+                        />
+                        <Text style={styles.footerText}>Already linked your account?</Text>
+                        <Button
+                            title="Sign in"
+                            onPress={() => navigation.navigate('Login')} // Make sure the route is correctly defined in your navigator
+                        />
+                    </View>
+                </ScrollView>
         );
     };
 
-    let renderLogin = () => {
+    const validateUser = async () => {
+        // Implement your validation logic here
+        return true; // Example validation status
+    };
+
+    const handleCreateAccount = async () => {
+        const isValid = await validateUser();
+        if (isValid) {
+            // Implement account creation logic
+            console.log('Account creation initiated');
+        }
+    };
+
+    let renderCreateForm = () => {
         return (
             <View style={styles.box}>
-                <Text style={styles.header}>Sign In</Text>
-                <TextInput
-                    style={styles.input}
-                    onChangeText={setUsername}
-                    value={username}
-                    placeholder="Username/Email"
-                />
-                <TextInput
-                    style={styles.input}
-                    onChangeText={setPassword}
-                    value={password}
-                    placeholder="Password"
-                    secureTextEntry={true}
-                />
-                <TouchableOpacity
-                  onPress={loginFunction}
-                  disabled={loading}
-                    style={[styles.buttonExtra, loading ? styles.disabledButton : null]}
-                    activeOpacity={0.7}
-                >
-                  <Text style={styles.buttonText}>{loading ? 'Loading...' : 'Login'}</Text>
-                </TouchableOpacity>
-                <View style={styles.accountText}>
-                    <TouchableOpacity
-                      onPress={() => navigation.navigate('ForgotPassword')}
-
-                    >
-                      <Text style={styles.buttonTextExtra}>Forgot Password</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      onPress={() => navigation.navigate('SignUp')}
-                    >
-                      <Text style={styles.buttonTextExtra}>No Account? Register</Text>
-                    </TouchableOpacity>
-                </View>
-                <Text style={styles.signInWith}>or sign in with linked account:</Text>
-                    <View style={styles.loginContainer}>
-                      <TouchableOpacity onPress={() => console.log("hello1")} style={styles.button}>
-                        <View style={styles.innerContainer}>
-                          <Image
-                            style={styles.logo}
-                            source={googleLogo}
-                          />
+                    <ScrollView contentContainerStyle={styles.container}>
+                        <Text style={styles.header}>Create Account</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Username"
+                            value={username}
+                            onChangeText={setUsername}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Email"
+                            value={email}
+                            onChangeText={setEmail}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Password"
+                            secureTextEntry={true}
+                            value={password}
+                            onChangeText={setPassword}
+                        />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Confirm Password"
+                            secureTextEntry={true}
+                            value={confirmPass}
+                            onChangeText={setConfirmPass}
+                        />
+                        <TouchableOpacity
+                          onPress={handleCreateAccount}
+                            style={styles.buttonExtra}
+                            activeOpacity={0.7}
+                        >
+                          <Text style={styles.buttonText}>Create Account</Text>
+                        </TouchableOpacity>
+                        <View style={styles.socialLogin}>
+                        <View style={{flexDirection: "column"}}>
+                            <Text style={styles.signInWith}>Or Register With:</Text>
+                                <View style={styles.loginContainer}>
+                                  <TouchableOpacity onPress={() => console.log("hello1")} style={styles.button}>
+                                    <View style={styles.innerContainer}>
+                                      <Image
+                                        style={styles.logo}
+                                        source={googleLogo}
+                                      />
+                                    </View>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity onPress={() => console.log("hello2")} style={styles.button}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                      <SvgXml xml={githubLogo} width={imageWidth} height={imageWidth}/>
+                                    </View>
+                                  </TouchableOpacity>
+                                </View>
+                            </View>
                         </View>
-                      </TouchableOpacity>
-                      <TouchableOpacity onPress={() => console.log("hello2")} style={styles.button}>
-                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                          <SvgXml xml={githubLogo} width={imageWidth} height={imageWidth}/>
+                        <View style={{flexDirection: "row", alignItems: "center", marginTop: 10}}>
+                            <Text style={{color: "white", fontSize: 16, lineHeight: 18}}>Already have an account?</Text>
+                            <TouchableOpacity
+                              onPress={() => navigation.navigate('Login')}
+                            >
+                              <Text style={{            color: '#007BFF',
+                                                        fontSize: 16, marginLeft: 10, lineHeight: 18}}>Login</Text>
+                            </TouchableOpacity>
                         </View>
-                      </TouchableOpacity>
-                    </View>
+                    </ScrollView>
             </View>
         );
     }
@@ -421,9 +368,9 @@ const Login = () => {
                     works on our machine.
                 </Text>
             </View>
-            {external ? renderExternal() : renderLogin()}
+              {(!external) ? renderCreateForm() : renderExternal()}
         </ImageBackground>
     );
-};
+}
 
-export default Login;
+export default CreateNewAccount;

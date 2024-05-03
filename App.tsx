@@ -32,11 +32,6 @@ const App = () => {
                     options={{headerShown: false}}
                 />
                 <Stack.Screen
-                    name="ForgotPassword"
-                    component={ForgotPassword}
-                    options={{headerShown: false}}
-                />
-                <Stack.Screen
                     name="home"
                     component={Home}
                 />

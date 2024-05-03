@@ -280,7 +280,7 @@ const ForgotPassword = () => {
                 >
                   <Text style={styles.buttonText}>Submit</Text>
                 </TouchableOpacity>
-                <View style={{flexDirection: "row", marginTop: 10}}>
+                <View style={{flexDirection: "row", marginTop: 10, justifyContent: "space-evenly", width: screenWidth * .65}}>
                                 <TouchableOpacity
                                   onPress={() => navigation.navigate('Login')}
                                 >

@@ -7,6 +7,7 @@ import CreateNewAccount from "./src/pages/createNewAccount"
 import { theme } from './src/theme';
 import {NavigationContainer} from '@react-navigation/native'
 import {createNativeStackNavigator} from '@react-navigation/native-stack'
+import BottomBar from './src/components/BottomBar';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,23 +18,14 @@ const App = () => {
         <NavigationContainer>
             <Stack.Navigator>
                 <Stack.Screen
-                    name="ForgotPassword"
-                    component={ForgotPassword}
+                    name="home"
+                    component={Home}
                     options={{headerShown: false}}
                 />
                 <Stack.Screen
                     name="Login"
                     component={Login}
                     options={{headerShown: false}}
-                />
-                <Stack.Screen
-                    name="SignUp"
-                    component={CreateNewAccount}
-                    options={{headerShown: false}}
-                />
-                <Stack.Screen
-                    name="home"
-                    component={Home}
                 />
             </Stack.Navigator>
         </NavigationContainer>

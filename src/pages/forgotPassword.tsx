@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTheme, TextInput, Button } from 'react-native-paper';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, Alert, ScrollView } from 'react-native';
 import loginImage from "../components/img/login_background_cropped.jpg";
@@ -11,6 +11,7 @@ import { useNavigation } from '@react-navigation/native';
 const screenWidth = Dimensions.get('window').width;
 const imageWidth = screenWidth * 0.10; // 15% of the screen width
 const { width, height } = Dimensions.get('window')
+import Config from 'react-native-config'
 
 
 const githubLogo = `
@@ -74,6 +75,7 @@ const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [isEmailValid, setIsEmailValid] = useState(false);
     const navigation = useNavigation();
+    const emailRef = useRef(null);
 
     const styles = StyleSheet.create({
         container: {
@@ -225,15 +227,68 @@ const ForgotPassword = () => {
                         }
     });
 
-    const handleEmailChange = text => {
-        setEmail(text);
-        // You might want to implement a more robust email validation
-        setIsEmailValid(text.includes('@') && text.includes('.'));
+    // Email validation function
+    function isValidEmail(email) {
+        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    const handleEmailChange = (newEmail) => {
+        setEmail(newEmail);
+        setIsEmailValid(isValidEmail(newEmail));
+        emailRef.current = newEmail;
     };
 
-    const sendResetValidation = () => {
-        // Placeholder function for sending password reset email
-        console.log('Reset password email sent to:', email);
+    const API_URL = Config.API_URL
+
+    const sendResetValidation = async () => {
+        const currentEmail = emailRef.current;
+
+        if (!currentEmail || currentEmail.length < 5) {
+            Alert.alert("Invalid Credentials", "Please enter your email you used to sign up");
+            return;
+        }
+
+        try {
+            console.log("url is: ", `${API_URL}/api/user/forgotPasswordValidation`)
+            let response = await fetch(`${API_URL}/api/user/forgotPasswordValidation`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: currentEmail, url: 'www.gigo.dev' })
+            });
+
+            console.log("response is: ", response)
+
+            let res = await response.json();
+
+            if (!res || !res.message) {
+                Alert.alert("Server Error", "We are unable to connect with the servers at this time. We're sorry for the inconvenience!");
+                return;
+            }
+
+            switch (res.message) {
+                case "must provide email for password recovery":
+                case "account not found":
+                    Alert.alert("Account Not Found", "We could not find an account with that email address. Please try again, or create an account if you don't already have one.");
+                    break;
+                case "failed to store reset token":
+                case "failed to send password reset email":
+                    Alert.alert("Server Error", "We are having an issue at this time. We're sorry for the inconvenience! Please try again later.");
+                    break;
+                case "Password reset email sent":
+                    Alert.alert("Check your Email", "We have sent an email with instructions on how to reset your password.");
+                    navigation.navigate("Login");
+                    break;
+                default:
+                    Alert.alert("Error", "An unexpected error occurred.");
+                    break;
+            }
+        } catch (error) {
+            console.log("error is: ", error)
+            Alert.alert("Network Error", "Unable to connect. Check your network settings.");
+        }
     };
 
     return (

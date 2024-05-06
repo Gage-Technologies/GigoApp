@@ -1,37 +1,49 @@
 import { DefaultTheme } from 'react-native-paper';
 
-// Define base colors used throughout the theme
+// Define base colors used throughout the theme, matching the dark mode of your web app
 const baseColors = {
-    primary: '#29C18C',
-    primaryVariant: '#1c8762',
-    secondary: '#3D8EF7',
-    secondaryVariant: '#2a63ac',
-    background: '#FFFFFF',
-    surface: '#FFFFFF',
-    error: '#B00020',
-    onPrimary: '#FFFFFF',
-    onSecondary: '#FFFFFF',
-    onBackground: '#1c1c1a',
-    onSurface: '#1c1c1a',
-    onError: '#FFFFFF',
-    text: '#1c1c1a',
-    disabled: '#9B9B9B',
-    placeholder: '#9B9B9B',
-    backdrop: '#1c1c1a',
-    notification: '#FFFCAB',
+    primary: '#3D8EF7',          // Blue
+    primaryVariant: '#2a63ac',   // Darker Blue
+    secondary: '#29C18C',        // Green
+    secondaryVariant: '#1c8762', // Darker Green
+    background: '#1c1c1a',       // Very dark grey (almost black)
+    surface: '#282826',          // Dark grey
+    error: '#B00020',            // Red
+    onPrimary: '#FFFFFF',        // White on primary
+    onSecondary: '#FFFFFF',      // White on secondary
+    onBackground: '#FFFFFF',     // White on background
+    onSurface: '#FFFFFF',        // White on surface
+    onError: '#FFFFFF',          // White on error
+    text: '#FFFFFF',             // White text
+    disabled: '#9B9B9B',         // Grey
+    placeholder: '#9B9B9B',      // Grey
+    backdrop: '#1c1c1a',         // Same as background
+    notification: '#FFFCAB',     // Yellowish
 };
 
+// Define typography based on the Poppins font, mirroring the styles used in your web app
 const typography = {
-    h1: {
+    regular: {
+        fontFamily: 'Poppins-Regular',
+        fontWeight: 'normal',
+    },
+    medium: {
         fontFamily: 'Poppins-Medium',
-        fontWeight: '600',
-        fontSize: 72,
-        lineHeight: 95,
+        fontWeight: '500',
+    },
+    light: {
+        fontFamily: 'Poppins-Light',
+        fontWeight: '300',
+    },
+    thin: {
+        fontFamily: 'Poppins-Thin',
+        fontWeight: '100',
     },
 };
 
 export const theme = {
     ...DefaultTheme,
+    dark: true, // Enable dark mode
     colors: {
         ...DefaultTheme.colors,
         ...baseColors,
@@ -40,5 +52,5 @@ export const theme = {
         ...DefaultTheme.fonts,
         ...typography,
     },
-    roundness: 10,
+    roundness: 10, // Adjust the roundness of components if desired
 };

@@ -12,10 +12,13 @@ const JourneyHomeHeader = ({ startedJourney }) => {
     return (
         <View style={styles.outerContainer}>
             <Text style={[styles.header, {
-                color: theme.colors.text,
-                fontFamily: theme.fonts.h1.fontFamily,
-                fontWeight: theme.fonts.h1.fontWeight,
-                fontSize: 46,
+                color: `black`,
+                fontFamily: theme.fonts.medium.fontFamily,
+                fontWeight: '500',
+                fontSize: 44,
+                textShadowColor: 'rgba(0, 0, 0, 0.75)', // Adding shadow
+                textShadowOffset: { width: -1, height: 1 },
+                textShadowRadius: 2
             }]}>
                 Embark on your Coding Journey
             </Text>
@@ -26,10 +29,12 @@ const JourneyHomeHeader = ({ startedJourney }) => {
                 width={width * 0.8}
                 height={80}
                 backgroundColor={theme.colors.primary}
-                backgroundDarker={theme.colors.primaryDark}
+                backgroundDarker={theme.colors.primaryVariant}
                 textColor={theme.colors.onPrimary}
                 borderRadius={12}
                 onPress={() => console.log("Navigate to main journey")}
+                textSize={28}
+                textFontFamily={theme.fonts.medium.fontFamily}
             >
                 Start Your Journey
             </AwesomeButton>
@@ -43,20 +48,23 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 16,
+        paddingBottom: 50,
         backgroundColor: '#dfce53',
-        borderWidth: 0,
+        borderWidth: 1,
+        borderColor: '#ccc',
+        borderRadius: 10,
         width: '100%',
         marginHorizontal: 0,
         marginTop: 0,
     },
     header: {
         textAlign: 'center',
-        marginBottom: 20,
+        marginBottom: 40,
     },
     iconContainer: {
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 20,
+        marginBottom: 45,
     }
 });
 

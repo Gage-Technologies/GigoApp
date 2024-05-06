@@ -27,6 +27,16 @@ const App = () => {
                     component={Login}
                     options={{headerShown: false}}
                 />
+                <Stack.Screen
+                    name="SignUp"
+                    component={CreateNewAccount}
+                    options={{headerShown: false}}
+                />
+                <Stack.Screen
+                    name="ForgotPassword"
+                    component={ForgotPassword}
+                    options={{headerShown: false}}
+                />
             </Stack.Navigator>
         </NavigationContainer>
     </PaperProvider>

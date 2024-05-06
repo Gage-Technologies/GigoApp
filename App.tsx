@@ -18,6 +18,11 @@ const App = () => {
         <NavigationContainer>
             <Stack.Navigator>
                 <Stack.Screen
+                    name="ForgotPassword"
+                    component={ForgotPassword}
+                    options={{headerShown: false}}
+                />
+                <Stack.Screen
                     name="home"
                     component={Home}
                     options={{headerShown: false}}
@@ -30,11 +35,6 @@ const App = () => {
                 <Stack.Screen
                     name="SignUp"
                     component={CreateNewAccount}
-                    options={{headerShown: false}}
-                />
-                <Stack.Screen
-                    name="ForgotPassword"
-                    component={ForgotPassword}
                     options={{headerShown: false}}
                 />
             </Stack.Navigator>

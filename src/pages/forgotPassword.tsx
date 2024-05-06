@@ -259,31 +259,38 @@ const ForgotPassword = () => {
                 body: JSON.stringify({ email: currentEmail, url: 'www.gigo.dev' })
             });
 
-            console.log("response is: ", response)
+            console.log("Response Status:", response.status); // Log the status of the response
+            const responseText = await response.text(); // Get the response as text first
+            console.log("Raw response text:", responseText);
 
-            let res = await response.json();
+            try {
+                let res = JSON.parse(responseText); // Then try parsing it as JSON
+                console.log("Parsed JSON:", res); // Log the parsed JSON
 
-            if (!res || !res.message) {
-                Alert.alert("Server Error", "We are unable to connect with the servers at this time. We're sorry for the inconvenience!");
-                return;
-            }
+                if (!res || !res.message) {
+                    Alert.alert("Server Error", "We are unable to connect with the servers at this time. We're sorry for the inconvenience!");
+                    return;
+                }
 
-            switch (res.message) {
-                case "must provide email for password recovery":
-                case "account not found":
-                    Alert.alert("Account Not Found", "We could not find an account with that email address. Please try again, or create an account if you don't already have one.");
-                    break;
-                case "failed to store reset token":
-                case "failed to send password reset email":
-                    Alert.alert("Server Error", "We are having an issue at this time. We're sorry for the inconvenience! Please try again later.");
-                    break;
-                case "Password reset email sent":
-                    Alert.alert("Check your Email", "We have sent an email with instructions on how to reset your password.");
-                    navigation.navigate("Login");
-                    break;
-                default:
-                    Alert.alert("Error", "An unexpected error occurred.");
-                    break;
+                switch (res.message) {
+                    case "must provide email for password recovery":
+                    case "account not found":
+                        Alert.alert("Account Not Found", "We could not find an account with that email address. Please try again, or create an account if you don't already have one.");
+                        break;
+                    case "failed to store reset token":
+                    case "failed to send password reset email":
+                        Alert.alert("Server Error", "We are having an issue at this time. We're sorry for the inconvenience! Please try again later.");
+                        break;
+                    case "Password reset email sent":
+                        Alert.alert("Check your Email", "We have sent an email with instructions on how to reset your password.");
+                        navigation.navigate("Login");
+                        break;
+                    default:
+                        Alert.alert("Error", "An unexpected error occurred.");
+                        break;
+                }
+            } catch (parseError) {
+                console.error("Error parsing JSON:", parseError); // Log any errors during JSON parsing
             }
         } catch (error) {
             console.log("error is: ", error)

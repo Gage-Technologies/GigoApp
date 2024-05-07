@@ -259,9 +259,7 @@ const ForgotPassword = () => {
                 body: JSON.stringify({ email: currentEmail, url: 'www.gigo.dev' })
             });
 
-            console.log("Response Status:", response.status); // Log the status of the response
             const responseText = await response.text(); // Get the response as text first
-            console.log("Raw response text:", responseText);
 
             try {
                 let res = JSON.parse(responseText); // Then try parsing it as JSON

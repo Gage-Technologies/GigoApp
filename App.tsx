@@ -18,6 +18,11 @@ const App = () => {
         <NavigationContainer>
             <Stack.Navigator>
                 <Stack.Screen
+                    name="Login"
+                    component={Login}
+                    options={{headerShown: false}}
+                />
+                <Stack.Screen
                     name="ForgotPassword"
                     component={ForgotPassword}
                     options={{headerShown: false}}
@@ -25,11 +30,6 @@ const App = () => {
                 <Stack.Screen
                     name="home"
                     component={Home}
-                    options={{headerShown: false}}
-                />
-                <Stack.Screen
-                    name="Login"
-                    component={Login}
                     options={{headerShown: false}}
                 />
                 <Stack.Screen

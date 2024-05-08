@@ -12,6 +12,7 @@ import Geolocation from 'react-native-geolocation-service';
 import { useNavigation } from '@react-navigation/native';
 import Config from 'react-native-config'
 import {authorize} from "../../auth.js"
+import { initialAuthStateUpdate, updateAuthState} from "../reducers/auth.ts"
 import { useDispatch } from 'react-redux';
 
 
@@ -80,6 +81,7 @@ const imageWidth = screenWidth * 0.10; // 15% of the screen width
 const Login = () => {
     const theme = useTheme();
     const navigation = useNavigation();
+    const dispatch = useDispatch();
 
     const API_URL = Config.API_URL
 
@@ -232,7 +234,6 @@ const Login = () => {
     const [ghConfirm, setGhConfirm] = React.useState(false)
 
     const loginFunction = async () => {
-//         const dispatch = useDispatch();
 
         setLoading(true);
 
@@ -246,38 +247,38 @@ const Login = () => {
             let auth = await authorize(username, password);
 
             if (auth.user !== undefined) {
-//                 let authState = {
-//                     ...initialAuthStateUpdate,
-//                     authenticated: true,
-//                     expiration: auth.exp,
-//                     id: auth.user,
-//                     role: auth.user_status,
-//                     email: auth.email,
-//                     phone: auth.phone,
-//                     userName: auth.user_name,
-//                     thumbnail: auth.thumbnail,
-//                     backgroundColor: auth.color_palette,
-//                     backgroundName: auth.name,
-//                     backgroundRenderInFront: auth.render_in_front,
-//                     exclusiveContent: auth.exclusive_account,
-//                     exclusiveAgreement: auth.exclusive_agreement,
-//                     tutorialState: auth.tutorials,
-//                     tier: auth.tier,
-//                     inTrial: auth.in_trial,
-//                     alreadyCancelled: auth.already_cancelled,
-//                     hasPaymentInfo: auth.has_payment_info,
-//                     hasSubscription: auth.has_subscription,
-//                     usedFreeTrial: auth.used_free_trial,
-//                 };
+                let authState = {
+                    ...initialAuthStateUpdate,
+                    authenticated: true,
+                    expiration: auth.exp,
+                    id: auth.user,
+                    role: auth.user_status,
+                    email: auth.email,
+                    phone: auth.phone,
+                    userName: auth.user_name,
+                    thumbnail: auth.thumbnail,
+                    backgroundColor: auth.color_palette,
+                    backgroundName: auth.name,
+                    backgroundRenderInFront: auth.render_in_front,
+                    exclusiveContent: auth.exclusive_account,
+                    exclusiveAgreement: auth.exclusive_agreement,
+                    tutorialState: auth.tutorials,
+                    tier: auth.tier,
+                    inTrial: auth.in_trial,
+                    alreadyCancelled: auth.already_cancelled,
+                    hasPaymentInfo: auth.has_payment_info,
+                    hasSubscription: auth.has_subscription,
+                    usedFreeTrial: auth.used_free_trial,
+                };
 
-//                 dispatch(updateAuthState(authState));
+
+                dispatch(updateAuthState(authState));
 
 //                 const payload = {
 //                     event: 'Login',
 //                     metadata: {},
 //                 };
 //                 trackEvent(payload);
-                console.log("in navigate")
 
                 navigation.navigate("home");
             } else if (auth.includes("Too many failed attempts")) {

@@ -6,7 +6,7 @@ import { useTheme } from 'react-native-paper';
 const Home = () => {
     const [loading, setLoading] = useState(true);
     const [projects, setProjects] = useState([]);
-    const theme = useTheme(); // Use the theme
+    const theme = useTheme();
 
     const [startedJourney, setStartedJourney] = useState(false);
     const [completedJourneyTasks, setCompletedJourneyTasks] = useState(5);

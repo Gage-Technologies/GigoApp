@@ -17,37 +17,39 @@ const Stack = createNativeStackNavigator();
 
 const App = () => {
   return (
-    <PaperProvider theme={theme}>
-        <NavigationContainer>
-            <Stack.Navigator>
-                <Stack.Screen
-                    name="Login"
-                    component={Login}
-                    options={{headerShown: false}}
-                />
-                <Stack.Screen
-                    name="JourneyMain"
-                    component={JourneyMain}
-                    options={{headerShown: false}}
-                />
-                <Stack.Screen
-                    name="ForgotPassword"
-                    component={ForgotPassword}
-                    options={{headerShown: false}}
-                />
-                <Stack.Screen
-                    name="home"
-                    component={Home}
-                    options={{headerShown: false}}
-                />
-                <Stack.Screen
-                    name="SignUp"
-                    component={CreateNewAccount}
-                    options={{headerShown: false}}
-                />
-            </Stack.Navigator>
-        </NavigationContainer>
-    </PaperProvider>
+      <ReduxProvider store={store}>
+            <PaperProvider theme={theme}>
+                <NavigationContainer>
+                    <Stack.Navigator>
+                        <Stack.Screen
+                            name="Login"
+                            component={Login}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="JourneyMain"
+                            component={JourneyMain}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="ForgotPassword"
+                            component={ForgotPassword}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="home"
+                            component={Home}
+                            options={{headerShown: false}}
+                        />
+                        <Stack.Screen
+                            name="SignUp"
+                            component={CreateNewAccount}
+                            options={{headerShown: false}}
+                        />
+                    </Stack.Navigator>
+                </NavigationContainer>
+            </PaperProvider>
+      </ReduxProvider>
   );
 };
 

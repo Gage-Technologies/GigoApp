@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { TouchableOpacity, View, Text } from 'react-native';
-import { openAuthSessionAsync, closeAuthSession } from 'react-native-inappbrowser-reborn';
+import { openAuthSessionAsync, closeAuthSession, InAppBrowser } from 'react-native-inappbrowser-reborn';
 import PropTypes from 'prop-types';
 import { toQuery } from './utils';  // Ensure this utility handles encoding URI components correctly
 
@@ -43,7 +43,7 @@ class LoginGithub extends Component {
         console.log("4")
         try {
             console.log("5")
-            const result = await openAuthSessionAsync(url, redirectUri);
+            const result = await InAppBrowser.openAuth(url, redirectUri);
             console.log("6")
             if (result.type === 'success' && result.url) {
                 console.log("7")

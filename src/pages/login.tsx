@@ -14,6 +14,12 @@ import Config from 'react-native-config'
 import {authorize} from "../../auth.js"
 import { initialAuthStateUpdate, updateAuthState} from "../reducers/auth.ts"
 import { useDispatch } from 'react-redux';
+import LoginGithub from "../components/Login/Github/LoginGithub"
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 
 
 const { width, height } = Dimensions.get('window')
@@ -233,6 +239,127 @@ const Login = () => {
     const [showPass, setShowPass] = React.useState(false)
     const [ghConfirm, setGhConfirm] = React.useState(false)
 
+  const startGoogle = () => {
+//     const payload = {
+//       host: 'mobile_device', // Modify as needed
+//       event: 'LoginStart',
+//       timespent: 0,
+//       path: 'Google Login',
+//       latitude: null,
+//       longitude: null,
+//       metadata: { "auth_provider": "google" },
+//     };
+//     trackEvent(payload);
+    googleSignIn();
+  };
+
+      const googleSignIn = async () => {
+        setLoading(true);
+        try {
+          const userInfo = await GoogleSignin.signIn();
+          const auth = await authorizeGoogle(userInfo.idToken); // Adjust this function to your backend
+
+          if (auth === "User not found") {
+            Alert.alert("Login Failed", "This Google account is not linked with our service. Try logging in with the same email or sign up.");
+            setLoading(false);
+            return;
+          }
+
+          if (auth["user"] !== undefined) {
+            let authState = {
+              ...initialAuthStateUpdate, // Define this according to your auth state structure
+              authenticated: true,
+              ...auth,
+            };
+            dispatch(updateAuthState(authState));
+            navigation.navigate("home");
+          } else {
+            Alert.alert("Login Failed", "The provided credentials did not match.");
+          }
+        } catch (error) {
+          Alert.alert("Login Error", "Failed to authenticate with Google.");
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
+    }
+
+
+    const onSuccessGithub = async (gh) => {
+//         trackEvent({
+//             host: 'mobile_app', // Since there's no window.location in RN
+//             event: 'LoginStart',
+//             timespent: 0,
+//             path: 'GitHub Login',
+//             latitude: null,
+//             longitude: null,
+//             metadata: { "auth_provider": "github" },
+//         });
+
+        setExternalToken(gh["code"]);
+        setExternalLogin("Github");
+        setLoading(true);
+
+        try {
+            let res = await call("/api/auth/loginWithGithub", "post", {
+                external_auth: gh["code"],
+            });
+
+            if (!res.auth) {
+                Alert.alert("Login Error", "Incorrect credentials, please try again.");
+                setLoading(false);
+                return;
+            }
+
+            setGhConfirm(true);
+        } catch (error) {
+            Alert.alert("Network Error", "Failed to communicate with server.");
+        }
+
+        setLoading(false);
+    };
+
+    const githubConfirm = async () => {
+        if (!ghConfirm) {
+            Alert.alert("Error", "BAD");
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            let res = await call("/api/auth/confirmLoginWithGithub", "post", {
+                password: password, // Ensure password is managed correctly
+            });
+
+            let auth = await authorizeGithub(password);
+            await AsyncStorage.setItem("loginXP", JSON.stringify(res["xp"]));
+
+            if (auth.user) {
+                let authState = {
+                    ...initialAuthStateUpdate,
+                    authenticated: true,
+                    ...auth,
+                };
+                dispatch(updateAuthState(authState));
+
+                setTimeout(() => {
+                    navigation.navigate(forwardPath || "Home");
+                }, 1000);
+            } else {
+                Alert.alert("Login Failed", "The provided username or password is incorrect.");
+            }
+        } catch (error) {
+            Alert.alert("Login Error", "An error occurred during the login process.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onFailureGithub = (error) => {
+        Alert.alert("Login Failed", "GitHub login failed. Please try again.");
+    };
+
     const loginFunction = async () => {
 
         setLoading(true);
@@ -300,60 +427,6 @@ const Login = () => {
         setExternal(true);
         setExternalToken(usr.access_token);
         setExternalLogin("Google");
-    };
-
-    const onSuccessGithub = async (gh: any) => {
-        // Assuming you have a method to get the current position
-        Geolocation.getCurrentPosition(
-            position => {
-                const payload = {
-                    host: 'YourAppIdentifier', // No window.location in React Native
-                    event: 'LoginStart', // Adjust with your actual event
-                    timespent: 0,
-                    path: 'CurrentScreenOrPath', // Adjust according to your navigation logic
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    metadata: {"auth_provider": "github"},
-                };
-                trackEvent(payload);
-            },
-            error => {
-                console.log(error);
-                // Handle location error
-            },
-            { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-        );
-
-        setExternal(true);
-        setExternalToken(gh["code"]);
-        setExternalLogin("Github");
-//         setLoading(true);
-
-        try {
-            let response = await fetch('/api/auth/loginWithGithub', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    external_auth: gh["code"],
-                })
-            });
-            let res = await response.json();
-
-            if (res["auth"] === false) {
-                Alert.alert("Incorrect credentials, please try again");
-                setLoading(false);
-                return;
-            }
-
-            setGhConfirm(true);
-        } catch (error) {
-            console.error('Error logging in:', error);
-            Alert.alert("Login failed, please try again later");
-        } finally {
-            setLoading(false);
-        }
     };
 
     const RenderExternal = ({ navigation, setPassword, showPass, password, loading, externalLogin, googleSignIn, githubConfirm, forwardPath }) => {
@@ -439,7 +512,7 @@ const Login = () => {
                 </View>
                 <Text style={styles.signInWith}>or sign in with linked account:</Text>
                     <View style={styles.loginContainer}>
-                      <TouchableOpacity onPress={() => console.log("hello1")} style={styles.button}>
+                      <TouchableOpacity onPress={startGoogle} style={styles.button}>
                         <View style={styles.innerContainer}>
                           <Image
                             style={styles.logo}
@@ -447,11 +520,23 @@ const Login = () => {
                           />
                         </View>
                       </TouchableOpacity>
-                      <TouchableOpacity onPress={() => console.log("hello2")} style={styles.button}>
+                    <LoginGithub
+                        color={"primary"}
+                        sx={{
+                            // width: window.innerWidth > 1000 ? '7vw' : '25vw',
+                            justifyContent: "center",
+                            padding: "15px"
+                        }}
+                        clientId="9ac1616be22aebfdeb3e"
+                        // this redirect URI is for production, testing on dev will not work
+                        redirectUri={""}
+                        onSuccess={onSuccessGithub}
+                        onFailure={onFailureGithub}
+                    >
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                           <SvgXml xml={githubLogo} width={imageWidth} height={imageWidth}/>
                         </View>
-                      </TouchableOpacity>
+                    </LoginGithub>
                     </View>
             </View>
         );

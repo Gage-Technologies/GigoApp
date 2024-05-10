@@ -1,21 +1,42 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Use community icons for more variety
-import { Button } from 'react-native-paper'; // Using react-native-paper for Material Design components
+import { Svg, Path } from 'react-native-svg';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { Button } from 'react-native-paper';
+import Config from 'react-native-config';
 
 const JourneyMap = ({ unitId }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const API_URL = Config.API_URL;
 
   useEffect(() => {
     const fetchTasks = async () => {
       setLoading(true);
-      // Dummy fetch function, replace with your actual data fetching logic
-      const fetchedTasks = await fetchTasksForUnit(unitId);
-      setTasks(fetchedTasks);
-      setLoading(false);
+      try {
+        const response = await fetch(`${API_URL}/api/journey/getTasksInUnit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ unit_id: unitId, user_id: 1684239109222039552 })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          const fetchedTasks = result.data.tasks.sort((a, b) => (a.node_above ?? 0) - (b.node_above ?? 0));
+          setTasks(fetchedTasks);
+        } else {
+          Alert.alert('Error', 'Failed to fetch tasks');
+        }
+      } catch (error) {
+        Alert.alert('Error', error.message || 'Failed to fetch tasks');
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchTasks();
@@ -49,17 +70,56 @@ const JourneyMap = ({ unitId }) => {
     </Modal>
   );
 
+  const CurvedPath = ({ points }) => {
+    const d = points.map((point, i, arr) => {
+      if (i === 0) {
+        return `M${point.x},${point.y}`;
+      } else {
+        const prev = arr[i - 1];
+        const midX = (prev.x + point.x) / 2;
+        return `Q${prev.x},${prev.y} ${midX},${point.y}`;
+      }
+    }).join(' ');
+
+    return (
+      <Svg height="100%" width="100%">
+        <Path d={d} stroke="#008866" strokeWidth="3" fill="none" />
+      </Svg>
+    );
+  };
+
+  const JourneyStops = () => {
+    const points = tasks.map((task, index) => ({
+      x: index % 2 === 0 ? 50 : 150,
+      y: index * 60 + 40,
+    }));
+
+    return (
+      <View style={styles.pathContainer}>
+        <CurvedPath points={points} />
+        {tasks.map((task, index) => (
+          <TouchableOpacity
+            key={task._id}
+            style={{
+              ...styles.taskButton,
+              left: index % 2 === 0 ? 40 : 140,
+              top: index * 60 + 20,
+            }}
+            onPress={() => handlePressTask(task)}
+          >
+            {renderTaskIcon(task)}
+          </TouchableOpacity>
+        ))}
+      </View>
+    );
+  };
+
   return (
-    <ScrollView>
+    <ScrollView contentContainerStyle={styles.scrollView}>
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        tasks.map((task, index) => (
-          <TouchableOpacity key={index} style={styles.taskContainer} onPress={() => handlePressTask(task)}>
-            <Text style={styles.taskText}>{task.title}</Text>
-            {renderTaskIcon(task)}
-          </TouchableOpacity>
-        ))
+        <JourneyStops />
       )}
       {selectedTask && <TaskModal />}
     </ScrollView>
@@ -107,6 +167,22 @@ const styles = StyleSheet.create({
   modalTextDescription: {
     textAlign: 'center',
     fontSize: 16,
+  },
+  pathContainer: {
+    position: 'relative',
+    height: 600,
+  },
+  taskButton: {
+    position: 'absolute',
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollView: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 20,
   },
 });
 

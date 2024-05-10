@@ -1,21 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, StyleSheet, ActivityIndicator, Alert, TouchableOpacity } from 'react-native';
-import { Text, Button, Modal } from 'react-native-paper';
+import { ScrollView, View, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, Modal as RNModal } from 'react-native';
+import { Text, Button, useTheme } from 'react-native-paper';
 import Config from 'react-native-config';
-import { useTheme } from 'react-native-paper';
 import JourneyMap from '../components/JourneyMap';
 
 const JourneyMain = () => {
-  const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [units, setUnits] = useState([]);
   const [activeJourney, setActiveJourney] = useState(true);
   const [userId, setUserId] = useState(1684239109222039552);
   const [showHandout, setShowHandout] = useState(null);
   const [openDetourPop, setOpenDetourPop] = useState(false);
-
-  const showModal = () => setVisible(true);
-  const hideModal = () => setVisible(false);
 
   const API_URL = Config.API_URL;
   const theme = useTheme();
@@ -146,7 +141,7 @@ const JourneyMain = () => {
             <Text>Add Unit</Text>
           </TouchableOpacity>
         )}
-        <Modal
+        <RNModal
           animationType="slide"
           transparent={true}
           visible={openDetourPop}
@@ -156,7 +151,7 @@ const JourneyMain = () => {
             <Text>Detour Selection Component</Text>
             <Button onPress={() => setOpenDetourPop(false)}>Close</Button>
           </View>
-        </Modal>
+        </RNModal>
       </View>
     );
   };
@@ -168,7 +163,7 @@ const JourneyMain = () => {
         <ActivityIndicator size="large" color={theme.colors.primary} />
       ) : (
         units.map((unit, index) => (
-          <View key={unit.id} style={{ marginBottom: 20 }}>
+          <View key={unit._id} style={{ marginBottom: 20 }}>
             {handleMap(unit, index)}
           </View>
         ))

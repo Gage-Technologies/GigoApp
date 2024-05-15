@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, StyleSheet, Alert, Dimensions } from 'react-native';
 import { Svg, Path } from 'react-native-svg';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import { Button } from 'react-native-paper';
+import { Button, useTheme } from 'react-native-paper';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Config from 'react-native-config';
 
 const JourneyMap = ({ unitId }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [handoutModalVisible, setHandoutModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [handoutContent, setHandoutContent] = useState('');
   const API_URL = Config.API_URL;
+  const theme = useTheme();
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -29,6 +32,8 @@ const JourneyMap = ({ unitId }) => {
         if (response.ok && result.success) {
           const fetchedTasks = result.data.tasks.sort((a, b) => (a.node_above ?? 0) - (b.node_above ?? 0));
           setTasks(fetchedTasks);
+          // Assuming each unit has a handout
+          setHandoutContent(result.data.handout);
         } else {
           Alert.alert('Error', 'Failed to fetch tasks');
         }
@@ -47,10 +52,26 @@ const JourneyMap = ({ unitId }) => {
     setModalVisible(true);
   };
 
-  const renderTaskIcon = (task) => {
-    const iconName = task.completed ? 'check-circle-outline' : 'help-circle-outline';
-    const iconColor = task.completed ? 'green' : 'grey';
-    return <Icon name={iconName} size={30} color={iconColor} />;
+  const renderTaskIcon = (task, index) => {
+    if (task.completed) {
+      return (
+        <View style={[styles.iconContainer, styles.completedIcon]}>
+          <FontAwesome name="check" size={40} color="white" />
+        </View>
+      );
+    } else if (task.inProgress || index === 0) {
+      return (
+        <View style={[styles.iconContainer, styles.unlockedIcon, { backgroundColor: theme.colors.secondary }]}>
+          <FontAwesome name="unlock" size={40} color="white" />
+        </View>
+      );
+    } else {
+      return (
+        <View style={[styles.iconContainer, styles.lockedIcon]}>
+          <FontAwesome name="question" size={40} color="white" />
+        </View>
+      );
+    }
   };
 
   const TaskModal = () => (
@@ -64,20 +85,37 @@ const JourneyMap = ({ unitId }) => {
         <View style={styles.modalView}>
           <Text style={styles.modalTextTitle}>{selectedTask?.title}</Text>
           <Text style={styles.modalTextDescription}>{selectedTask?.description}</Text>
-          <Button onPress={() => setModalVisible(false)}>Close</Button>
+          <Button mode="contained" onPress={() => setModalVisible(false)}>Close</Button>
+        </View>
+      </View>
+    </Modal>
+  );
+
+  const HandoutModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={handoutModalVisible}
+      onRequestClose={() => setHandoutModalVisible(false)}
+    >
+      <View style={styles.centeredView}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalTextTitle}>Handout</Text>
+          <ScrollView style={styles.modalTextDescription}>
+            <Text>{handoutContent}</Text>
+          </ScrollView>
+          <Button mode="contained" onPress={() => setHandoutModalVisible(false)}>Close</Button>
         </View>
       </View>
     </Modal>
   );
 
   const CurvedPath = ({ points }) => {
-    const d = points.map((point, i, arr) => {
+    const d = points.map((point, i) => {
       if (i === 0) {
         return `M${point.x},${point.y}`;
       } else {
-        const prev = arr[i - 1];
-        const midX = (prev.x + point.x) / 2;
-        return `Q${prev.x},${prev.y} ${midX},${point.y}`;
+        return `L${point.x},${point.y}`;
       }
     }).join(' ');
 
@@ -89,9 +127,13 @@ const JourneyMap = ({ unitId }) => {
   };
 
   const JourneyStops = () => {
+    const screenWidth = Dimensions.get('window').width;
+    const buttonSize = 100;
+    const shiftLeft = 30; // Shift all points 30 pixels to the left
+
     const points = tasks.map((task, index) => ({
-      x: index % 2 === 0 ? 50 : 150,
-      y: index * 60 + 40,
+      x: index % 2 === 0 ? screenWidth * 0.25 - shiftLeft : screenWidth * 0.75 - shiftLeft,
+      y: index * 80 + 50,
     }));
 
     return (
@@ -102,12 +144,13 @@ const JourneyMap = ({ unitId }) => {
             key={task._id}
             style={{
               ...styles.taskButton,
-              left: index % 2 === 0 ? 40 : 140,
-              top: index * 60 + 20,
+              left: points[index].x - buttonSize / 2,
+              top: points[index].y - buttonSize / 2,
+              backgroundColor: task.completed ? '#29C18C' : (task.inProgress || index === 0 ? theme.colors.secondary : '#808080'),
             }}
-            onPress={() => handlePressTask(task)}
+            onPress={() => (task.inProgress || index === 0) && handlePressTask(task)}
           >
-            {renderTaskIcon(task)}
+            {renderTaskIcon(task, index)}
           </TouchableOpacity>
         ))}
       </View>
@@ -119,9 +162,15 @@ const JourneyMap = ({ unitId }) => {
       {loading ? (
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
-        <JourneyStops />
+        <>
+          <Button mode="contained" onPress={() => setHandoutModalVisible(true)} style={styles.handoutButton}>
+            Show Handout
+          </Button>
+          <JourneyStops />
+        </>
       )}
       {selectedTask && <TaskModal />}
+      {handoutModalVisible && <HandoutModal />}
     </ScrollView>
   );
 };
@@ -171,18 +220,54 @@ const styles = StyleSheet.create({
   pathContainer: {
     position: 'relative',
     height: 600,
+    width: '100%',
   },
   taskButton: {
     position: 'absolute',
-    width: 40,
-    height: 40,
+    width: 100,
+    height: 100,
     justifyContent: 'center',
     alignItems: 'center',
+    borderRadius: 50,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: '#ccc',
+  },
+  iconContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 4,
+  },
+  completedIcon: {
+    backgroundColor: '#29C18C',
+  },
+  inProgressIcon: {
+    backgroundColor: '#FFA500',
+  },
+  lockedIcon: {
+    backgroundColor: '#808080',
+  },
+  unlockedIcon: {
+    backgroundColor: '#FFA500',
   },
   scrollView: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 20,
+  },
+  handoutButton: {
+    marginVertical: 10,
   },
 });
 

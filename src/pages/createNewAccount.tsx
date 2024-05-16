@@ -7,6 +7,9 @@ import googleName from "../components/Icons/login/google-logo-white.png";
 import githubName from "../components/Icons/login/gh_name_light.png";
 import { SvgXml } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
+import { debounce } from 'lodash';
+import LoginGithub from "../components/Login/Github/LoginGithub"
+import {Avataaar} from "../components/Avatar/avatar.js"
 
 const screenWidth = Dimensions.get('window').width;
 const imageWidth = screenWidth * 0.10; // 15% of the screen width
@@ -77,6 +80,29 @@ const CreateNewAccount = () => {
     const [external, setExternal] = React.useState(false)
     const [confirmPass, setConfirmPass] = useState('');
     const navigation = useNavigation();
+    const [missingUser, setMissingUser] = React.useState<boolean>(false)
+    const [invalidUsername, setInvalidUsername] = React.useState<boolean>(false)
+    const [missingEmail, setMissingEmail] = React.useState<boolean>(false)
+    const [missingPhone, setMissingPhone] = React.useState<boolean>(false)
+    const [missingPassword, setMissingPassword] = React.useState<boolean>(false)
+    const [missingConfirm, setMissingConfirm] = React.useState<boolean>(false)
+    const [loading, setLoading] = React.useState(false)
+    const [avatarRef, setAvatarRef] = React.useState({})
+    const [Attributes, setAttributes] = useState({
+        topType: "ShortHairDreads02",
+        accessoriesType: "Prescription02",
+        avatarRef: {},
+        hairColor: "BrownDark",
+        facialHairType: "Blank",
+        clotheType: "Hoodie",
+        clotheColor: "PastelBlue",
+        eyeType: "Happy",
+        eyebrowType: "Default",
+        mouthType: "Smile",
+        avatarStyle: "Circle",
+        skinColor: "Light",
+    });
+    const [isAvatarInitialized, setIsAvatarInitialized] = useState<number>(0)
 
     const styles = StyleSheet.create({
         container: {
@@ -259,10 +285,231 @@ const CreateNewAccount = () => {
         );
     };
 
-    const validateUser = async () => {
-        // Implement your validation logic here
-        return true; // Example validation status
+    const onSuccessGithub = async (gh) => {
+//         trackEvent({
+//             host: 'mobile_app', // Since there's no window.location in RN
+//             event: 'LoginStart',
+//             timespent: 0,
+//             path: 'GitHub Login',
+//             latitude: null,
+//             longitude: null,
+//             metadata: { "auth_provider": "github" },
+//         });
+
+        setExternalToken(gh["code"]);
+        setExternalLogin("Github");
+        setLoading(true);
+
+        try {
+            let res = await call("/api/auth/loginWithGithub", "post", {
+                external_auth: gh["code"],
+            });
+
+            if (!res.auth) {
+                Alert.alert("Login Error", "Incorrect credentials, please try again.");
+                setLoading(false);
+                return;
+            }
+
+            setGhConfirm(true);
+        } catch (error) {
+            Alert.alert("Network Error", "Failed to communicate with server.");
+        }
+
+        setLoading(false);
     };
+
+    const githubConfirm = async () => {
+        if (!ghConfirm) {
+            Alert.alert("Error", "BAD");
+            setLoading(false);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            let res = await call("/api/auth/confirmLoginWithGithub", "post", {
+                password: password, // Ensure password is managed correctly
+            });
+
+            let auth = await authorizeGithub(password);
+            await AsyncStorage.setItem("loginXP", JSON.stringify(res["xp"]));
+
+            if (auth.user) {
+                let authState = {
+                    ...initialAuthStateUpdate,
+                    authenticated: true,
+                    ...auth,
+                };
+                dispatch(updateAuthState(authState));
+
+                setTimeout(() => {
+                    navigation.navigate(forwardPath || "Home");
+                }, 1000);
+            } else {
+                Alert.alert("Login Failed", "The provided username or password is incorrect.");
+            }
+        } catch (error) {
+            Alert.alert("Login Error", "An error occurred during the login process.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const onFailureGithub = (error) => {
+        Alert.alert("Login Failed", "GitHub login failed. Please try again.");
+    };
+
+    const googleCreate = async () => {
+        console.log("here")
+        setLoading(true);
+
+//         let payload = {
+//             // Simplified metadata, adjust according to available APIs
+//             metadata: {
+//                 mobile: true, // Example of mobile flag
+//             }
+//         };
+//         trackEvent(payload); // Make sure trackEvent is adapted for React Native
+
+        if (password !== confirmPass || password.length < 5) {
+            Alert.alert("Error", "Passwords do not match or too short");
+            setLoading(false);
+            return;
+        }
+
+        if (!timezone) {
+            Alert.alert("Error", "Timezone must be filled");
+            setLoading(false);
+            return;
+        }
+
+        let params = {
+            external_auth: externalToken,
+            password: password,
+            start_user_info: {
+                usage: "I want to learn how to code by doing really cool projects.",
+                proficiency: "Beginner",
+                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence",
+                preferred_language: "Python, Javascript, Golang, Typescript"
+            },
+            timezone: timezone ? timezone.value : "America/Chicago",
+            avatar_settings: {
+                topType: Attributes.topType,
+                accessoriesType: Attributes.accessoriesType,
+                hairColor: Attributes.hairColor,
+                facialHairType: Attributes.facialHairType,
+                clotheType: Attributes.clotheType,
+                clotheColor: Attributes.clotheColor,
+                eyeType: Attributes.eyeType,
+                eyebrowType: Attributes.eyebrowType,
+                mouthType: Attributes.mouthType,
+                avatarStyle: Attributes.avatarStyle,
+                skinColor: Attributes.skinColor
+            }
+        }
+
+        if (name !== "" && name !== undefined) {
+            //@ts-ignore
+            params["referral_user"] = name
+        }
+
+        try {
+            let res = await fetch('/api/user/createNewGoogleUser', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(params),
+            });
+
+            const result = await res.json();
+            if (result.message !== "Google User Added.") {
+                Alert.alert("Error", result.message);
+            } else {
+                handleSuccess(result); // Define this function to handle successful creation
+            }
+        } catch (error) {
+            Alert.alert("Error", "Network request failed");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const validateUser = async () => {
+        setLoading(true);
+
+        let missingFields = [];
+        if (username === "") {
+            setMissingUser(true);
+            missingFields.push('Username');
+        }
+        if (email === "") {
+            setMissingEmail(true);
+            missingFields.push('Email');
+        }
+        if (password === "") {
+            setMissingPassword(true);
+            missingFields.push('Password');
+        }
+        if (confirmPass === "") {
+            setMissingConfirm(true);
+            missingFields.push('Confirm Password');
+        }
+        if (missingFields.length > 0) {
+            setLoading(false);
+            Alert.alert("Please fill in the following fields:", missingFields.join(', '));
+            return false;
+        }
+
+        if (!hasLetters(username)) {
+            Alert.alert("Username Invalid", "Username must contain at least one letter!");
+            setLoading(false)
+            return false;
+        }
+
+        if (password !== confirmPass) {
+            Alert.alert("Error", "Passwords do not match");
+            setLoading(false);
+            return false;
+        }
+
+        if (password.length < 5) {
+            Alert.alert("Sorry!", "Your password is too short. Try Another!");
+            setLoading(false);
+            return false;
+        }
+
+        if (email !== "") {
+            const emailIsValid = await verifyEmail(email);
+            if (!emailIsValid) {
+                setLoading(false);
+                return false;
+            }
+        }
+
+        let res = await call("/api/user/validateUser", "post", null, null, null, {
+            user_name: username,
+            password: password,
+            email: email,
+            phone: "N/A",
+            timezone: timezone ? timezone.value : "America/Chicago",
+            force_pass: forcePass
+        });
+
+        if (res["message"]) {
+            Alert.alert("Notification", res["message"]);
+            setLoading(false);
+            if (res["message"].includes("required")) {
+                if (res["message"].includes("username")) setMissingUser(true);
+                if (res["message"].includes("password")) setMissingPassword(true);
+                if (res["message"].includes("email")) setMissingEmail(true);
+                if (res["message"].includes("phone number")) setMissingPhone(true);
+            }
+            return res["message"] === "User Cleared.";
+        }
+        return false;
+    }
 
     const handleCreateAccount = async () => {
         const isValid = await validateUser();
@@ -271,6 +518,108 @@ const CreateNewAccount = () => {
             console.log('Account creation initiated');
         }
     };
+
+    const accountCreation = async () => {
+        setLoading(true);
+
+        const formData = new FormData();
+        formData.append('avatar', {
+            uri: svgUri, // You need to generate this URI from your SVG component
+            type: 'image/svg+xml',
+            name: 'avatar.svg'
+        });
+
+        // Additional parameters
+        formData.append('user_name', username);
+
+        if (password !== confirmPass) {
+            Alert.alert("Error", "Passwords do not match");
+            setLoading(false);
+            return;
+        }
+
+        if (password.length < 5) {
+            //@ts-ignore
+            Alert.alert("Passwords do not match")
+            setLoading(false)
+            return
+        }
+
+        if (timezone === null) {
+            //@ts-ignore
+            Alert.alert("Timezone must be filled")
+            setLoading(false)
+            return
+        }
+
+        if (username.length > 50) {
+            Alert.alert("Username must be less than 50 characters.")
+            return
+        }
+
+        // More validations...
+
+        let params = {
+            user_name: username,
+            password: password,
+            email: email,
+            phone: "N/A",
+            status: "basic",
+            pfp_path: "",
+            badges: [],
+            tier: "1",
+            coffee: "0",
+            rank: "0",
+            bio: "",
+            first_name: firstName,
+            last_name: lastName,
+            external_auth: "",
+            start_user_info: {
+                usage: "I want to learn how to code by doing really cool projects.",
+                proficiency: "Beginner",
+                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence",
+                preferred_language: "Python, Javascript, Golang, Typescript"
+            },
+            timezone: timezone ? timezone.value : "America/Chicago",
+            avatar_settings: {
+                topType: Attributes.topType,
+                accessoriesType: Attributes.accessoriesType,
+                hairColor: Attributes.hairColor,
+                facialHairType: Attributes.facialHairType,
+                clotheType: Attributes.clotheType,
+                clotheColor: Attributes.clotheColor,
+                eyeType: Attributes.eyeType,
+                eyebrowType: Attributes.eyebrowType,
+                mouthType: Attributes.mouthType,
+                avatarStyle: Attributes.avatarStyle,
+                skinColor: Attributes.skinColor
+            },
+            force_pass: forcePass
+        }
+
+        if (name !== "" && name !== undefined) {
+            //@ts-ignore
+            params["referral_user"] = name
+        }
+
+        try {
+            let response = await call("/api/user/createNewUser", "POST", params, formData);
+
+            if (response.message !== "User Created.") {
+                Alert.alert("Error", "Something went wrong: " + response.message);
+            } else {
+                dispatch(updateAuthState({...initialAuthStateUpdate, authenticated: true}));
+                navigate("Home");
+            }
+        } catch (error) {
+            Alert.alert("Network Error", "Unable to connect to the server.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const debouncedAccountCreation = debounce(accountCreation, 3000);
+
 
     let renderCreateForm = () => {
         return (
@@ -304,9 +653,25 @@ const CreateNewAccount = () => {
                             onChangeText={setConfirmPass}
                         />
                         <TouchableOpacity
-                          onPress={handleCreateAccount}
+                          onPress={async () => {
+                            let ok = await validateUser()
+                            if (ok){
+                                debouncedAccountCreation()
+                            }
+                          }}
                             style={styles.buttonExtra}
                             activeOpacity={0.7}
+                            disabled={(
+                                missingEmail ||
+                                missingPassword ||
+                                missingConfirm ||
+                                invalidUsername ||
+                                username === "" ||
+                                email === "" ||
+                                password === "" ||
+                                confirmPass === "" ||
+                                password !== confirmPass
+                            )}
                         >
                           <Text style={styles.buttonText}>Create Account</Text>
                         </TouchableOpacity>
@@ -314,7 +679,7 @@ const CreateNewAccount = () => {
                         <View style={{flexDirection: "column"}}>
                             <Text style={styles.signInWith}>Or Register With:</Text>
                                 <View style={styles.loginContainer}>
-                                  <TouchableOpacity onPress={() => console.log("hello1")} style={styles.button}>
+                                  <TouchableOpacity onPress={googleCreate} style={styles.button}>
                                     <View style={styles.innerContainer}>
                                       <Image
                                         style={styles.logo}
@@ -322,11 +687,23 @@ const CreateNewAccount = () => {
                                       />
                                     </View>
                                   </TouchableOpacity>
-                                  <TouchableOpacity onPress={() => console.log("hello2")} style={styles.button}>
-                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                      <SvgXml xml={githubLogo} width={imageWidth} height={imageWidth}/>
-                                    </View>
-                                  </TouchableOpacity>
+                                  <LoginGithub
+                                      color={"primary"}
+                                      sx={{
+                                          // width: window.innerWidth > 1000 ? '7vw' : '25vw',
+                                          justifyContent: "center",
+                                          padding: "15px"
+                                      }}
+                                      clientId="9ac1616be22aebfdeb3e"
+                                      // this redirect URI is for production, testing on dev will not work
+                                      redirectUri={""}
+                                      onSuccess={onSuccessGithub}
+                                      onFailure={onFailureGithub}
+                                  >
+                                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <SvgXml xml={githubLogo} width={imageWidth} height={imageWidth}/>
+                                      </View>
+                                  </LoginGithub>
                                 </View>
                             </View>
                         </View>
@@ -343,6 +720,8 @@ const CreateNewAccount = () => {
             </View>
         );
     }
+
+    console.log("avatar is: ", Avataaar)
 
     return (
         <ImageBackground

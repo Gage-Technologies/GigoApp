@@ -7,13 +7,40 @@ import googleName from "../components/Icons/login/google-logo-white.png";
 import githubName from "../components/Icons/login/gh_name_light.png";
 import { SvgXml } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import LoginGithub from "../components/Login/Github/LoginGithub"
-import {Avataaar} from "../components/Avatar/avatar.js"
+// import Avataaar from "../components/Avatar/avatar.js"
+import profilePic from "../components/Avatar/profile-pic.svg"
+import Config from 'react-native-config'
+import { useDispatch } from 'react-redux';
+import {v4 as uuidv4} from 'uuid';
+import { initialAuthStateUpdate, updateAuthState} from "../reducers/auth.ts"
+import fetchWithUpload from "../services/api-call.tsx"
+import RNFetchBlob from 'rn-fetch-blob';
 
 const screenWidth = Dimensions.get('window').width;
 const imageWidth = screenWidth * 0.10; // 15% of the screen width
 const { width, height } = Dimensions.get('window')
+import moment from 'moment-timezone';
+
+const API_URL = Config.API_URL;
+
+interface TimezoneOption {
+    value: string;
+    label: string;
+}
+
+const formatTz = (tz: string): TimezoneOption => {
+    const tzOffset = moment.tz(tz).format('Z');
+    const value = parseFloat(
+        tzOffset.replace(':00','.00').replace(':15','.25').replace(':30','.50').replace(':45','.75')
+    ).toFixed(2);
+
+    return {
+        label: `${tz} (GMT${tzOffset})`,
+        value: tz,
+    };
+};
 
 
 const githubLogo = `
@@ -79,7 +106,6 @@ const CreateNewAccount = () => {
     const [password, setPassword] = useState('');
     const [external, setExternal] = React.useState(false)
     const [confirmPass, setConfirmPass] = useState('');
-    const navigation = useNavigation();
     const [missingUser, setMissingUser] = React.useState<boolean>(false)
     const [invalidUsername, setInvalidUsername] = React.useState<boolean>(false)
     const [missingEmail, setMissingEmail] = React.useState<boolean>(false)
@@ -88,20 +114,26 @@ const CreateNewAccount = () => {
     const [missingConfirm, setMissingConfirm] = React.useState<boolean>(false)
     const [loading, setLoading] = React.useState(false)
     const [avatarRef, setAvatarRef] = React.useState({})
+    const [timezone, setTimezone] = React.useState<TimezoneOption | null>(formatTz(moment.tz.guess()))
+    const [firstName, setFirstName] = React.useState("")
+    const [lastName, setLastName] = React.useState("")
+    const [forcePass, setForcePass] = React.useState<boolean>(false)
     const [Attributes, setAttributes] = useState({
-        topType: "ShortHairDreads02",
-        accessoriesType: "Prescription02",
+        topType: "Hijab",
+        accessoriesType: "Blank",
         avatarRef: {},
         hairColor: "BrownDark",
         facialHairType: "Blank",
-        clotheType: "Hoodie",
-        clotheColor: "PastelBlue",
-        eyeType: "Happy",
-        eyebrowType: "Default",
-        mouthType: "Smile",
+        clotheType: "ShirtCrewNeck",
+        clotheColor: "PastelOrange",
+        eyeType: "Surprised",
+        eyebrowType: "UpDown",
+        mouthType: "Serious",
         avatarStyle: "Circle",
-        skinColor: "Light",
+        skinColor: "Pale",
     });
+    const dispatch = useDispatch();
+    const navigation = useNavigation();
     const [isAvatarInitialized, setIsAvatarInitialized] = useState<number>(0)
 
     const styles = StyleSheet.create({
@@ -285,6 +317,81 @@ const CreateNewAccount = () => {
         );
     };
 
+    const setAvatar = (e: {
+        topType: string;
+        accessoriesType: string;
+        avatarRef: {};
+        hairColor: string;
+        facialHairType: string;
+        clotheType: string;
+        clotheColor: string;
+        eyeType: string;
+        eyebrowType: string;
+        mouthType: string;
+        avatarStyle: string;
+        skinColor: string;
+    } | ((prevState: {
+        topType: string;
+        accessoriesType: string;
+        avatarRef: {};
+        hairColor: string;
+        facialHairType: string;
+        clotheType: string;
+        clotheColor: string;
+        eyeType: string;
+        eyebrowType: string;
+        mouthType: string;
+        avatarStyle: string;
+        skinColor: string;
+    }) => {
+        topType: string;
+        accessoriesType: string;
+        avatarRef: {};
+        hairColor: string;
+        facialHairType: string;
+        clotheType: string;
+        clotheColor: string;
+        eyeType: string;
+        eyebrowType: string;
+        mouthType: string;
+        avatarStyle: string;
+        skinColor: string;
+    }) | ((prevState: {
+        topType: string;
+        accessoriesType: string;
+        avatarRef: object;
+        hairColor: string;
+        facialHairType: string;
+        clotheType: string;
+        clotheColor: string;
+        eyeType: string;
+        eyebrowType: string;
+        mouthType: string;
+        avatarStyle: string;
+        skinColor: string;
+    }) => {
+        topType: string;
+        accessoriesType: string;
+        avatarRef: object;
+        hairColor: string;
+        facialHairType: string;
+        clotheType: string;
+        clotheColor: string;
+        eyeType: string;
+        eyebrowType: string;
+        mouthType: string;
+        avatarStyle: string;
+        skinColor: string;
+    })) => {
+
+        setAttributes(e)
+
+
+        setAvatarRef(e.avatarRef.current)
+        setIsAvatarInitialized(isAvatarInitialized + 1)
+        // setLastStepDisabled(false)
+    }
+
     const onSuccessGithub = async (gh) => {
 //         trackEvent({
 //             host: 'mobile_app', // Since there's no window.location in RN
@@ -344,7 +451,7 @@ const CreateNewAccount = () => {
                 dispatch(updateAuthState(authState));
 
                 setTimeout(() => {
-                    navigation.navigate(forwardPath || "Home");
+                    navigation.navigate("home");
                 }, 1000);
             } else {
                 Alert.alert("Login Failed", "The provided username or password is incorrect.");
@@ -363,6 +470,13 @@ const CreateNewAccount = () => {
     const googleCreate = async () => {
         console.log("here")
         setLoading(true);
+
+        const formData = new FormData();
+        formData.append('image', {
+            uri: profilePic,
+            type: 'image/jpeg', // or the appropriate type based on your image
+            name: 'image.jpg', // or the name of your image file
+        });
 
 //         let payload = {
 //             // Simplified metadata, adjust according to available APIs
@@ -409,6 +523,12 @@ const CreateNewAccount = () => {
             }
         }
 
+        for (const key in params) {
+            if (params.hasOwnProperty(key)) {
+                formData.append(key, params[key]);
+            }
+        }
+
         if (name !== "" && name !== undefined) {
             //@ts-ignore
             params["referral_user"] = name
@@ -420,7 +540,7 @@ const CreateNewAccount = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(params),
+                body: formData,
             });
 
             const result = await res.json();
@@ -435,6 +555,47 @@ const CreateNewAccount = () => {
             setLoading(false);
         }
     };
+
+    function hasLetters(str: string): boolean {
+        return /[a-zA-Z]/.test(str);
+    }
+
+    const verifyEmail = async (emailParam) => {
+        if (emailParam === "") {
+            Alert.alert("You must input a valid email", "", [{ text: "OK", style: "cancel" }]);
+            return false; // Directly return false when emailParam is empty
+        }
+
+        console.log(`${API_URL}/api/email/verify`);
+
+        try {
+            let res = await fetch(`${API_URL}/api/email/verify`, { // Corrected template string
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: emailParam }),
+            });
+            console.log("res status: ", res.status); // Log response status
+            res = await res.json();
+            console.log("parsed res: ", res); // Log parsed response
+
+            if (res["valid"] === undefined) {
+                Alert.alert("An unexpected error has occurred", "We're sorry, we'll get right on that!", [{ text: "OK", style: "cancel" }]);
+                return false;
+            } else if (res["valid"] === false) {
+                Alert.alert("Invalid Email Address", "Please enter a valid email address and retry", [{ text: "OK", style: "cancel" }]);
+                return false;
+            } else if (res["valid"] === true) {
+                return true; // Ensure returning true when valid
+            }
+        } catch (error) {
+            console.log("error: ", error); // Log the error
+            Alert.alert("Network Error", "Unable to connect to the server.", [{ text: "OK", style: "cancel" }]);
+            return false;
+        }
+    }
+
 
     const validateUser = async () => {
         setLoading(true);
@@ -482,34 +643,68 @@ const CreateNewAccount = () => {
 
         if (email !== "") {
             const emailIsValid = await verifyEmail(email);
+            console.log("email is valid: ", emailIsValid)
             if (!emailIsValid) {
+                console.log("1")
                 setLoading(false);
                 return false;
             }
         }
 
-        let res = await call("/api/user/validateUser", "post", null, null, null, {
-            user_name: username,
-            password: password,
-            email: email,
-            phone: "N/A",
-            timezone: timezone ? timezone.value : "America/Chicago",
-            force_pass: forcePass
-        });
+        console.log("hello")
 
-        if (res["message"]) {
-            Alert.alert("Notification", res["message"]);
-            setLoading(false);
-            if (res["message"].includes("required")) {
-                if (res["message"].includes("username")) setMissingUser(true);
-                if (res["message"].includes("password")) setMissingPassword(true);
-                if (res["message"].includes("email")) setMissingEmail(true);
-                if (res["message"].includes("phone number")) setMissingPhone(true);
+        try {
+            console.log("try mes: ", timezone)
+            console.log("username: ", username)
+            console.log("password: ", password)
+            console.log("email: ", email)
+            console.log("timezone: ", timezone)
+            console.log("forcepass: ", forcePass)
+            let res = await fetch(`${API_URL}/api/user/validateUser`, { // Use backticks for template literals
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    user_name: username,
+                    password: password,
+                    email: email,
+                    phone: "N/A",
+                    timezone: timezone ? timezone.value : "America/Chicago",
+                    force_pass: forcePass
+                }),
+            });
+
+            console.log("fetch response status: ", res.status); // Log response status
+            console.log("fetch response headers: ", res.headers); // Log response headers
+            if (!res.ok) {
+                console.error("Network response was not ok", res.statusText); // Log error if response is not ok
+                throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            return res["message"] === "User Cleared.";
+            console.log("bitch")
+            res = await res.json();
+            console.log("new res: ", res)
+
+            if (res["message"]) {
+                setLoading(false);
+                if (res["message"].includes("required")) {
+                    if (res["message"].includes("username")) setMissingUser(true);
+                    if (res["message"].includes("password")) setMissingPassword(true);
+                    if (res["message"].includes("email")) setMissingEmail(true);
+                    if (res["message"].includes("phone number")) setMissingPhone(true);
+                }
+                return res["message"] === "User Cleared.";
+            }
+        } catch (error) {
+            Alert.alert("Network Error", "Unable to connect to the server.");
+            console.log("error is: ", error)
         }
+
+        setLoading(false);
         return false;
     }
+//todo add later
+//     let {name} = useParams();
 
     const handleCreateAccount = async () => {
         const isValid = await validateUser();
@@ -519,18 +714,76 @@ const CreateNewAccount = () => {
         }
     };
 
+//     const fileToBlob = async (uri) => {
+//         try {
+//             console.log("1: ", uri);
+//
+//             let path = uri;
+//             if (uri.startsWith('file://')){
+//                 path = uri.replace('file://', '')
+//             }
+//
+//             // Read the file as base64
+//             const response = await RNFetchBlob.fs.readFile(path, 'base64');
+//             console.log("2");
+//
+//             // Convert base64 string to byte array
+//             const byteCharacters = atob(response);
+//             const byteNumbers = new Array(byteCharacters.length);
+//             for (let i = 0; i < byteCharacters.length; i++) {
+//                 byteNumbers[i] = byteCharacters.charCodeAt(i);
+//             }
+//             const byteArray = new Uint8Array(byteNumbers);
+//
+//             // Create Blob from byte array
+//             const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+//             console.log("3");
+//
+//             return blob;
+//         } catch (error) {
+//             console.error('Error converting file to Blob:', error);
+//             throw error;
+//         }
+//     };
+
+    const svgToBlob = async (svgString) => {
+        try {
+//             const byteCharacters = atob(svgString);
+//             const byteNumbers = new Array(byteCharacters.length);
+//             for (let i = 0; i < byteCharacters.length; i++){
+//                 byteNumbers[i] = byteCharacters.charCodeAt(i)
+//             }
+//             const byteArray = new Uint8Array(byteNumbers);
+            const blob = new Blob([svgString], { type: 'image/svg+xml' });
+            return blob
+        } catch (error) {
+            console.error('Error converting svg to Blob:', error);
+            throw error;
+        }
+    };
+
+
     const accountCreation = async () => {
+        console.log("here")
         setLoading(true);
 
-        const formData = new FormData();
-        formData.append('avatar', {
-            uri: svgUri, // You need to generate this URI from your SVG component
-            type: 'image/svg+xml',
-            name: 'avatar.svg'
-        });
+        const svgString = profilePic;
 
-        // Additional parameters
-        formData.append('user_name', username);
+//         const formData = new FormData();
+//         formData.append('image', {
+//             uri: profilePic,
+//             type: 'image/jpeg', // or the appropriate type based on your image
+//             name: 'image.jpg', // or the name of your image file
+//         });
+//         formData.append('avatar', {
+//             uri: svgUri, // You need to generate this URI from your SVG component
+//             type: 'image/svg+xml',
+//             name: 'avatar.svg'
+//         });
+//
+//         // Additional parameters
+//         formData.append('user_name', username);
+        console.log("after image")
 
         if (password !== confirmPass) {
             Alert.alert("Error", "Passwords do not match");
@@ -558,6 +811,8 @@ const CreateNewAccount = () => {
         }
 
         // More validations...
+
+        console.log("after check")
 
         let params = {
             user_name: username,
@@ -597,21 +852,69 @@ const CreateNewAccount = () => {
             force_pass: forcePass
         }
 
-        if (name !== "" && name !== undefined) {
-            //@ts-ignore
-            params["referral_user"] = name
-        }
+        console.log('after params')
+
+//         if (name !== "" && name !== undefined) {
+//             //@ts-ignore
+//             params["referral_user"] = name
+//         }
+
+//         for (const key in params) {
+//             if (params.hasOwnProperty(key)) {
+//                 formData.append(key, params[key]);
+//             }
+//         }
+
+        console.log("after form data")
 
         try {
-            let response = await call("/api/user/createNewUser", "POST", params, formData);
+            const svgBlob = await svgToBlob(svgString);
+            console.log("api call: ", `${API_URL}/api/user/createNewUser`)
+            let create = await fetchWithUpload(
+                `${API_URL}/api/user/createNewUser`,
+                svgBlob,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(params),
+                    credentials: 'include'
+                },
+                (res: any) => {
+                    if (res["message"] !== "User Created.") {
+                        Alert.alert("Somethings went wrong...", res["message"]);
+                    }
 
-            if (response.message !== "User Created.") {
-                Alert.alert("Error", "Something went wrong: " + response.message);
-            } else {
-                dispatch(updateAuthState({...initialAuthStateUpdate, authenticated: true}));
-                navigate("Home");
-            }
+                    if (res === undefined) {
+                        Alert.alert("Network Error", "Unable to connect to the server.");
+                    }
+
+                    if (res["message"] === "User Created.") {
+//                         payload = {
+//                             host: window.location.host,
+//                             event: WebTrackingEvent.Signup,
+//                             timespent: 0,
+//                             path: location.pathname,
+//                             latitude: null,
+//                             longitude: null,
+//                             metadata: {
+//                                 mobile: isMobile,
+//                                 width: window.innerWidth,
+//                                 height: window.innerHeight,
+//                                 user_agent: navigator.userAgent,
+//                                 referrer: document.referrer,
+//                             },
+//                         }
+//                         trackEvent(payload);
+                        dispatch(updateAuthState({...initialAuthStateUpdate, authenticated: true}))
+
+                        navigation.navigate("home");
+                    }
+                }
+            )
         } catch (error) {
+            console.log("error here is is: ", error)
             Alert.alert("Network Error", "Unable to connect to the server.");
         } finally {
             setLoading(false);
@@ -656,6 +959,7 @@ const CreateNewAccount = () => {
                           onPress={async () => {
                             let ok = await validateUser()
                             if (ok){
+                                console.log("content")
                                 debouncedAccountCreation()
                             }
                           }}
@@ -720,8 +1024,6 @@ const CreateNewAccount = () => {
             </View>
         );
     }
-
-    console.log("avatar is: ", Avataaar)
 
     return (
         <ImageBackground

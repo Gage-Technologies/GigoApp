@@ -1,29 +1,16 @@
 import React, {useState, useRef, useEffect} from "react";
 import { Piece } from "avataaars";
-import Avatar from "avataaars";
+import Avatar from "./avatarIndex.tsx";
 import map from "lodash/map";
 import options from "./options";
-import {
-  Button,
-  DownloadRow,
-  Tabs,
-  Tabpanes,
-  ColorContainer,
-  Container,
-  StyledAvatar,
-  Pieces,
-  Color,
-  None,
-  Tab,
-  Tabpane,
-} from "./style";
+import styles from "./style";
 import { DownloadIcon } from "./svg";
 import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { Svg, Path } from 'react-native-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Canvas from 'react-native-canvas'
 
-export default function Avataaar(props) {
+const Avataaar = (props) => {
   const canvasRef = useRef(null);
   const avatarRef = useRef(null);
   const [selectedTab, setSelectedTab] = useState('top');
@@ -90,35 +77,27 @@ export default function Avataaar(props) {
   }, []);
 
   return (
-      <View>
-        <Button onClick={randomizeAvatar} style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          width: 'auto',
-          gap: '5px',
-          backgroundColor: '#007bff', // Background color
-          color: 'white',              // Text color
-          borderRadius: '8px',         // Rounded edges
-          fontFamily: 'Poppins, sans-serif', // Poppins font
-        }}>
+    <View>
+        <TouchableOpacity onPress={randomizeAvatar}>
           <Icon name="shuffle" size={30} color="#000" />
-        </Button>
+        </TouchableOpacity>
         <View style={{ display: 'flex', flexDirection: 'row', position: 'relative', width: "90%", justifyContent: "center" }}>
-          <StyledAvatar style={window.innerWidth > 1000 ? {} : {width: "auto", marginRight: "50px"}}>
+          <View style={window.innerWidth > 1000 ? {} : {width: "auto", marginRight: "50px"}}>
             <Avatar
                 ref={avatarRef}
                 style={window.innerWidth > 1000 ? { width: '200px', height: '200px', position: 'relative', top: '35px' } : { width: '150px', height: '150px', position: 'relative', top: '35px' } }
                 {...props.value}
             />
-          </StyledAvatar>
-          <Tabs style={window.innerWidth > 1000 ? { position: 'relative', top: '5px' } : {position: "relative", top: "-5px"}}>
-            {map(options, (option) => (
-                <Tab selectedTab={selectedTab} type={option.type} onClick={() => setSelectedTab(option.type)}>
-                  {option.label}
-                </Tab>
+          </View>
+          <View>
+            {options.map((option) => (
+              <TouchableOpacity onPress={() => setSelectedTab(option.type)} key={option.type}>
+                <Text>
+                    {option.label}
+                </Text>
+              </TouchableOpacity>
             ))}
-          </Tabs>
+          </View>
         </View>
         {props.creation === undefined && (
             <Tabpanes style={window.innerWidth > 1000 ? { position: 'relative', top: '15px' } : {display: "flex", width: "85%", justifyContent: "center", top: "15px"}}>
@@ -222,15 +201,6 @@ export default function Avataaar(props) {
               })}
             </Tabpanes>
         ) }
-      {/*<DownloadRow>*/}
-      {/*  <Button onClick={onDownloadSVG}>*/}
-      {/*    <DownloadIcon /> SVG*/}
-      {/*  </Button>{" "}*/}
-      {/*  <Button onClick={onDownloadPNG}>*/}
-      {/*    <DownloadIcon /> PNG*/}
-      {/*  </Button>{" "}*/}
-      {/*</DownloadRow>*/}
-
       <Canvas
         style={{ display: "none" }}
         width="528"
@@ -240,3 +210,5 @@ export default function Avataaar(props) {
     </View>
   );
 }
+
+export default Avataaar;

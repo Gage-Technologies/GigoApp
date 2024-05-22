@@ -1,99 +1,84 @@
-import styled from 'styled-components/native';
+import { StyleSheet, Dimensions } from 'react-native';
 
-export const GithuFork = styled.View`
-  width: 12.1em;
-  height: 12.1em;
-  position: absolute;
-  overflow: hidden;
-  top: 0;
-  right: 0;
-  z-index: 9999;
-  pointer-events: none;
-`;
+const styles = StyleSheet.create({
+  githuFork: {
+    width: Dimensions.get('window').width * 0.25, // Converted em to percentage of screen width
+    height: Dimensions.get('window').width * 0.25, // Same as above
+    position: 'absolute',
+    overflow: 'hidden',
+    top: 0,
+    right: 0,
+    zIndex: 9999,
+    // Note: `pointer-events` is not supported in React Native styles
+  },
+  container: {
+    position: 'relative',
+    borderRadius: 8,
+    width: 400, // Assuming this is the appropriate size, adjust if needed
+    alignSelf: 'center',
+    backgroundColor: '#f3f3f3',
+    marginTop: 20,
+    paddingVertical: 20,
+  },
+  pieces: {
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  color: {
+    height: 26,
+    width: 23,
+  },
+  none: {
+    opacity: 0.2,
+    fontSize: 11,
+    position: 'absolute',
+    top: 20,
+    left: 9,
+  },
+  styledAvatar: {
+    width: 315,
+    height: 235,
+    paddingLeft: 20,
+  },
+  tab: {
+    fontSize: 12,
+    textAlign: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
+    padding: 4,
+    borderRadius: 4,
+  },
+  tabpane: {
+    display: 'none', // Note: display property does not exist in React Native
+    width: 400,
+    padding: 10,
+  },
+  downloadRow: {
+    textAlign: 'center',
+  },
+  tabs: {
+    position: 'absolute',
+    right: 50,
+    top: 8,
+    width: 100,
+  },
+  colorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+  },
+  tabpanes: {
+    width: 400,
+  },
+  button: {
+    borderRadius: 7,
+    backgroundColor: '#001f3f',
+    paddingVertical: 5,
+    paddingHorizontal: 7,
+    fontSize: 20,
+    letterSpacing: 0.6,
+    marginHorizontal: 5,
+  },
+});
 
-export const Container = styled.View`
-  position: relative;
-  border-radius: 8px;
-  width: 400px;
-  margin: auto;
-  background: #f3f3f3;
-  margin-top: 20px;
-  padding: 20px 0;
-`;
-
-export const Pieces = styled.View`
-  display: inline-block;
-  position: relative;
-  overflow: hidden;
-`;
-
-export const Color = styled.View`
-  display: inline-block;
-  height: 26px;
-  width: 23px;
-`;
-
-export const None = styled.View`
-  opacity: 0.2;
-  font-size: 11px;
-  position: absolute;
-  top: 20px;
-  left: 9px;
-`;
-
-export const StyledAvatar = styled.View`
-  display: block;
-  width: 315px;
-  height: 235px;
-  padding-left: 20px;
-`;
-
-export const Tab = styled.View`
-  font-size: 12px;
-  text-align: center;
-  border: 1px solid transparent;
-  padding: 4px;
-  border-radius: 4px;
-`;
-
-export const Tabpane = styled.View`
-  box-sizing: border-box;
-  display: none;
-  width: 400px;
-  padding: 0 10px 10px;
-`;
-
-export const DownloadRow = styled.View`
-  text-align: center;
-`;
-
-export const Tabs = styled.View`
-  box-sizing: border-box;
-  display: block;
-  position: absolute;
-  right: 50px;
-  top: 8px;
-  width: 100px;
-`;
-
-export const ColorContainer = styled.View`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-wrap: wrap;
-`;
-
-export const Tabpanes = styled.View`
-  box-sizing: border-box;
-  display: inline-block;
-  width: 400px;
-`;
-
-export const Button = styled.TouchableOpacity`
-  border-radius: 7px;
-  background-color: #001f3f;
-  padding: 5px 7px;
-  font-size: 20px;
-  letter-spacing: 0.6px;
-  margin: 0 5px;
-`;

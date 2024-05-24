@@ -3,15 +3,17 @@ import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, Sty
 import { Svg, Path } from 'react-native-svg';
 import { Button, useTheme } from 'react-native-paper';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Ionicons from 'react-native-vector-icons/Ionicons'; // For clipboard icon
 import Config from 'react-native-config';
 
 const JourneyMap = ({ unitId }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [handoutModalVisible, setHandoutModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
+  const [handoutVisible, setHandoutVisible] = useState(false);
   const [handoutContent, setHandoutContent] = useState('');
+  const [unitTitle, setUnitTitle] = useState(''); // New state for unit title
   const API_URL = Config.API_URL;
   const theme = useTheme();
 
@@ -32,8 +34,8 @@ const JourneyMap = ({ unitId }) => {
         if (response.ok && result.success) {
           const fetchedTasks = result.data.tasks.sort((a, b) => (a.node_above ?? 0) - (b.node_above ?? 0));
           setTasks(fetchedTasks);
-          // Assuming each unit has a handout
           setHandoutContent(result.data.handout);
+          setUnitTitle(result.data.unitTitle); // Set the unit title
         } else {
           Alert.alert('Error', 'Failed to fetch tasks');
         }
@@ -50,6 +52,10 @@ const JourneyMap = ({ unitId }) => {
   const handlePressTask = (task) => {
     setSelectedTask(task);
     setModalVisible(true);
+  };
+
+  const toggleHandout = () => {
+    setHandoutVisible(!handoutVisible);
   };
 
   const renderTaskIcon = (task, index) => {
@@ -91,25 +97,6 @@ const JourneyMap = ({ unitId }) => {
     </Modal>
   );
 
-  const HandoutModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={handoutModalVisible}
-      onRequestClose={() => setHandoutModalVisible(false)}
-    >
-      <View style={styles.centeredView}>
-        <View style={styles.modalView}>
-          <Text style={styles.modalTextTitle}>Handout</Text>
-          <ScrollView style={styles.modalTextDescription}>
-            <Text>{handoutContent}</Text>
-          </ScrollView>
-          <Button mode="contained" onPress={() => setHandoutModalVisible(false)}>Close</Button>
-        </View>
-      </View>
-    </Modal>
-  );
-
   const CurvedPath = ({ points }) => {
     const d = points.map((point, i) => {
       if (i === 0) {
@@ -129,15 +116,17 @@ const JourneyMap = ({ unitId }) => {
   const JourneyStops = () => {
     const screenWidth = Dimensions.get('window').width;
     const buttonSize = 100;
-    const shiftLeft = 30; // Shift all points 30 pixels to the left
+    const shiftLeft = 30;
 
     const points = tasks.map((task, index) => ({
       x: index % 2 === 0 ? screenWidth * 0.25 - shiftLeft : screenWidth * 0.75 - shiftLeft,
-      y: index * 80 + 50,
+      y: index * 80 - 20,
     }));
 
+    const containerHeight = points.length * 80;
+
     return (
-      <View style={styles.pathContainer}>
+      <View style={[styles.pathContainer, { height: containerHeight }]}>
         <CurvedPath points={points} />
         {tasks.map((task, index) => (
           <TouchableOpacity
@@ -163,14 +152,23 @@ const JourneyMap = ({ unitId }) => {
         <ActivityIndicator size="large" color="#0000ff" />
       ) : (
         <>
-          <Button mode="contained" onPress={() => setHandoutModalVisible(true)} style={styles.handoutButton}>
-            Show Handout
-          </Button>
-          <JourneyStops />
+          <View style={styles.unitHeader}>
+          </View>
+          <Text style={[styles.unitTitle, { fontFamily: theme.fonts.medium.fontFamily }]}>
+            {unitTitle}
+          </Text>
+          {handoutVisible ? (
+            <View style={styles.handoutContainer}>
+              <ScrollView>
+                <Text style={styles.handoutText}>{handoutContent}</Text>
+              </ScrollView>
+            </View>
+          ) : (
+            <JourneyStops />
+          )}
         </>
       )}
       {selectedTask && <TaskModal />}
-      {handoutModalVisible && <HandoutModal />}
     </ScrollView>
   );
 };
@@ -219,7 +217,6 @@ const styles = StyleSheet.create({
   },
   pathContainer: {
     position: 'relative',
-    height: 600,
     width: '100%',
   },
   taskButton: {
@@ -266,8 +263,32 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 20,
   },
-  handoutButton: {
+  unitTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 80,
+    marginBottom: 10,
+  },
+  unitHeader: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
+  },
+  clipboardIcon: {
+    padding: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: 50,
+  },
+  handoutContainer: {
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
     marginVertical: 10,
+  },
+  handoutText: {
+    fontSize: 16,
   },
 });
 

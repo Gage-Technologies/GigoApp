@@ -3,6 +3,7 @@ import { ScrollView, View, StyleSheet, ActivityIndicator, Alert, TouchableOpacit
 import { Text, Button, useTheme } from 'react-native-paper';
 import Config from 'react-native-config';
 import JourneyMap from '../components/JourneyMap';
+import Ionicons from 'react-native-vector-icons/Ionicons'; // Ensure Ionicons is imported here as well
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
@@ -122,13 +123,15 @@ const JourneyMain = () => {
     return (
       <View style={styles.unitContainer} key={unit._id}>
         <View style={[styles.unitBox, { backgroundColor: unit.color }]}>
-          {allCompleted && (
-            <View style={styles.completedIndicator}>
-              <Text style={{ color: 'white' }}>Completed</Text>
-            </View>
-          )}
+          <View style={styles.unitHeader}>
+            <TouchableOpacity onPress={() => setShowHandout(showHandout === index ? null : index)} style={styles.clipboardIcon}>
+              <Ionicons name="clipboard-outline" size={24} color={theme.colors.primary} />
+            </TouchableOpacity>
+          </View>
           <TouchableOpacity onPress={() => setShowHandout(showHandout === index ? null : index)}>
-            <Text style={{ color: getTextColor(unit.color), fontSize: 20 }}>{unit.name}</Text>
+            <Text style={[styles.unitTitle, { color: getTextColor(unit.color), fontFamily: theme.fonts.medium.fontFamily }]}>
+              {unit.name}
+            </Text>
           </TouchableOpacity>
           {showHandout === index ? (
             <Text style={[styles.handoutText, { color: getTextColor(unit.color) }]}>{unit.handout}</Text>
@@ -188,10 +191,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   unitBox: {
-    width: 400,
+    width: 380,
     padding: 30,
     borderRadius: 30,
     position: 'relative',
+  },
+  unitTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 40,
+    marginBottom: 10,
   },
   completedIndicator: {
     position: 'absolute',
@@ -231,6 +241,17 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 14,
     maxWidth: '90%',
+  },
+  unitHeader: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    zIndex: 1,
+  },
+  clipboardIcon: {
+    padding: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    borderRadius: 50,
   },
 });
 

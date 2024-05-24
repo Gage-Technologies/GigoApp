@@ -11,6 +11,7 @@ import GigoCircleLogo from "../components/GigoCircleLogo.svg";
 import Geolocation from 'react-native-geolocation-service';
 import { useNavigation } from '@react-navigation/native';
 import Config from 'react-native-config'
+import {authorizeGithub, authorizeGoogle} from "../services/auth.js"
 import {authorize} from "../../auth.js"
 import { initialAuthStateUpdate, updateAuthState} from "../reducers/auth.ts"
 import { useDispatch } from 'react-redux';
@@ -191,42 +192,49 @@ const Login = () => {
                     alignItems: 'center',
                 },
                 externalBox: {
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: width > 1000 ? '35%' : '70%',
+                    backgroundColor: 'black',
                     borderRadius: 10,
-                    backgroundColor: '#fff', // Adjust according to your theme color
-                    paddingVertical: width > 1000 ? 15 : 30
+                    width: width * 0.99,  // 99% of screen width
+                    height: height * 0.7,  // 70% of screen height
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: 20,
                 },
                 externalHeader: {
-                    fontSize: 20,
-                    marginBottom: 10,
+            fontSize: 24,
+            marginBottom: 20,
+            color: "white"
                 },
                 externalInput: {
-                    width: '100%',
-                    height: 40,
-                    marginVertical: 10,
-                    borderWidth: 1,
-                    paddingHorizontal: 10,
+            width: '80%',
+            height: 30,
+            marginBottom: 20,
+            borderRadius: 10,
+            borderWidth: 1,
+            padding: 10,
+            color: "white",
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            borderColor: "gray"
                 },
                 externalButton: {
                     flexDirection: 'row',
                     alignItems: 'center',
-                    backgroundColor: theme.colors.accent,
                     padding: 10,
                     borderRadius: 5,
                     justifyContent: 'center',
                     minHeight: 35,
                     width: '50%',
                     marginTop: 10,
+                                  backgroundColor: '#007BFF', // A default blue color for button background
                 },
                 externalButtonText: {
-                    color: theme.fonts.regular,
-                    marginLeft: 10,
+              color: 'white', // Text color for buttons
+              fontSize: 16, // Font size for text
                 },
                 externalSubText: {
                     fontSize: 14,
                     marginTop: 20,
+                    color: "white"
                 }
     });
     // Assuming the use of hooks for state management
@@ -239,7 +247,7 @@ const Login = () => {
     const [showPass, setShowPass] = React.useState(false)
     const [ghConfirm, setGhConfirm] = React.useState(false)
 
-  const startGoogle = () => {
+  const startGoogle = async () => {
 //     const payload = {
 //       host: 'mobile_device', // Modify as needed
 //       event: 'LoginStart',
@@ -250,14 +258,19 @@ const Login = () => {
 //       metadata: { "auth_provider": "google" },
 //     };
 //     trackEvent(payload);
-    googleSignIn();
+      const userInfo = await GoogleSignin.signIn();
+      setExternal(true)
+      setExternalToken(userInfo.idToken)
+      setExternalLogin("Google")
+//       const auth = await authorizeGoogle(userInfo.idToken); // Adjust this function to your backend
+//     googleSignIn();
   };
 
       const googleSignIn = async () => {
         setLoading(true);
         try {
-          const userInfo = await GoogleSignin.signIn();
-          const auth = await authorizeGoogle(userInfo.idToken); // Adjust this function to your backend
+//           const userInfo = await GoogleSignin.signIn();
+          const auth = await authorizeGoogle(externalToken, password); // Adjust this function to your backend
 
           if (auth === "User not found") {
             Alert.alert("Login Failed", "This Google account is not linked with our service. Try logging in with the same email or sign up.");
@@ -407,7 +420,7 @@ const Login = () => {
 //                 };
 //                 trackEvent(payload);
 
-                navigation.navigate("JourneyMain");
+                navigation.navigate("home");
             } else if (auth.includes("Too many failed attempts")) {
                 Alert.alert("Login failed.", auth);
                 setLoading(false);
@@ -418,7 +431,6 @@ const Login = () => {
             }
         } catch (error) {
             Alert.alert("Login Error", "An unexpected error occurred.");
-            console.log("error is: ", error)
             setLoading(false);
         }
     };
@@ -429,8 +441,7 @@ const Login = () => {
         setExternalLogin("Google");
     };
 
-    const RenderExternal = ({ navigation, setPassword, showPass, password, loading, externalLogin, googleSignIn, githubConfirm, forwardPath }) => {
-        const width = Dimensions.get('window').width; // Get window width to adjust styles dynamically
+    const renderExternal = () => {
 
         return (
             <View style={styles.externalContainer}>
@@ -448,24 +459,26 @@ const Login = () => {
                     />
                     {loading ? (
                         <View style={styles.externalButton}>
-                            <ActivityIndicator size="small" color="#0000ff" />
                             <Text style={styles.externalButtonText}>Login</Text>
                         </View>
                     ) : (
                         <TouchableOpacity style={styles.externalButton} onPress={() => {
                             externalLogin === "Google" ? googleSignIn() : githubConfirm();
                         }}>
-                            <Ionicons name="send" size={20} color="white" />
                             <Text style={styles.externalButtonText}>Login</Text>
                         </TouchableOpacity>
                     )}
                     <Text style={styles.externalSubText}>
                         Haven't linked your account yet?
                     </Text>
-                    <Button
-                        title="sign up"
-                        onPress={() => navigation.navigate('SignUp', { forward: encodeURIComponent(forwardPath || "") })}
-                    />
+                      <Button
+                         onPress={() => navigation.navigate('SignUp', { forward: encodeURIComponent(forwardPath || "") })}
+                        title="Sign Up"
+                        color="blue"
+                        style={{color: "blue"}}
+                      >
+                        <Text>Sign Up</Text>
+                      </Button>
                 </View>
             </View>
         );

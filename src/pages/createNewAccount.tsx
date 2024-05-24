@@ -14,6 +14,14 @@ import profilePic from "../components/Avatar/profile-pic.svg"
 import Config from 'react-native-config'
 import { useDispatch } from 'react-redux';
 import {v4 as uuidv4} from 'uuid';
+import {useGoogleLogin} from "@react-oauth/google";
+import { authorizeGithub, authorizeGoogle} from "../services/auth.js"
+import {authorize} from "../../auth.js"
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import { initialAuthStateUpdate, updateAuthState} from "../reducers/auth.ts"
 import fetchWithUpload from "../services/api-call.tsx"
 import RNFetchBlob from 'rn-fetch-blob';
@@ -24,6 +32,9 @@ const { width, height } = Dimensions.get('window')
 import moment from 'moment-timezone';
 
 const API_URL = Config.API_URL;
+const GOOGLE_ANDROID_CLIENT_ID = Config.GOOGLE_ANDROID_CLIENT_ID
+const GOOGLE_WEB_CLIENT_ID = Config.GOOGLE_WEB_CLIENT_ID
+
 
 interface TimezoneOption {
     value: string;
@@ -105,6 +116,8 @@ const CreateNewAccount = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [external, setExternal] = React.useState(false)
+    const [externalLogin, setExternalLogin] = React.useState("")
+    const [externalToken, setExternalToken] = React.useState("")
     const [confirmPass, setConfirmPass] = useState('');
     const [missingUser, setMissingUser] = React.useState<boolean>(false)
     const [invalidUsername, setInvalidUsername] = React.useState<boolean>(false)
@@ -118,6 +131,8 @@ const CreateNewAccount = () => {
     const [firstName, setFirstName] = React.useState("")
     const [lastName, setLastName] = React.useState("")
     const [forcePass, setForcePass] = React.useState<boolean>(false)
+    const [step, setStep] = React.useState(0)
+    const [showPass, setShowPass] = React.useState(false)
     const [Attributes, setAttributes] = useState({
         topType: "Hijab",
         accessoriesType: "Blank",
@@ -317,6 +332,20 @@ const CreateNewAccount = () => {
         );
     };
 
+//     useEffect(() => {
+//         const configureGoogleSignIn = async () => {
+//             const scopes = ['openid', 'email', 'profile'];
+//             await GoogleSignin.configure({
+//                 androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+//                 scopes: scopes
+//             });
+//             console.log("Configured scopes:", scopes);
+//         };
+//
+//         configureGoogleSignIn();
+//     }, []);
+
+
     const setAvatar = (e: {
         topType: string;
         accessoriesType: string;
@@ -392,6 +421,12 @@ const CreateNewAccount = () => {
         // setLastStepDisabled(false)
     }
 
+    const onSuccessGoogle = async (usr) => {
+        setExternal(true)
+        setExternalToken(usr)
+        setExternalLogin("Google")
+    }
+
     const onSuccessGithub = async (gh) => {
 //         trackEvent({
 //             host: 'mobile_app', // Since there's no window.location in RN
@@ -425,6 +460,39 @@ const CreateNewAccount = () => {
 
         setLoading(false);
     };
+
+    const createLogin = async (newUser: boolean | null) => {
+        let auth = await authorize(username, password);
+        // @ts-ignore
+        if (auth["user"] !== undefined) {
+            let authState = Object.assign({}, initialAuthStateUpdate)
+            authState.authenticated = true
+            // @ts-ignore
+            authState.expiration = auth["exp"]
+            // @ts-ignore
+            authState.id = auth["user"]
+            // @ts-ignore
+            authState.role = auth["user_status"]
+            authState.email = auth["email"]
+            authState.phone = auth["phone"]
+            authState.userName = auth["user_name"]
+            authState.thumbnail = auth["thumbnail"]
+            authState.exclusiveContent = auth["exclusive_account"]
+            authState.exclusiveAgreement = auth["exclusive_agreement"]
+            authState.tutorialState = DefaultTutorialState
+            dispatch(updateAuthState(authState))
+
+            await sleep(1000)
+
+
+            setLoading(false)
+        } else {
+            if (sessionStorage.getItem("alive") === null)
+                //@ts-ignore
+                swal("Sorry, we failed to log you in, please try again on login page");
+            setLoading(false)
+        }
+    }
 
     const githubConfirm = async () => {
         if (!ghConfirm) {
@@ -467,24 +535,42 @@ const CreateNewAccount = () => {
         Alert.alert("Login Failed", "GitHub login failed. Please try again.");
     };
 
-    const googleCreate = async () => {
-        console.log("here")
+//     const googleSignUp = async () => {
+//         console.log("hello in signup")
+//     }
+
+     const googleSignUp = async () => {
         setLoading(true);
+        try {
+//             await GoogleSignin.configure({
+//                       androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+//                       webClientId: GOOGLE_WEB_CLIENT_ID,
+//             });
+//             const {idToken} = await GoogleSignin.signIn();
+//             console.log("id token: ", idToken)
+          const userInfo = await GoogleSignin.signIn();
+          const idToken = userInfo.idToken;
 
-        const formData = new FormData();
-        formData.append('image', {
-            uri: profilePic,
-            type: 'image/jpeg', // or the appropriate type based on your image
-            name: 'image.jpg', // or the name of your image file
+          onSuccessGoogle(idToken)
+
+        } catch (error) {
+          Alert.alert('Sign-Up Error', 'Failed to authenticate with Google.');
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      const sleep = (milliseconds): Promise<void> => {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                resolve();
+            }, milliseconds);
         });
+      };
 
-//         let payload = {
-//             // Simplified metadata, adjust according to available APIs
-//             metadata: {
-//                 mobile: true, // Example of mobile flag
-//             }
-//         };
-//         trackEvent(payload); // Make sure trackEvent is adapted for React Native
+    const googleCreate = async () => {
+        setLoading(true);
 
         if (password !== confirmPass || password.length < 5) {
             Alert.alert("Error", "Passwords do not match or too short");
@@ -497,6 +583,9 @@ const CreateNewAccount = () => {
             setLoading(false);
             return;
         }
+
+        const svgString = profilePic;
+
 
         let params = {
             external_auth: externalToken,
@@ -523,37 +612,74 @@ const CreateNewAccount = () => {
             }
         }
 
-        for (const key in params) {
-            if (params.hasOwnProperty(key)) {
-                formData.append(key, params[key]);
-            }
-        }
-
-        if (name !== "" && name !== undefined) {
-            //@ts-ignore
-            params["referral_user"] = name
-        }
-
         try {
-            let res = await fetch('/api/user/createNewGoogleUser', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+            const svgBlob = await svgToBlob(svgString);
+            let create = await fetchWithUpload(
+                `${API_URL}/api/user/createNewGoogleUserApp`,
+                svgBlob,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(params),
+                    credentials: 'include'
                 },
-                body: formData,
-            });
+                (res: any) => {
+                    if (res["message"] !== "Google User Added.") {
+                        Alert.alert("Something went wrong here...", res["message"]);
+                    }
 
-            const result = await res.json();
-            if (result.message !== "Google User Added.") {
-                Alert.alert("Error", result.message);
-            } else {
-                handleSuccess(result); // Define this function to handle successful creation
+                    if (res === undefined) {
+                        Alert.alert("Network Error", "Unable to connect to the server.");
+                    }
+
+                    if (res["message"] === "Google User Added.") {
+                        authorizeGoogle(externalToken, password).then(auth => {
+                            // @ts-ignore
+                            if (auth["user"] !== undefined) {
+                                let authState = Object.assign({}, initialAuthStateUpdate)
+                                authState.authenticated = true
+                                // @ts-ignore
+                                authState.expiration = auth["exp"]
+                                // @ts-ignore
+                                authState.id = auth["user"]
+                                // @ts-ignore
+                                authState.role = auth["user_status"]
+                                authState.email = auth["email"]
+                                authState.phone = auth["phone"]
+                                authState.userName = auth["user_name"]
+                                authState.thumbnail = auth["thumbnail"]
+                                authState.backgroundColor = auth["color_palette"]
+                                authState.backgroundName = auth["name"]
+                                authState.backgroundRenderInFront = auth["render_in_front"]
+                                authState.exclusiveContent = auth["exclusive_account"]
+                                authState.exclusiveAgreement = auth["exclusive_agreement"]
+                                authState.tutorialState = auth["tutorials"] as TutorialState
+                                authState.tier = auth["tier"]
+                                authState.inTrial = auth["in_trial"]
+                                authState.alreadyCancelled = auth["already_cancelled"]
+                                authState.hasPaymentInfo = auth["has_payment_info"]
+                                authState.hasSubscription = auth["has_subscription"]
+                                authState.usedFreeTrial = auth["used_free_trial"]
+                                dispatch(updateAuthState(authState))
+
+                                // this makes sure the dispatch occurs
+                                sleep(1000).then(() => {
+                                    navigation.navigate("home");
+                                })
+                            } else {
+                                Alert.alert("Sorry, we failed to log you in, please try again on login page.")
+                            }
+                        })
+                    }
+                }
+            )
+            } catch (error) {
+                Alert.alert("Error", "Network request failed");
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            Alert.alert("Error", "Network request failed");
-        } finally {
-            setLoading(false);
-        }
     };
 
     function hasLetters(str: string): boolean {
@@ -566,7 +692,6 @@ const CreateNewAccount = () => {
             return false; // Directly return false when emailParam is empty
         }
 
-        console.log(`${API_URL}/api/email/verify`);
 
         try {
             let res = await fetch(`${API_URL}/api/email/verify`, { // Corrected template string
@@ -576,9 +701,7 @@ const CreateNewAccount = () => {
                 },
                 body: JSON.stringify({ email: emailParam }),
             });
-            console.log("res status: ", res.status); // Log response status
             res = await res.json();
-            console.log("parsed res: ", res); // Log parsed response
 
             if (res["valid"] === undefined) {
                 Alert.alert("An unexpected error has occurred", "We're sorry, we'll get right on that!", [{ text: "OK", style: "cancel" }]);
@@ -643,23 +766,14 @@ const CreateNewAccount = () => {
 
         if (email !== "") {
             const emailIsValid = await verifyEmail(email);
-            console.log("email is valid: ", emailIsValid)
             if (!emailIsValid) {
-                console.log("1")
                 setLoading(false);
                 return false;
             }
         }
 
-        console.log("hello")
 
         try {
-            console.log("try mes: ", timezone)
-            console.log("username: ", username)
-            console.log("password: ", password)
-            console.log("email: ", email)
-            console.log("timezone: ", timezone)
-            console.log("forcepass: ", forcePass)
             let res = await fetch(`${API_URL}/api/user/validateUser`, { // Use backticks for template literals
                 method: 'POST',
                 headers: {
@@ -675,15 +789,11 @@ const CreateNewAccount = () => {
                 }),
             });
 
-            console.log("fetch response status: ", res.status); // Log response status
-            console.log("fetch response headers: ", res.headers); // Log response headers
             if (!res.ok) {
                 console.error("Network response was not ok", res.statusText); // Log error if response is not ok
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            console.log("bitch")
             res = await res.json();
-            console.log("new res: ", res)
 
             if (res["message"]) {
                 setLoading(false);
@@ -697,7 +807,6 @@ const CreateNewAccount = () => {
             }
         } catch (error) {
             Alert.alert("Network Error", "Unable to connect to the server.");
-            console.log("error is: ", error)
         }
 
         setLoading(false);
@@ -764,7 +873,6 @@ const CreateNewAccount = () => {
 
 
     const accountCreation = async () => {
-        console.log("here")
         setLoading(true);
 
         const svgString = profilePic;
@@ -781,9 +889,7 @@ const CreateNewAccount = () => {
 //             name: 'avatar.svg'
 //         });
 //
-//         // Additional parameters
-//         formData.append('user_name', username);
-        console.log("after image")
+
 
         if (password !== confirmPass) {
             Alert.alert("Error", "Passwords do not match");
@@ -812,7 +918,6 @@ const CreateNewAccount = () => {
 
         // More validations...
 
-        console.log("after check")
 
         let params = {
             user_name: username,
@@ -852,24 +957,10 @@ const CreateNewAccount = () => {
             force_pass: forcePass
         }
 
-        console.log('after params')
 
-//         if (name !== "" && name !== undefined) {
-//             //@ts-ignore
-//             params["referral_user"] = name
-//         }
-
-//         for (const key in params) {
-//             if (params.hasOwnProperty(key)) {
-//                 formData.append(key, params[key]);
-//             }
-//         }
-
-        console.log("after form data")
 
         try {
             const svgBlob = await svgToBlob(svgString);
-            console.log("api call: ", `${API_URL}/api/user/createNewUser`)
             let create = await fetchWithUpload(
                 `${API_URL}/api/user/createNewUser`,
                 svgBlob,
@@ -883,7 +974,7 @@ const CreateNewAccount = () => {
                 },
                 (res: any) => {
                     if (res["message"] !== "User Created.") {
-                        Alert.alert("Somethings went wrong...", res["message"]);
+                        Alert.alert("Something went wrong...", res["message"]);
                     }
 
                     if (res === undefined) {
@@ -907,14 +998,13 @@ const CreateNewAccount = () => {
 //                             },
 //                         }
 //                         trackEvent(payload);
-                        dispatch(updateAuthState({...initialAuthStateUpdate, authenticated: true}))
+                        createLogin(true)
 
                         navigation.navigate("home");
                     }
                 }
             )
         } catch (error) {
-            console.log("error here is is: ", error)
             Alert.alert("Network Error", "Unable to connect to the server.");
         } finally {
             setLoading(false);
@@ -922,6 +1012,71 @@ const CreateNewAccount = () => {
     };
 
     const debouncedAccountCreation = debounce(accountCreation, 3000);
+
+      const renderExternal = () => {
+        return step === 0 ? (
+          <View style={styles.container}>
+            <View style={styles.box}>
+              <Text style={styles.title}>Create a Password</Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  { borderColor: password.length > 5 && password !== '' ? 'green' : 'red' }
+                ]}
+                placeholder="Password"
+                secureTextEntry={!showPass}
+                value={password}
+                onChangeText={setPassword}
+              />
+              <TextInput
+                style={[
+                  styles.input,
+                  { borderColor: password === confirmPass && password !== '' ? 'green' : 'red' }
+                ]}
+                placeholder="Confirm Password"
+                secureTextEntry={!showPass}
+                value={confirmPass}
+                onChangeText={setConfirmPass}
+                onSubmitEditing={() => {
+                  externalLogin === 'Google' ? googleCreate() : githubCreate();
+                }}
+              />
+              <Text style={styles.helperText}>
+                We use this password to encrypt sensitive information.
+              </Text>
+              <Button
+                onPress={() => {
+                  externalLogin === 'Google' ? googleCreate() : githubCreate();
+                }}
+                title="Create Account"
+                disabled={loading}
+                style={styles.buttonExtra}
+              >
+                <Text style={styles.buttonText}>Create Account</Text>
+              </Button>
+              <Text style={styles.signInWith}>
+                Already linked your account?
+              </Text>
+              <Button
+                onPress={() => {
+                  navigation.navigate('Login')
+                }}
+                title="Sign In"
+                color="blue"
+                style={{color: "blue"}}
+              >
+                <Text>Sign In</Text>
+              </Button>
+            </View>
+          </View>
+        ) : (
+          <View style={styles.centeredContainer}>
+            <View style={styles.box}>
+              {/* Render questions or other content */}
+            </View>
+          </View>
+        );
+      };
 
 
     let renderCreateForm = () => {
@@ -983,7 +1138,7 @@ const CreateNewAccount = () => {
                         <View style={{flexDirection: "column"}}>
                             <Text style={styles.signInWith}>Or Register With:</Text>
                                 <View style={styles.loginContainer}>
-                                  <TouchableOpacity onPress={googleCreate} style={styles.button}>
+                                  <TouchableOpacity onPress={() => googleSignUp()} style={styles.button}>
                                     <View style={styles.innerContainer}>
                                       <Image
                                         style={styles.logo}

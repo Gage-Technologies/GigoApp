@@ -11,6 +11,7 @@ import BottomBar from './src/components/BottomBar';
 import { Provider as ReduxProvider } from 'react-redux';
 import store from "./src/reducers/store.ts"
 import JourneyMain from './src/pages/journeyMain';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const Stack = createNativeStackNavigator();
 

@@ -46,7 +46,7 @@ class LoginGithub extends Component {
             const result = await InAppBrowser.openAuth(url, redirectUri);
             console.log("6")
             if (result.type === 'success' && result.url) {
-                console.log("7")
+                console.log("7: ", result.url)
                 this.props.onSuccess(result.url);
             } else {
                 console.log("8")

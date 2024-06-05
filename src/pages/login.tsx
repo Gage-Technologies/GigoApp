@@ -540,7 +540,7 @@ const Login = () => {
                             justifyContent: "center",
                             padding: "15px"
                         }}
-                        clientId="9ac1616be22aebfdeb3e"
+                        clientId="Ov23liWncdWCkys9HUil"
                         // this redirect URI is for production, testing on dev will not work
                         redirectUri={""}
                         onSuccess={onSuccessGithub}

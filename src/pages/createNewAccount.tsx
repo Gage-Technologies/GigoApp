@@ -428,37 +428,11 @@ const CreateNewAccount = () => {
     }
 
     const onSuccessGithub = async (gh) => {
-//         trackEvent({
-//             host: 'mobile_app', // Since there's no window.location in RN
-//             event: 'LoginStart',
-//             timespent: 0,
-//             path: 'GitHub Login',
-//             latitude: null,
-//             longitude: null,
-//             metadata: { "auth_provider": "github" },
-//         });
+        console.log("here in success")
 
         setExternalToken(gh["code"]);
         setExternalLogin("Github");
         setLoading(true);
-
-        try {
-            let res = await call("/api/auth/loginWithGithub", "post", {
-                external_auth: gh["code"],
-            });
-
-            if (!res.auth) {
-                Alert.alert("Login Error", "Incorrect credentials, please try again.");
-                setLoading(false);
-                return;
-            }
-
-            setGhConfirm(true);
-        } catch (error) {
-            Alert.alert("Network Error", "Failed to communicate with server.");
-        }
-
-        setLoading(false);
     };
 
     const createLogin = async (newUser: boolean | null) => {
@@ -494,36 +468,100 @@ const CreateNewAccount = () => {
         }
     }
 
-    const githubConfirm = async () => {
+    const githubCreate = async () => {
         if (!ghConfirm) {
             Alert.alert("Error", "BAD");
             setLoading(false);
             return;
         }
 
+        const svgString = profilePic;
+
         setLoading(true);
         try {
-            let res = await call("/api/auth/confirmLoginWithGithub", "post", {
-                password: password, // Ensure password is managed correctly
-            });
+            const svgBlob = await svgToBlob(svgString);
+            let create = await fetchWithUpload(
+                `${API_URL}/api/auth/confirmLoginWithGithub`,
+                svgBlob,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(params),
+                    credentials: 'include'
+                },
+                (res: any) => {
+                    if (res["message"] !== "Google User Added.") {
+                        Alert.alert("Something went wrong here...", res["message"]);
+                    }
 
-            let auth = await authorizeGithub(password);
-            await AsyncStorage.setItem("loginXP", JSON.stringify(res["xp"]));
+                    if (res === undefined) {
+                        Alert.alert("Network Error", "Unable to connect to the server.");
+                    }
 
-            if (auth.user) {
-                let authState = {
-                    ...initialAuthStateUpdate,
-                    authenticated: true,
-                    ...auth,
-                };
-                dispatch(updateAuthState(authState));
+                    if (res["message"] === "Google User Added.") {
+                        authorizeGithub(password).then(auth => {
+                            // @ts-ignore
+                            if (auth["user"] !== undefined) {
+                                let authState = Object.assign({}, initialAuthStateUpdate)
+                                authState.authenticated = true
+                                // @ts-ignore
+                                authState.expiration = auth["exp"]
+                                // @ts-ignore
+                                authState.id = auth["user"]
+                                // @ts-ignore
+                                authState.role = auth["user_status"]
+                                authState.email = auth["email"]
+                                authState.phone = auth["phone"]
+                                authState.userName = auth["user_name"]
+                                authState.thumbnail = auth["thumbnail"]
+                                authState.backgroundColor = auth["color_palette"]
+                                authState.backgroundName = auth["name"]
+                                authState.backgroundRenderInFront = auth["render_in_front"]
+                                authState.exclusiveContent = auth["exclusive_account"]
+                                authState.exclusiveAgreement = auth["exclusive_agreement"]
+                                authState.tutorialState = auth["tutorials"] as TutorialState
+                                authState.tier = auth["tier"]
+                                authState.inTrial = auth["in_trial"]
+                                authState.alreadyCancelled = auth["already_cancelled"]
+                                authState.hasPaymentInfo = auth["has_payment_info"]
+                                authState.hasSubscription = auth["has_subscription"]
+                                authState.usedFreeTrial = auth["used_free_trial"]
+                                dispatch(updateAuthState(authState))
 
-                setTimeout(() => {
-                    navigation.navigate("home");
-                }, 1000);
-            } else {
-                Alert.alert("Login Failed", "The provided username or password is incorrect.");
-            }
+                                // this makes sure the dispatch occurs
+                                sleep(1000).then(() => {
+                                    navigation.navigate("home");
+                                })
+                            } else {
+                                Alert.alert("Sorry, we failed to log you in, please try again on login page.")
+                            }
+                        })
+                    }
+                }
+            )
+//             let res = await call("/api/auth/confirmLoginWithGithub", "post", {
+//                 password: password, // Ensure password is managed correctly
+//             });
+//
+//             let auth = await authorizeGithub(password);
+//             await AsyncStorage.setItem("loginXP", JSON.stringify(res["xp"]));
+//
+//             if (auth.user) {
+//                 let authState = {
+//                     ...initialAuthStateUpdate,
+//                     authenticated: true,
+//                     ...auth,
+//                 };
+//                 dispatch(updateAuthState(authState));
+//
+//                 setTimeout(() => {
+//                     navigation.navigate("home");
+//                 }, 1000);
+//             } else {
+//                 Alert.alert("Login Failed", "The provided username or password is incorrect.");
+//             }
         } catch (error) {
             Alert.alert("Login Error", "An error occurred during the login process.");
         } finally {
@@ -1153,9 +1191,9 @@ const CreateNewAccount = () => {
                                           justifyContent: "center",
                                           padding: "15px"
                                       }}
-                                      clientId="9ac1616be22aebfdeb3e"
+                                      clientId="Ov23liWncdWCkys9HUil"
                                       // this redirect URI is for production, testing on dev will not work
-                                      redirectUri={""}
+                                      redirectUri={"gigoApp://auth/github/callback"}
                                       onSuccess={onSuccessGithub}
                                       onFailure={onFailureGithub}
                                   >

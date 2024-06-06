@@ -26,7 +26,7 @@ const App = () => {
         console.log("app page about to call deep link")
         handleDeepLink(navigationRef);
         return () => {
-            Linking.removeEventListener('url');
+//             Linking.removeEventListener('url');
         };
     }, []);
   return (
@@ -36,13 +36,13 @@ const App = () => {
           <View style={styles.container}>
             <Stack.Navigator>
               <Stack.Screen
-                name="SignUp"
-                component={CreateNewAccount}
+                name="AccountSettings"
+                component={AccountSettings}
                 options={{ headerShown: false }}
               />
               <Stack.Screen
-                name="AccountSettings"
-                component={AccountSettings}
+                name="SignUp"
+                component={CreateNewAccount}
                 options={{ headerShown: false }}
               />
               <Stack.Screen

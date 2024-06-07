@@ -3,12 +3,13 @@ import { ScrollView, View, StyleSheet, ActivityIndicator, Alert, TouchableOpacit
 import { Text, Button, useTheme } from 'react-native-paper';
 import Config from 'react-native-config';
 import JourneyMap from '../components/JourneyMap';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // Ensure Ionicons is imported here as well
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import GetStarted from '../components/GetStarted';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
   const [units, setUnits] = useState([]);
-  const [activeJourney, setActiveJourney] = useState(true);
+  const [activeJourney, setActiveJourney] = useState(false); // Force to false for testing
   const [userId, setUserId] = useState(1684239109222039552);
   const [showHandout, setShowHandout] = useState(null);
   const [openDetourPop, setOpenDetourPop] = useState(false);
@@ -33,6 +34,7 @@ const JourneyMain = () => {
       }
 
       let map = await response.json();
+      console.log('Map response:', map);
       if (!map.started_journey) {
         setActiveJourney(false);
         setLoading(false);
@@ -52,6 +54,7 @@ const JourneyMain = () => {
       });
 
       let res = await response.json();
+      console.log('User map response:', res);
       if (!response.ok) {
         throw new Error('Failed to fetch user map');
       }
@@ -103,6 +106,7 @@ const JourneyMain = () => {
   };
 
   useEffect(() => {
+    console.log('Fetching tasks...');
     getTasks();
   }, []);
 
@@ -159,17 +163,25 @@ const JourneyMain = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+      </View>
+    );
+  }
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Text style={[styles.header, { color: theme.colors.text }]}>Your Journey</Text>
-      {loading ? (
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      ) : (
+      {activeJourney ? (
         units.map((unit, index) => (
           <View key={unit._id} style={{ marginBottom: 20 }}>
             {handleMap(unit, index)}
           </View>
         ))
+      ) : (
+        <GetStarted getTasks={getTasks} />
       )}
     </ScrollView>
   );

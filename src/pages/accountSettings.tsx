@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Button, Switch } from 'react-native';
 import { Dialog, Portal, Provider as PaperProvider } from 'react-native-paper';
-import { TabView, SceneMap, TabBar, Card } from 'react-native-paper';
+import { TabView, SceneMap, TabBar, Card, CardContent } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
 
 const AccountSettings = () => {
@@ -39,7 +39,7 @@ const AccountSettings = () => {
     const [workspaceTimeZone, setWorkspaceTimeZone] = React.useState('');
     const [holidayPref, setHolidayPref] = React.useState(false);
     const [membershipDates, setMembershipDates] = React.useState({ start: null, last: null, upcoming: null })
-    const [membership, setMembership] = React.useState(2)
+    const [membership, setMembership] = React.useState(0)
     const [membershipType, setMembershipType] = React.useState("info")
     const [loading, setLoading] = React.useState(false)
     const [subscription, setSubscription] = React.useState<Subscription | null>(null)
@@ -181,10 +181,10 @@ const AccountSettings = () => {
         return timestamp === 0 || timestamp === null ? "N/A" : UnixDateConverter(timestamp); // UnixDateConverter function is not defined, replace it with your date formatting logic
     };
 
-    const renderMembershipContent = () => {
+    const membershipTab = () => {
         return (
             <View style={{ width: "100%" }}>
-                <Text style={{ fontSize: 24, textAlign: 'left' }}>
+                <Text style={{ fontSize: 24, textAlign: 'left', color: "white" }}>
                     {`Membership Level`}
                     <Text style={{
                         fontWeight: '200',
@@ -263,111 +263,61 @@ const AccountSettings = () => {
                             </View>
                         </View>
                     ) : (
-                        <ScrollView>
-                            <Text style={{ fontSize: 24, textAlign: 'center' }}>
-                                Why Go Pro?
-                            </Text>
-                            {/* Card items */}
-                        </ScrollView>
+                        <View style={styles.exclusiveContainer}>
+                          <Text style={styles.exclusiveTitle}>Why Go Pro?</Text>
+                          <View style={styles.exclusiveCardContainer}>
+                            <Card style={styles.exclusiveCard}>
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Code Teacher" subtitle="Your personal AI tutor." />
+                              <Card.Content>
+                                <Text style={styles.exclusiveContentText}>
+                                  Get smarter Code Teacher to learn faster and more efficiently. Take advantage of your personal AI tutor to understand code and fix errors.
+                                </Text>
+                              </Card.Content>
+                            </Card>
+                            <Card style={styles.exclusiveCard}>
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Private Projects" subtitle="Learn in stealth mode." />
+                              <Card.Content>
+                                <Text style={styles.exclusiveContentText}>
+                                  Create private projects that are accessible only to you.
+                                </Text>
+                              </Card.Content>
+                            </Card>
+                            <Card style={styles.exclusiveCard}>
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="More DevSpace Resources" subtitle="8 CPU cores, 8GB RAM, 50GB disk space." />
+                              <Card.Content>
+                                <Text style={styles.exclusiveContentText}>
+                                  Increased CPU and memory allocation for running larger and more complex projects.
+                                </Text>
+                              </Card.Content>
+                            </Card>
+                            <Card style={styles.exclusiveCard}>
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Concurrent DevSpaces" subtitle="Run up to 3 DevSpaces at once." />
+                              <Card.Content>
+                                <Text style={styles.exclusiveContentText}>
+                                  Run multiple DevSpaces at the same time for efficient multitasking.
+                                </Text>
+                              </Card.Content>
+                            </Card>
+                            <Card style={styles.exclusiveCard}>
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Streak Freezes" subtitle="Preserve your streak." />
+                              <Card.Content>
+                                <Text style={styles.exclusiveContentText}>
+                                  Get 2 streak freezes a week to maintain your learning streak on days you don't log on.
+                                </Text>
+                              </Card.Content>
+                            </Card>
+                            <Card style={styles.exclusiveCard}>
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Premium VSCode Theme" subtitle="Code like a pro." />
+                              <Card.Content>
+                                <Text style={styles.exclusiveContentText}>
+                                  Access to an exclusive Visual Studio Code theme to enhance your development experience.
+                                </Text>
+                              </Card.Content>
+                            </Card>
+                          </View>
+                        </View>
                     )}
                 </Card>
-            </View>
-        );
-    };
-
-    const membershipTab = () => {
-        const formatDate = (timestamp: number | null) => {
-            return timestamp === 0 || timestamp === null ? "N/A" : UnixDateConverter(timestamp);
-        };
-
-        let percentageOfMembership = 0;
-        if (membershipDates["last"] && membershipDates["last"] > 0 && membershipDates["upcoming"] && membershipDates["upcoming"] > 0) {
-            percentageOfMembership = ((new Date().getTime() / 1000) - membershipDates["last"]) / (membershipDates["upcoming"] - membershipDates["last"])
-        }
-
-        const MembershipDetails = () => {
-            return (
-                <ScrollView>
-                    <Text style={{ fontSize: 20, textAlign: 'center' }}>
-                        Membership Details
-                    </Text>
-                    {/* Render membership details */}
-                </ScrollView>
-            );
-        };
-
-        return (
-            <View style={{ margin: 3, padding: 3, flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-                {membershipType === "info" ? (
-                    loading ? (
-                        <ActivityIndicator />
-                    ) : (
-                        <View style={{ width: "100%" }}>
-                            <Text style={{ fontSize: 24, textAlign: 'left' }}>
-                                {`Membership Level`}
-                                <Text style={{
-                                    fontWeight: '200',
-                                    marginLeft: 15,
-                                    textTransform: "none"
-                                }}>
-                                    {subscription?.current_subscription_string || "Free"}
-                                </Text>
-                                {membership === 0 && (
-                                    <Text
-                                        style={{
-                                            fontWeight: '150',
-                                            textTransform: "none",
-                                            fontSize: 12,
-                                            marginLeft: 3
-                                        }}
-                                    >
-                                        (lame)
-                                    </Text>
-                                )}
-                                {membership > 0 && inTrial && (!hasPaymentInfo || alreadyCancelled) && (
-                                    <Text
-                                        style={{
-                                            fontWeight: '200',
-                                            textTransform: "none",
-                                            fontSize: 14,
-                                            marginLeft: 3
-                                        }}
-                                    >
-                                        trial
-                                    </Text>
-                                )}
-                                {membership > 0 && !inTrial && (!hasPaymentInfo || alreadyCancelled) && (
-                                    <Text
-                                        style={{
-                                            fontWeight: '200',
-                                            textTransform: "none",
-                                            fontSize: 14,
-                                            marginLeft: 3
-                                        }}
-                                    >
-                                        cancelled
-                                    </Text>
-                                )}
-                            </Text>
-                            <Card style={{ borderRadius: 10, borderColor: theme.colors.background, backgroundColor: "transparent" }}>
-                                {membership > 0 ? (
-                                    <MembershipDetails />
-                                ) : (
-                                    <View>
-                                        <Text style={{ fontSize: 24, textAlign: 'center' }}>
-                                            Why Go Pro?
-                                        </Text>
-                                        {/* Render other membership details */}
-                                    </View>
-                                )}
-                            </Card>
-                        </View>
-                    )
-                ) : (
-                    <Text style={{ fontSize: 20, textAlign: 'center', color: 'red' }}>
-                        There was an issue with this action, please try again later.
-                    </Text>
-                )}
             </View>
         );
     };
@@ -414,89 +364,93 @@ const AccountSettings = () => {
 
     const workspaceTab = () => {
         return (
-        <ScrollView style={{ margin: 3, padding: 3 }}>
-            <Text style={{ fontSize: 24, marginBottom: 16 }}>Workspace Settings</Text>
-            <View style={{ borderWidth: 1, borderColor: 'lightgray', borderRadius: 10, padding: 10, marginBottom: 16 }}>
-                <Text style={{ fontSize: 20, marginBottom: 8, textAlign: 'center' }}>Auto Git</Text>
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-                    <View style={{ width: '48%' }}>
+        <ScrollView style={styles.workspaceContainer}>
+            <Text style={styles.workspaceTitle}>Workspace Settings</Text>
+            <View style={styles.workspaceCard}>
+                <Text style={styles.workspaceSectionTitle}>Auto Git</Text>
+                <View style={styles.workspaceSwitchRow}>
+                    <View style={styles.workspaceSwitchItem}>
                         <Switch
                             value={workspaceRunStart}
                             onValueChange={(value) => handleSwitchChange(value, setWorkspaceRunStart)}
                         />
-                        <Text style={{ fontSize: 14, marginBottom: 8 }}>Toggle Auto Git system inside DevSpaces</Text>
+                        <Text style={styles.workspaceSwitchLabel}>Toggle Auto Git system inside DevSpaces</Text>
                     </View>
-                    <View style={{ width: '48%' }}>
+                    <View style={styles.workspaceSwitchItem}>
                         <Switch
                             value={workspaceLogging}
                             onValueChange={(value) => handleSwitchChange(value, setWorkspaceLogging)}
                             disabled={!workspaceRunStart}
                         />
-                        <Text style={{ fontSize: 14, marginBottom: 8 }}>Whether Auto Git will log commits to a local file</Text>
+                        <Text style={styles.workspaceSwitchLabel}>Whether Auto Git will log commits to a local file</Text>
                     </View>
-                    <View style={{ width: '48%' }}>
+                    <View style={styles.workspaceSwitchItem}>
                         <Switch
                             value={workspaceSilent}
                             onValueChange={(value) => handleSwitchChange(value, setWorkspaceSilent)}
                             disabled={!workspaceRunStart}
                         />
-                        <Text style={{ fontSize: 14, marginBottom: 8 }}>Disable alert popups for Auto Git actions</Text>
+                        <Text style={styles.workspaceSwitchLabel}>Disable alert popups for Auto Git actions</Text>
                     </View>
-                    <View style={{ width: '48%' }}>
+                    <View style={styles.workspaceSwitchItem}>
                         <TextInput
-                            style={{ borderWidth: 1, borderColor: 'lightgray', borderRadius: 5, padding: 8 }}
+                            style={styles.workspaceTextInput}
                             value={workspaceUpdateInterval}
                             onChangeText={(text) => handleInputChange(text, setWorkspaceUpdateInterval)}
                             placeholder="Update Interval"
                             editable={workspaceRunStart}
+                                                        placeholderTextColor="white"
                         />
-                        <Text style={{ fontSize: 14, marginBottom: 8 }}>How frequently in seconds Auto Git will commit changes</Text>
+                        <Text style={styles.workspaceSwitchLabel}>How frequently in seconds Auto Git will commit changes</Text>
                     </View>
-                    <View style={{ width: '48%' }}>
+                    <View style={styles.workspaceSwitchItem}>
                         <TextInput
-                            style={{ borderWidth: 1, borderColor: 'lightgray', borderRadius: 5, padding: 8 }}
+                            style={styles.workspaceTextInput}
                             value={workspaceCommitMessage}
                             onChangeText={(text) => handleInputChange(text, setWorkspaceCommitMessage)}
                             placeholder="Commit Message"
                             editable={workspaceRunStart}
+                                                        placeholderTextColor="white"
                         />
-                        <Text style={{ fontSize: 14, marginBottom: 8 }}>Commit message that will be used by Auto Git</Text>
+                        <Text style={styles.workspaceSwitchLabel}>Commit message that will be used by Auto Git</Text>
                     </View>
-                    <View style={{ width: '48%' }}>
+                    <View style={styles.workspaceSwitchItem}>
                         <TextInput
-                            style={{ borderWidth: 1, borderColor: 'lightgray', borderRadius: 5, padding: 8 }}
+                            style={styles.workspaceTextInput}
                             value={workspaceLocale}
                             onChangeText={(text) => handleInputChange(text, setWorkspaceLocale)}
                             placeholder="Locale"
                             editable={workspaceRunStart}
+                                                        placeholderTextColor="white"
                         />
-                        <Text style={{ fontSize: 14, marginBottom: 8 }}>Locale to be used by Auto Git in commit messages</Text>
+                        <Text style={styles.workspaceSwitchLabel}>Locale to be used by Auto Git in commit messages</Text>
                     </View>
-                    <View style={{ width: '48%' }}>
+                    <View style={styles.workspaceSwitchItem}>
                         <TextInput
-                            style={{ borderWidth: 1, borderColor: 'lightgray', borderRadius: 5, padding: 8 }}
+                            style={styles.workspaceTextInput}
                             value={workspaceTimeZone}
                             onChangeText={(text) => handleInputChange(text, setWorkspaceTimeZone)}
                             placeholder="Time Zone"
                             editable={workspaceRunStart}
+                            placeholderTextColor="white"
                         />
-                        <Text style={{ fontSize: 14, marginBottom: 8 }}>Timezone used for Auto Git's log file</Text>
+                        <Text style={styles.workspaceSwitchLabel}>Timezone used for Auto Git's log file</Text>
                     </View>
                 </View>
             </View>
-            <Text style={{ fontSize: 20, marginBottom: 8, textAlign: 'center' }}>Editor</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={styles.workspaceSectionTitle}>Editor</Text>
+            <View style={styles.workspaceSwitchRow}>
                 <Switch
                     value={holidayPref}
                     onValueChange={(value) => handleSwitchChange(value, setHolidayPref)}
                 />
-                <Text style={{ fontSize: 14 }}>Toggle holiday themes in the editor</Text>
+                <Text style={styles.workspaceSwitchLabel}>Toggle holiday themes in the editor</Text>
             </View>
             <TouchableOpacity
-                style={{ backgroundColor: 'transparent', borderWidth: 1, borderColor: 'black', borderRadius: 5, padding: 10, marginTop: 16 }}
+                style={styles.workspaceSubmitButton}
                 onPress={handleSubmit}
             >
-                <Text style={{ textAlign: 'center' }}>Submit</Text>
+                <Text style={styles.workspaceSubmitButtonText}>Submit</Text>
             </TouchableOpacity>
         </ScrollView>
         );
@@ -745,6 +699,100 @@ const styles = StyleSheet.create({
     paymentTextMembership: {
         fontSize: 16,
         color: 'white',
+    },
+      exclusiveContainer: {
+        flex: 1,
+        padding: 10,
+      },
+      exclusiveTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        color: "#fff"
+      },
+      exclusiveCardContainer: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+      },
+      exclusiveCard: {
+        width: '48%',
+        marginBottom: 20,
+        backgroundColor: '#282826'
+      },
+      exclusiveCardContent: {
+        padding: 10,
+      },
+      exclusiveCardContentTitle: {
+        color: '#fff', // White text color
+      },
+      exclusiveCardContentSubtitle: {
+        color: '#fff'
+      },
+      exclusiveCardContentText: {
+        color: '#fff', // White text color
+      },
+      exclusiveContentText: {
+        fontSize: 16,
+        color: '#fff', // White text color
+      },
+    workspaceContainer: {
+        margin: 3,
+        padding: 3,
+    },
+    workspaceTitle: {
+        fontSize: 24,
+        marginBottom: 16,
+        color: 'white',
+    },
+    workspaceCard: {
+        borderWidth: 1,
+        borderColor: 'green',
+        borderRadius: 10,
+        padding: 10,
+        marginBottom: 16,
+    },
+    workspaceSectionTitle: {
+        fontSize: 20,
+        marginBottom: 8,
+        textAlign: 'center',
+        color: 'white',
+    },
+    workspaceSwitchRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+        marginBottom: 16,
+    },
+    workspaceSwitchItem: {
+        width: '48%',
+    },
+    workspaceSwitchLabel: {
+        fontSize: 14,
+        marginBottom: 8,
+        color: 'white',
+    },
+    workspaceTextInput: {
+        borderWidth: 1,
+        borderColor: 'lightgray',
+        borderRadius: 5,
+        padding: 8,
+        marginBottom: 8,
+        color: 'white',
+        height: "auto",
+        width: "105%"
+    },
+    workspaceSubmitButton: {
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: 'black',
+        borderRadius: 5,
+        padding: 10,
+        marginTop: 16,
+    },
+    workspaceSubmitButtonText: {
+        textAlign: 'center',
+        color: 'white'
     },
 });
 

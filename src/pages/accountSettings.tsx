@@ -39,12 +39,14 @@ const AccountSettings = () => {
     const [workspaceTimeZone, setWorkspaceTimeZone] = React.useState('');
     const [holidayPref, setHolidayPref] = React.useState(false);
     const [membershipDates, setMembershipDates] = React.useState({ start: null, last: null, upcoming: null })
-    const [membership, setMembership] = React.useState(0)
+    const [membership, setMembership] = React.useState(1)
     const [membershipType, setMembershipType] = React.useState("info")
     const [loading, setLoading] = React.useState(false)
     const [subscription, setSubscription] = React.useState<Subscription | null>(null)
     const [inTrial, setInTrial] = React.useState(false)
     const [hasPaymentInfo, setHasPaymentInfo] = React.useState(false)
+    const [alreadyCancelled, setAlreadyCancelled] = React.useState(false)
+    const [membershipCost, setMembershipCost] = React.useState("")
 
     const updateHoliday = () => {
         setHolidayPref(!holidayPref);
@@ -182,6 +184,14 @@ const AccountSettings = () => {
     };
 
     const membershipTab = () => {
+        const formatDate = (timestamp: number | null) => {
+            return timestamp === 0 || timestamp === null ? "N/A" : UnixDateConverter(timestamp);
+        };
+
+        let percentageOfMembership = 0;
+        if (membershipDates["last"] && membershipDates["last"] > 0 && membershipDates["upcoming"] && membershipDates["upcoming"] > 0) {
+            percentageOfMembership = ((new Date().getTime() / 1000) - membershipDates["last"]) / (membershipDates["upcoming"] - membershipDates["last"])
+        }
         return (
             <View style={{ width: "100%" }}>
                 <Text style={{ fontSize: 24, textAlign: 'left', color: "white" }}>
@@ -727,13 +737,16 @@ const styles = StyleSheet.create({
         color: '#fff', // White text color
       },
       exclusiveCardContentSubtitle: {
-        color: '#fff'
+        color: '#fff',
+        fontSize: 12,
+        numberOfLines: 2
       },
       exclusiveCardContentText: {
         color: '#fff', // White text color
+        fontSize: 12
       },
       exclusiveContentText: {
-        fontSize: 16,
+        fontSize: 14,
         color: '#fff', // White text color
       },
     workspaceContainer: {

@@ -40,6 +40,11 @@ const App = () => {
                 component={AccountSettings}
                 options={{ headerShown: false }}
               />
+                <Stack.Screen
+                  name="Login"
+                  component={Login}
+                  options={{ headerShown: false }}
+                />
               <Stack.Screen
                 name="SignUp"
                 component={CreateNewAccount}
@@ -48,11 +53,6 @@ const App = () => {
               <Stack.Screen
                 name="JourneyMain"
                 component={JourneyMain}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="Login"
-                component={Login}
                 options={{ headerShown: false }}
               />
               <Stack.Screen

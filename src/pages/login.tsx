@@ -420,7 +420,7 @@ const Login = () => {
 //                 };
 //                 trackEvent(payload);
 
-                navigation.navigate("home");
+                navigation.navigate("Home");
             } else if (auth.includes("Too many failed attempts")) {
                 Alert.alert("Login failed.", auth);
                 setLoading(false);

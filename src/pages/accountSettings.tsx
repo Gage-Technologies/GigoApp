@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Button, Switch } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Button, Switch, Alert } from 'react-native';
 import { Dialog, Portal, Provider as PaperProvider } from 'react-native-paper';
 import { TabView, SceneMap, TabBar, Card, CardContent } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
+import Config from 'react-native-config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AccountSettings = () => {
     const theme = useTheme();
+    const API_URL = Config.API_URL
     const [edit, setEdit] = useState(false);
     const [newUsername, setNewUsername] = useState('');
     const [newEmail, setNewEmail] = useState('');
@@ -39,7 +42,7 @@ const AccountSettings = () => {
     const [workspaceTimeZone, setWorkspaceTimeZone] = React.useState('');
     const [holidayPref, setHolidayPref] = React.useState(false);
     const [membershipDates, setMembershipDates] = React.useState({ start: null, last: null, upcoming: null })
-    const [membership, setMembership] = React.useState(1)
+    const [membership, setMembership] = React.useState(0)
     const [membershipType, setMembershipType] = React.useState("info")
     const [loading, setLoading] = React.useState(false)
     const [subscription, setSubscription] = React.useState<Subscription | null>(null)
@@ -47,18 +50,471 @@ const AccountSettings = () => {
     const [hasPaymentInfo, setHasPaymentInfo] = React.useState(false)
     const [alreadyCancelled, setAlreadyCancelled] = React.useState(false)
     const [membershipCost, setMembershipCost] = React.useState("")
+    const [hasSubscriptionId, setHasSubscriptionId] = React.useState(false)
+    const [userInfo, setUserInfo] = React.useState(null)
+    const [Attributes, setAttributes] = useState({
+        topType: "NoHair",
+        accessoriesType: "Blank",
+        avatarRef: {},
+        hairColor: "Auburn",
+        facialHairType: "Blank",
+        clotheType: "ShirtScoopNeck",
+        clotheColor: "Heather",
+        eyeType: "Close",
+        eyebrowType: "RaisedExcitedNatural",
+        mouthType: "Serious",
+        avatarStyle: "",
+        skinColor: "Light",
+    });
+    const [avatarRef, setAvatarRef] = React.useState({})
 
-    const updateHoliday = () => {
-        setHolidayPref(!holidayPref);
+
+    const updateHoliday = async () => {
+        let update = fetch(`${API_URL}/api/user/updateHolidayPreference`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        if (!update.ok){
+            console.log("response here is: ", update)
+            throw new Error('Network response was not ok');
+        }
+        const res = await update.json();
+        if (res === undefined || res["message"] === undefined || res["message"] !== "user holiday preference updated") {
+            swal("We are unable to process your request at this time. Please try again later.")
+        } else {
+            setHolidayPref(!holidayPref)
+        }
     };
 
-    const editUser = () => {
-        // Implement your edit user logic here
+    const editUser = async () => {
+        if (newUsername.length > 50) {
+            Alert.alert("Username must be less than 50 characters.");
+            return;
+        }
+
+        if (newUsername !== username) {
+            try {
+                const response = await fetch(`${API_URL}/api/user/changeUsername`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ new_username: newUsername }),
+                });
+
+                const resUser = await response.json();
+
+                if (resUser.message === "Username updated successfully") {
+                    setEdit(false);
+                    Alert.alert("Username updated successfully.");
+                } else {
+                    Alert.alert(resUser.message);
+                }
+            } catch (error) {
+                Alert.alert("Error", "An error occurred while updating the username.");
+            }
+        }
+
+        if (newEmail !== email) {
+            try {
+                const response = await fetch(`${API_URL}/api/user/changeEmail`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ new_email: newEmail }),
+                });
+
+                const resEmail = await response.json();
+
+                if (resEmail.message === "Email updated successfully") {
+                    setEdit(false);
+                    Alert.alert("Success", "Email updated successfully.");
+                } else if (resEmail.message === "email is already in use") {
+                    Alert.alert("Email in use", "It appears the email you provided is already in use.");
+                } else {
+                    Alert.alert("Error", resEmail.message);
+                }
+            } catch (error) {
+                Alert.alert("Error", "An error occurred while updating the email.");
+            }
+        }
+
+        if (newPhone !== phone) {
+            try {
+                const response = await fetch(`${API_URL}/api/user/changePhone`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ new_phone: newPhone }),
+                });
+
+                const resPhone = await response.json();
+
+                if (resPhone.message === "Phone number updated successfully") {
+                    setEdit(false);
+                    Alert.alert("Phone number updated successfully.");
+                } else {
+                    Alert.alert(resPhone.message);
+                }
+            } catch (error) {
+                Alert.alert("Error", "An error occurred while updating the phone number.");
+            }
+        }
+
+        if (newPassword !== "") {
+            try {
+                const response = await fetch(`${API_URL}/api/user/changePassword`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ old_password: oldPassword, new_password: newPassword }),
+                });
+
+                const resPass = await response.json();
+
+                if (resPass.message === "Password updated successfully") {
+                    setEdit(false);
+                    Alert.alert("Password changed successfully.");
+                } else {
+                    Alert.alert(resPass.message);
+                }
+            } catch (error) {
+                Alert.alert("Error", "An error occurred while changing the password.");
+            }
+        }
     };
 
-    const deleteUserAccount = () => {
-        // Implement your delete user account logic here
+    const clearReducers = () => {
+        const authState = { ...initialAuthState };
+        dispatch(updateAuthState(authState));
+        dispatch(resetAppWrapper());
+        dispatch(clearProjectState());
+        dispatch(clearSearchParamsState());
+        dispatch(clearJourneyFormState());
+        dispatch(clearCache());
+        dispatch(clearMessageCache());
+        dispatch(clearChatState());
+        dispatch(clearBytesState());
+        dispatch(clearHeartsState());
     };
+
+
+    const deleteUserAccount = async () => {
+        clearReducers();
+
+        try {
+            const response = await fetch(`${API_URL}/api/user/deleteUserAccount`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+
+            const res = await response.json();
+
+            if (!res || !res.message) {
+                const alive = await AsyncStorage.getItem('alive');
+                if (!alive) {
+                    Alert.alert(
+                        "Server Error",
+                        "We are unable to connect with the GIGO servers at this time. We're sorry for the inconvenience!"
+                    );
+                }
+                return;
+            }
+
+            if (res.message !== "Account has been deleted.") {
+                const alive = await AsyncStorage.getItem('alive');
+                if (!alive) {
+                    Alert.alert(
+                        "Server Error",
+                        res.message !== "internal server error occurred"
+                            ? res.message
+                            : "An unexpected error has occurred. We're sorry, we'll get right on that!"
+                    );
+                }
+                return;
+            }
+
+            Alert.alert("User has been deleted.", "You will be redirected to the login page in a few.");
+            navigation.navigate("Login"); // Use your appropriate navigation method to redirect
+
+            const persistOptions = {};
+            persistStore(store, persistOptions).purge();
+
+            await AsyncStorage.setItem("homeIndex", "undefined");
+        } catch (error) {
+            Alert.alert("Error", "An error occurred while deleting the user account.");
+        }
+    };
+
+    const getPortalLink = async () => {
+        setPortalLinkLoading(true)
+
+        let name = fetch(`${API_URL}/api/stripe/portalSession`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+
+        if (!name.ok){
+            console.log("response here is: ", name)
+            throw new Error('Network response was not ok');
+        }
+        const res = await name.json();
+
+        setPortalLinkLoading(false)
+
+        if (res !== undefined && res["session"] !== undefined) {
+            window.location.replace(res["session"])
+            // setPortalLink(res["session"])
+        }
+    }
+
+    const stripeNavigate = async (yearly: boolean | null) => {
+
+        let stripe = fetch(`${API_URL}/api/stripe/premiumMembershipSession`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+
+        if (!stripe.ok){
+            console.log("response here is: ", stripe)
+            throw new Error('Network response was not ok');
+        }
+        const res = await stripe.json();
+
+        if (res["message"] === "You must be logged in to access the GIGO system.") {
+            let authState = Object.assign({}, initialAuthStateUpdate)
+            // @ts-ignore
+            dispatch(updateAuthState(authState))
+              navigation.navigate('Login')
+        }
+        if (res !== undefined && res["return url"] !== undefined && res["return year"] !== undefined) {
+        //todo figure out how to change this for app
+            if (yearly != null && yearly) {
+                window.location.replace(res["return year"])
+            } else {
+                window.location.replace(res["return url"])
+            }
+        }
+    }
+
+    const handleCloseAgree = (yearly: boolean | null) => {
+        if (hasSubscriptionId) {
+            getPortalLink()
+        } else {
+            stripeNavigate(yearly)
+        }
+        setOpen(false)
+    }
+
+    const checkUserHoliday = async () => {
+    console.log("1")
+        try {
+            console.log("2")
+            const response = await fetch(`${API_URL}/api/user/get`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+            console.log("hello we are here")
+
+            if (!response.ok) {
+                console.log("response here is: ", response)
+                throw new Error('Network response was not ok');
+            }
+
+            const res = await response.json();
+
+            setHolidayPref(res.user.holiday_themes);
+        } catch (error) {
+            console.log("error is: ", error)
+            Alert.alert("Error", "There has been an issue loading holiday preferences. Please try again later.");
+        }
+    };
+
+    const editWorkspace = async () => {
+        console.log("in edit workspace")
+        if (workspaceCommitMessage === "") {
+            Alert.alert("Please enter a commit message.");
+            return;
+        }
+
+        const updateInterval = parseInt(workspaceUpdateInterval, 10);
+
+        if (isNaN(updateInterval)) {
+            Alert.alert("Invalid Input", "Update interval must be a valid number.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_URL}/api/user/updateWorkspace`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    workspace_settings: {
+                        auto_git: {
+                            runOnStart: workspaceRunStart,
+                            updateInterval: updateInterval,
+                            logging: workspaceLogging,
+                            silent: workspaceSilent,
+                            commitMessage: workspaceCommitMessage,
+                            locale: workspaceLocale,
+                            timeZone: workspaceTimeZone
+                        }
+                    }
+                })
+            });
+
+            const res = await response.json();
+            console.log("workspace response: ", res)
+
+            if ("message" in res) {
+                const message = res.message;
+                if (message === "workspace settings edited successfully") {
+                    Alert.alert("Success", "Your workspace settings were edited successfully.", "success");
+                } else {
+                    Alert.alert("Server Error", "An error occurred editing your workspace settings.", "error");
+                }
+            } else {
+                Alert.alert("Server Error", "An error occurred editing your workspace settings.", "error");
+            }
+        } catch (error) {
+            Alert.alert("Network Error", "An error occurred editing your workspace settings. Please try again later.", "error");
+        }
+    };
+
+    useEffect(() => {
+        const loadSessionData = async () => {
+            try {
+                const storedValue = await AsyncStorage.getItem('accountsPage');
+                if (storedValue !== null && storedValue === 'membership') {
+                    setTab('membership');
+                    setMembershipType('info');
+                }
+                await AsyncStorage.removeItem('accountsPage');
+            } catch (error) {
+                console.error('Error reading session data', error);
+            }
+
+            setLoading(true);
+            await apiLoad();
+            setLoading(false);
+            checkUserHoliday();
+        };
+
+        loadSessionData();
+    }, []);
+
+    const apiLoad = async () => {
+        console.log("within the api load")
+//         let follow = call(
+//             "/api/user/subscription",
+//             "post",
+//             null,
+//             null,
+//             null,
+//             //@ts-ignore
+//             {},
+//             null,
+//             config.rootPath
+//         )
+        let followResponse = await fetch(`${API_URL}/api/user/subscription`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({})
+        })
+
+        if (!followResponse.ok){
+            console.log("follow response is: ", followResponse.ok)
+            throw new Error('Network response was not ok')
+        }
+
+        const res = await followResponse.json()
+        console.log("res is: ", res)
+
+        setMembership(res["current_subscription"])
+        setMembershipCost(res["payment"])
+        setMembershipDates({
+            start: res["membershipStart"],
+            last: res["lastPayment"],
+            upcoming: res["upcomingPayment"]
+        })
+        setInTrial(res["inTrial"])
+        setHasPaymentInfo(res["hasPaymentInfo"])
+        setHasSubscriptionId(res["hasSubscription"])
+        setAlreadyCancelled(res["alreadyCancelled"])
+        setSubscription(res)
+
+        if (userInfo === null) {
+//             let name = call(
+//                 "/api/user/get",
+//                 "post",
+//                 null,
+//                 null,
+//                 null,
+//                 //@ts-ignore
+//                 {},
+//                 null,
+//                 config.rootPath
+//             )
+//
+//             const [res] = await Promise.all([
+//                 name,
+//             ])
+
+            let nameResponse = await fetch(`${API_URL}/api/user/get`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({})
+            })
+
+            if (!nameResponse.ok){
+                throw new Error('Network response was not ok')
+            }
+
+            const response = await nameResponse.json()
+            console.log("response in workspace update: ", response)
+
+            if (response !== undefined && response["user"] !== undefined) {
+                console.log("update interval: ", response["user"]["workspace_settings"]["auto_git"]["updateInterval"])
+                setUserInfo(response["user"])
+                setNewUsername(response["user"]["user_name"])
+                setNewEmail(response["user"]["email"])
+                setNewPhone(response["user"]["phone"])
+                setWorkspaceRunStart(response["user"]["workspace_settings"]["auto_git"]["runOnStart"])
+                setWorkspaceUpdateInterval(response["user"]["workspace_settings"]["auto_git"]["updateInterval"])
+                setWorkspaceLogging(response["user"]["workspace_settings"]["auto_git"]["logging"])
+                setWorkspaceSilent(response["user"]["workspace_settings"]["auto_git"]["silent"])
+                setWorkspaceCommitMessage(response["user"]["workspace_settings"]["auto_git"]["commitMessage"])
+                setWorkspaceLocale(response["user"]["workspace_settings"]["auto_git"]["locale"])
+                setWorkspaceTimeZone(response["user"]["workspace_settings"]["auto_git"]["timeZone"]);
+                (response["user"]["avatar_settings"]) !== null ? setAttributes(response["user"]["avatar_settings"]) : setAttributes(Attributes);
+                (response["user"]["stripe_account"]) !== undefined ? setStripeAccount(response["user"]["stripe_account"]) : setStripeAccount("")
+            }
+        }
+    }
 
     const userTab = () => {
         return (
@@ -155,19 +611,51 @@ const AccountSettings = () => {
 
     const exclusiveContentLink = async () => {
         setConnectedAccountLoading(true);
-        let res = await call("/api/stripe/createConnectedAccount", "post", null, null, null, {}, null, config.rootPath);
-        setConnectedAccountLoading(false);
-        if (res !== undefined && res.account !== undefined) {
-            window.location.replace(res.account);
+
+        try {
+            const response = await fetch(`${API_URL}/api/stripe/createConnectedAccount`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+
+            const res = await response.json();
+
+            setConnectedAccountLoading(false);
+
+            if (res !== undefined && res.account !== undefined) {
+                Linking.openURL(res.account);
+            }
+        } catch (error) {
+            setConnectedAccountLoading(false);
+            Alert.alert("Error", "An error occurred while creating the connected account.");
         }
     };
 
     const exclusiveContentUpdateLink = async () => {
         setConnectedAccountLoading(true);
-        let res = await call("/api/stripe/updateConnectedAccount", "post", null, null, null, {}, null, config.rootPath);
-        setConnectedAccountLoading(false);
-        if (res !== undefined && res.account !== undefined) {
-            window.location.replace(res.account);
+
+        try {
+            const response = await fetch(`${API_URL}/api/stripe/updateConnectedAccount`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+
+            const res = await response.json();
+
+            setConnectedAccountLoading(false);
+
+            if (res !== undefined && res.account !== undefined) {
+                Linking.openURL(res.account);
+            }
+        } catch (error) {
+            setConnectedAccountLoading(false);
+            Alert.alert("Error", "An error occurred while updating the connected account.");
         }
     };
 
@@ -338,6 +826,10 @@ const AccountSettings = () => {
         setWsSettingsLoading(false);
     }
 
+    const handleInputChange = (text, setter) => {
+        setter(text);
+    };
+
     const exclusiveContentTab = () => {
         return (
             <ScrollView style={styles.scrollView}>
@@ -349,7 +841,7 @@ const AccountSettings = () => {
                         {stripeAccount !== "" ? (
                             <Button title="Update Connected Account" onPress={exclusiveContentUpdateLink} />
                         ) : (
-                            <Button title="Connect Account" onPress={exclusiveContentLink} />
+                            <Button title="Connect Account" onPress={exclusiveContentLink} style={{borderWidth: 1, borderColor: "#27ab7c", borderRadius: 20}} />
                         )}
                     </View>
                     <Text style={styles.sectionTitleExclusive}>Why do I have to set this up?</Text>
@@ -405,7 +897,7 @@ const AccountSettings = () => {
                     <View style={styles.workspaceSwitchItem}>
                         <TextInput
                             style={styles.workspaceTextInput}
-                            value={workspaceUpdateInterval}
+                            value={workspaceUpdateInterval.toString()}
                             onChangeText={(text) => handleInputChange(text, setWorkspaceUpdateInterval)}
                             placeholder="Update Interval"
                             editable={workspaceRunStart}
@@ -549,7 +1041,7 @@ const styles = StyleSheet.create({
     card: {
         padding: 20,
         borderWidth: 1,
-        borderColor: "gray",
+        borderColor: '#27ab7c',
         borderRadius: 10,
         marginBottom: 20,
     },
@@ -739,7 +1231,9 @@ const styles = StyleSheet.create({
       exclusiveCardContentSubtitle: {
         color: '#fff',
         fontSize: 12,
-        numberOfLines: 2
+        width: "100%",
+        height: "auto",
+        lineHeight: 14, // adjust line height for better readability
       },
       exclusiveCardContentText: {
         color: '#fff', // White text color

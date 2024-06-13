@@ -691,7 +691,7 @@ const AccountSettings = () => {
         }
         return (
             <View style={{ width: "100%", paddingTop: "100px" }}>
-                <Text style={{ fontSize: 24, textAlign: 'left', color: "white" }}>
+                <Text style={{ fontSize: 24, textAlign: 'left', color: "white", paddingBottom: 10, paddingTop: 20 }}>
                     {`Membership Level  `}
                     <Text style={{
                         fontWeight: '200',
@@ -737,7 +737,7 @@ const AccountSettings = () => {
                         </Text>
                     )}
                 </Text>
-                <Card style={{ borderRadius: 10, borderColor: "#29c18c", borderWidth: 1, backgroundColor: "transparent" }}>
+                <Card style={{ borderRadius: 10, borderColor: "#29c18c", borderWidth: 1, backgroundColor: "transparent", paddingBottom: 5 }}>
                     {membership > 0 ? (
                         <View style={styles.containerMembership}>
                             <Text style={styles.titleMembership}>Membership Details</Text>
@@ -872,6 +872,11 @@ const AccountSettings = () => {
             </ScrollView>
         );
     };
+
+      const handleSwitchChange = (value, setStateFunction) => {
+        console.log("value is: ", value)
+        setStateFunction(value);
+      };
 
     const workspaceTab = () => {
         return (
@@ -1269,7 +1274,7 @@ const styles = StyleSheet.create({
     },
     workspaceCard: {
         borderWidth: 1,
-        borderColor: 'green',
+        borderColor: '#29c18c',
         borderRadius: 10,
         padding: 10,
         marginBottom: 16,
@@ -1307,14 +1312,14 @@ const styles = StyleSheet.create({
     workspaceSubmitButton: {
         backgroundColor: 'transparent',
         borderWidth: 1,
-        borderColor: 'black',
+        borderColor: '#29c18c',
         borderRadius: 5,
         padding: 10,
         marginTop: 16,
     },
     workspaceSubmitButtonText: {
         textAlign: 'center',
-        color: 'white'
+        color: 'white',
     },
 });
 

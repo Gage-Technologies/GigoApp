@@ -850,7 +850,11 @@ const AccountSettings = () => {
                         {stripeAccount !== "" ? (
                             <Button title="Update Connected Account" onPress={exclusiveContentUpdateLink} />
                         ) : (
-                            <Button title="Connect Account" onPress={exclusiveContentLink} style={{borderWidth: 1, borderColor: "#27ab7c", borderRadius: 20}} />
+                            <TouchableOpacity onPress={exclusiveContentLink} style={{borderColor: '#29c18c', borderWidth: 1, borderRadius: 5, padding: 5, alignItems: "center"}}>
+                                <Text style={{color: "#29c18c"}}>
+                                    Connect Account
+                                </Text>
+                            </TouchableOpacity>
                         )}
                     </View>
                     <Text style={styles.sectionTitleExclusive}>Why do I have to set this up?</Text>
@@ -1321,6 +1325,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: 'white',
     },
+    connectButton: {
+        color: "#29c18c"
+    }
 });
 
 export default AccountSettings;

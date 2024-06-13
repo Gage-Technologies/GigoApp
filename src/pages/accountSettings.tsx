@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Button, Switch, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Button, Switch, Alert, Linking } from 'react-native';
 import { Dialog, Portal, Provider as PaperProvider } from 'react-native-paper';
 import { TabView, SceneMap, TabBar, Card, CardContent } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
 import Config from 'react-native-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useSelector } from 'react-redux';
+import { selectAuthState} from "../reducers/auth.ts"
 
 const AccountSettings = () => {
     const theme = useTheme();
+    const authStateSetup = useSelector((state: RootState) => selectAuthState(state));
+    const username = authStateSetup.userName
+    const email = authStateSetup.email
+    const phone = authStateSetup.phone
     const API_URL = Config.API_URL
     const [edit, setEdit] = useState(false);
     const [newUsername, setNewUsername] = useState('');
@@ -104,12 +110,14 @@ const AccountSettings = () => {
                     },
                     body: JSON.stringify({ new_username: newUsername }),
                 });
+                console.log("response is: ", response)
 
                 const resUser = await response.json();
+                console.log("res user: ", resUser)
 
                 if (resUser.message === "Username updated successfully") {
                     setEdit(false);
-                    Alert.alert("Username updated successfully.");
+                    Alert.alert("Username updated successfully.")
                 } else {
                     Alert.alert(resUser.message);
                 }
@@ -630,6 +638,7 @@ const AccountSettings = () => {
             }
         } catch (error) {
             setConnectedAccountLoading(false);
+            console.log("error is: ", error)
             Alert.alert("Error", "An error occurred while creating the connected account.");
         }
     };
@@ -681,13 +690,13 @@ const AccountSettings = () => {
             percentageOfMembership = ((new Date().getTime() / 1000) - membershipDates["last"]) / (membershipDates["upcoming"] - membershipDates["last"])
         }
         return (
-            <View style={{ width: "100%" }}>
+            <View style={{ width: "100%", paddingTop: "100px" }}>
                 <Text style={{ fontSize: 24, textAlign: 'left', color: "white" }}>
-                    {`Membership Level`}
+                    {`Membership Level  `}
                     <Text style={{
                         fontWeight: '200',
                         marginLeft: 15,
-                        textTransform: "none"
+                        textTransform: "none",
                     }}>
                         {subscription?.current_subscription_string || "Free"}
                     </Text>
@@ -728,7 +737,7 @@ const AccountSettings = () => {
                         </Text>
                     )}
                 </Text>
-                <Card style={{ borderRadius: 10, borderColor: theme.colors.background, backgroundColor: "transparent" }}>
+                <Card style={{ borderRadius: 10, borderColor: "#29c18c", borderWidth: 1, backgroundColor: "transparent" }}>
                     {membership > 0 ? (
                         <View style={styles.containerMembership}>
                             <Text style={styles.titleMembership}>Membership Details</Text>
@@ -765,7 +774,7 @@ const AccountSettings = () => {
                           <Text style={styles.exclusiveTitle}>Why Go Pro?</Text>
                           <View style={styles.exclusiveCardContainer}>
                             <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Code Teacher" subtitle="Your personal AI tutor." />
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Code Teacher" subtitle="Your personal AI tutor." />
                               <Card.Content>
                                 <Text style={styles.exclusiveContentText}>
                                   Get smarter Code Teacher to learn faster and more efficiently. Take advantage of your personal AI tutor to understand code and fix errors.
@@ -773,7 +782,7 @@ const AccountSettings = () => {
                               </Card.Content>
                             </Card>
                             <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Private Projects" subtitle="Learn in stealth mode." />
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Private Projects" subtitle="Learn in stealth mode." />
                               <Card.Content>
                                 <Text style={styles.exclusiveContentText}>
                                   Create private projects that are accessible only to you.
@@ -781,7 +790,7 @@ const AccountSettings = () => {
                               </Card.Content>
                             </Card>
                             <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="More DevSpace Resources" subtitle="8 CPU cores, 8GB RAM, 50GB disk space." />
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="More DevSpace Resources" subtitle="8 CPU cores, 8GB RAM, 50GB disk space." />
                               <Card.Content>
                                 <Text style={styles.exclusiveContentText}>
                                   Increased CPU and memory allocation for running larger and more complex projects.
@@ -789,7 +798,7 @@ const AccountSettings = () => {
                               </Card.Content>
                             </Card>
                             <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Concurrent DevSpaces" subtitle="Run up to 3 DevSpaces at once." />
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Concurrent DevSpaces" subtitle="Run up to 3 DevSpaces at once." />
                               <Card.Content>
                                 <Text style={styles.exclusiveContentText}>
                                   Run multiple DevSpaces at the same time for efficient multitasking.
@@ -797,7 +806,7 @@ const AccountSettings = () => {
                               </Card.Content>
                             </Card>
                             <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Streak Freezes" subtitle="Preserve your streak." />
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Streak Freezes" subtitle="Preserve your streak." />
                               <Card.Content>
                                 <Text style={styles.exclusiveContentText}>
                                   Get 2 streak freezes a week to maintain your learning streak on days you don't log on.
@@ -805,7 +814,7 @@ const AccountSettings = () => {
                               </Card.Content>
                             </Card>
                             <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Premium VSCode Theme" subtitle="Code like a pro." />
+                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Premium VSCode Theme" subtitle="Code like a pro." />
                               <Card.Content>
                                 <Text style={styles.exclusiveContentText}>
                                   Access to an exclusive Visual Studio Code theme to enhance your development experience.
@@ -1037,6 +1046,7 @@ const styles = StyleSheet.create({
     buttonRow: {
         flexDirection: "row",
         justifyContent: "space-between",
+        width: "60%"
     },
     card: {
         padding: 20,
@@ -1145,7 +1155,7 @@ const styles = StyleSheet.create({
     contentContainer: {
         flex: 1,
         backgroundColor: "#1c1c1a", // black background
-        paddingHorizontal: 20,
+        paddingHorizontal: 20
     },
     editUserButton: {
         borderRadius: 30,
@@ -1153,6 +1163,8 @@ const styles = StyleSheet.create({
     },
     containerMembership: {
         marginTop: 20,
+        paddingLeft: 10,
+        paddingRight: 10
     },
     titleMembership: {
         fontSize: 18,
@@ -1227,13 +1239,16 @@ const styles = StyleSheet.create({
       },
       exclusiveCardContentTitle: {
         color: '#fff', // White text color
+        width: "100%",
+        flexWrap: "wrap"
       },
       exclusiveCardContentSubtitle: {
         color: '#fff',
-        fontSize: 12,
+        fontSize: 11,
         width: "100%",
         height: "auto",
         lineHeight: 14, // adjust line height for better readability
+        paddingBottom: 10
       },
       exclusiveCardContentText: {
         color: '#fff', // White text color

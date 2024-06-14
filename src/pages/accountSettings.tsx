@@ -869,9 +869,28 @@ const AccountSettings = () => {
                         Exclusive coding projects are unique, premium programming challenges or assignments that users can access by paying a fee. These projects are designed to provide a stimulating and rewarding learning experience, allowing users to develop and hone their coding skills by working on real-world problems or innovative ideas.
                     </Text>
                     <Text style={styles.sectionTitleExclusive}>How to Create Exclusive Content</Text>
-                    <Text style={styles.paragraphExclusive}>
+                    <View style={styles.exclusiveBulletsContainer}>
+                      <Text style={styles.exclusiveBulletsParagraph}>
                         Creating exclusive content is easy, but it is important to know that the standard for a challenge being worthy of being exclusive is higher than general content. Before being able to make any exclusive content, you must also create a connected account for you to receive money into.
-                    </Text>
+                      </Text>
+                      <View style={styles.exclusiveBulletsListContainer}>
+                        <Text style={styles.exclusiveBulletsListItem}>
+                          <Text style={styles.bullet}>• </Text>Create a connected account by either going to account settings or clicking the 'Setup Exclusive Content Account' button below.
+                        </Text>
+                        <Text style={styles.exclusiveBulletsListItem}>
+                          <Text style={styles.bullet}>• </Text>Once you have created a connected account, you can get started by clicking the 'Create Exclusive Content' button below.
+                        </Text>
+                        <Text style={styles.exclusiveBulletsListItem}>
+                          <Text style={styles.bullet}>• </Text>When you get serious about creating exclusive content, click the 'Don't Show Me This Page Again' button below and submit it.
+                        </Text>
+                        <Text style={styles.exclusiveBulletsListItem}>
+                          <Text style={styles.bullet}>• </Text>Just know, once you hit that button you will only be able to get to this page through the About page.
+                        </Text>
+                        <Text style={styles.exclusiveBulletsListItem}>
+                          <Text style={styles.bullet}>• </Text>After you have confirmed to have read this page, clicking the 'Exclusive Content' button in the top menu will take you straight to creating exclusive content.
+                        </Text>
+                      </View>
+                    </View>
                 </View>
             </ScrollView>
         );
@@ -1332,7 +1351,29 @@ const styles = StyleSheet.create({
     },
     connectButton: {
         color: "#29c18c"
-    }
+    },
+      exclusiveBulletsContainer: {
+        marginVertical: 8,
+        paddingHorizontal: 16,
+      },
+      exclusiveBulletsParagraph: {
+        fontSize: 16,
+        textAlign: 'left',
+        marginBottom: 16,
+        color: 'white', // Set text color to white
+      },
+      exclusiveBulletsListContainer: {
+        marginLeft: 16,
+        lineHeight: 24,
+      },
+      exclusiveBulletsListItem: {
+        fontSize: 16,
+        marginBottom: 8,
+        color: 'white', // Set text color to white
+      },
+      bullet: {
+        color: 'white', // Set bullet color to white
+      },
 });
 
 export default AccountSettings;

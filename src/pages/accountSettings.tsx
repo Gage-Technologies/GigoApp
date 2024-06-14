@@ -1152,7 +1152,7 @@ const styles = StyleSheet.create({
         textShadowRadius: 1,
     },
     tabsContainer: {
-        width: '20%',
+        width: '25%',
         backgroundColor: "#1c1c1a", // black background
         paddingVertical: 20,
     },

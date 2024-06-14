@@ -997,16 +997,16 @@ const AccountSettings = () => {
             <View style={styles.mainContainer}>
                 <View style={styles.tabsContainer}>
                     <TouchableOpacity onPress={() => setTab("user")} style={tab === "user" ? styles.tabButtonClicked : styles.tabButton}>
-                        <Text style={styles.tabText}>User</Text>
+                        <Text style={ tab === "user" ? styles.tabTextClicked : styles.tabText}>User</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setTab("workspace settings")} style={tab === "workspace settings" ? styles.tabButtonClicked : styles.tabButton}>
-                        <Text style={styles.tabText}>Workspace Settings</Text>
+                        <Text style={ tab === "workspace settings" ? styles.tabTextClicked : styles.tabText}>Workspace Settings</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setTab("membership")} style={tab === "membership" ? styles.tabButtonClicked : styles.tabButton}>
-                        <Text style={styles.tabText}>Membership</Text>
+                        <Text style={ tab === "membership" ? styles.tabTextClicked : styles.tabText}>Membership</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={() => setTab("exclusive content setup")} style={tab === "exclusive content setup" ? styles.tabButtonClicked : styles.tabButton}>
-                        <Text style={styles.tabText}>Exclusive Content Setup</Text>
+                        <Text style={ tab === "exclusive content setup" ? styles.tabTextClicked : styles.tabText}>Exclusive Content Setup</Text>
                     </TouchableOpacity>
                 </View>
                 <ScrollView style={styles.contentContainer}>{tabDetermination()}</ScrollView>
@@ -1140,9 +1140,9 @@ const styles = StyleSheet.create({
     tabButtonClicked: {
         padding: 10,
         borderRightWidth: 1,
-        borderRightColor: "#00f",
-        borderRadius: 5,
+        borderRightColor: "#29c18c",
         marginBottom: 10,
+        width: "100%"
     },
     tabButton: {
         padding: 10,
@@ -1151,7 +1151,12 @@ const styles = StyleSheet.create({
     },
     tabText: {
         color: 'white', // blue text
-        textShadowColor: '#00f', // blue outline
+        textShadowOffset: { width: 1, height: 1 },
+        textShadowRadius: 1,
+        textAlign: 'center',
+    },
+    tabTextClicked: {
+        color: "#29c18c", // blue text
         textShadowOffset: { width: 1, height: 1 },
         textShadowRadius: 1,
         textAlign: 'center',

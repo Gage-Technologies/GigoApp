@@ -9,7 +9,7 @@ import GetStarted from '../components/GetStarted';
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
   const [units, setUnits] = useState([]);
-  const [activeJourney, setActiveJourney] = useState(false); // Force to false for testing
+  const [activeJourney, setActiveJourney] = useState(null); // Changed initial state to null
   const [userId, setUserId] = useState(1684239109222039552);
   const [showHandout, setShowHandout] = useState(null);
   const [openDetourPop, setOpenDetourPop] = useState(false);
@@ -60,7 +60,7 @@ const JourneyMain = () => {
       }
 
       if (!res.success) {
-        setActiveJourney(true);
+        setActiveJourney(false);
         setLoading(false);
         return;
       }
@@ -98,6 +98,7 @@ const JourneyMain = () => {
       }));
 
       setUnits(prevUnits => [...prevUnits, ...fetchedUnits]);
+      setActiveJourney(true); // Journey has started
       setLoading(false);
     } catch (error) {
       Alert.alert("Error", error.message || "Failed to fetch tasks. Please check your network connection.");

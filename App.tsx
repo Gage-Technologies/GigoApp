@@ -11,6 +11,7 @@ import ForgotPassword from './src/pages/forgotPassword';
 import CreateNewAccount from './src/pages/createNewAccount';
 import AccountSettings from './src/pages/accountSettings';
 import JourneyMain from './src/pages/journeyMain';
+import Byte from './src/pages/byte';
 import SpeedDial from './src/components/SpeedDial';
 import { theme } from './src/theme';
 import BottomBar from './src/components/BottomBar';
@@ -35,6 +36,11 @@ const App = () => {
         <NavigationContainer>
           <View style={styles.container}>
             <Stack.Navigator>
+            <Stack.Screen
+                name="Byte"
+                component={Byte}
+                options={{ headerShown: false }}
+              />
               <Stack.Screen
                 name="AccountSettings"
                 component={AccountSettings}

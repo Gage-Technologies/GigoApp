@@ -11,6 +11,7 @@ import ForgotPassword from './src/pages/forgotPassword';
 import CreateNewAccount from './src/pages/createNewAccount';
 import AccountSettings from './src/pages/accountSettings';
 import JourneyMain from './src/pages/journeyMain';
+import Profile from './src/pages/profile';
 import Byte from './src/pages/byte';
 import SpeedDial from './src/components/SpeedDial';
 import { theme } from './src/theme';
@@ -46,6 +47,16 @@ const App = () => {
                 component={AccountSettings}
                 options={{ headerShown: false }}
               />
+              <Stack.Screen
+                name="Profile"
+                component={Profile}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
+                name="Home"
+                component={Home}
+                options={{ headerShown: false }}
+              />
                 <Stack.Screen
                   name="Login"
                   component={Login}
@@ -64,11 +75,6 @@ const App = () => {
               <Stack.Screen
                 name="ForgotPassword"
                 component={ForgotPassword}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="Home"
-                component={Home}
                 options={{ headerShown: false }}
               />
             </Stack.Navigator>

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Button, Switch, Alert, Linking } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Button, Switch, Alert, Linking, Dimensions, SafeAreaView } from 'react-native';
 import { Dialog, Portal, Provider as PaperProvider } from 'react-native-paper';
 import { TabView, SceneMap, TabBar, Card, CardContent } from 'react-native-paper';
 import { useTheme } from 'react-native-paper';
 import Config from 'react-native-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSelector } from 'react-redux';
-import { selectAuthState} from "../reducers/auth.ts"
+import LinearGradient from 'react-native-linear-gradient';
+import { selectAuthState} from "../reducers/auth.ts";
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const AccountSettings = () => {
     const theme = useTheme();
@@ -58,6 +60,7 @@ const AccountSettings = () => {
     const [membershipCost, setMembershipCost] = React.useState("")
     const [hasSubscriptionId, setHasSubscriptionId] = React.useState(false)
     const [userInfo, setUserInfo] = React.useState(null)
+    const [selectedTab, setSelectedTab] = useState('Main');
     const [Attributes, setAttributes] = useState({
         topType: "NoHair",
         accessoriesType: "Blank",
@@ -690,142 +693,144 @@ const AccountSettings = () => {
             percentageOfMembership = ((new Date().getTime() / 1000) - membershipDates["last"]) / (membershipDates["upcoming"] - membershipDates["last"])
         }
         return (
-            <View style={{ width: "100%", paddingTop: "100px" }}>
-                <Text style={{ fontSize: 24, textAlign: 'left', color: "white", paddingBottom: 10, paddingTop: 20 }}>
-                    {`Membership Level  `}
-                    <Text style={{
-                        fontWeight: '200',
-                        marginLeft: 15,
-                        textTransform: "none",
-                    }}>
-                        {subscription?.current_subscription_string || "Free"}
-                    </Text>
-                    {membership === 0 && (
-                        <Text
-                            style={{
-                                fontWeight: '150',
-                                textTransform: "none",
-                                fontSize: 12,
-                                marginLeft: 3
-                            }}
-                        >
-                            (lame)
-                        </Text>
-                    )}
-                    {membership > 0 && inTrial && (!hasPaymentInfo || alreadyCancelled) && (
-                        <Text
-                            style={{
-                                fontWeight: '200',
-                                textTransform: "none",
-                                fontSize: 14,
-                                marginLeft: 3
-                            }}
-                        >
-                            trial
-                        </Text>
-                    )}
-                    {membership > 0 && !inTrial && (!hasPaymentInfo || alreadyCancelled) && (
-                        <Text
-                            style={{
-                                fontWeight: '200',
-                                textTransform: "none",
-                                fontSize: 14,
-                                marginLeft: 3
-                            }}
-                        >
-                            cancelled
-                        </Text>
-                    )}
-                </Text>
-                <Card style={{ borderRadius: 10, borderColor: "#29c18c", borderWidth: 1, backgroundColor: "transparent", paddingBottom: 5 }}>
-                    {membership > 0 ? (
-                        <View style={styles.containerMembership}>
-                            <Text style={styles.titleMembership}>Membership Details</Text>
-                            <View style={styles.progressContainerMembership}>
-                                <View style={styles.progressBarMembership}>
-                                    <View style={[styles.progressFillMembership, { width: `${percentageOfMembership * 100}%` }]} />
-                                </View>
-                            </View>
-                            <View style={styles.detailsContainerMembership}>
-                                <View style={styles.detailItemMembership}>
-                                    <Text style={styles.detailTitleMembership}>{inTrial ? "Trial Start" : "Last Payment"}</Text>
-                                    <Text style={styles.detailTextMembership}>{formatDate(membershipDates["last"])}</Text>
-                                </View>
-                                <View style={styles.detailItemMembership}>
-                                    <Text style={styles.detailTitleMembership}>{inTrial && !hasPaymentInfo ? "Trial End" : alreadyCancelled ? "End of Pro Access" : subscription?.scheduledDowngrade ? `Downgrade To ${proStatusToString(subscription?.scheduledDowngrade)}` : "Next Payment"}</Text>
-                                    <Text style={styles.detailTextMembership}>{formatDate(membershipDates["upcoming"])}</Text>
-                                </View>
-                            </View>
-                            <View style={styles.paymentContainerMembership}>
-                                {(!inTrial || hasPaymentInfo) && !alreadyCancelled && (
-                                    <View style={styles.paymentItemMembership}>
-                                        <Text style={styles.paymentTextMembership}>{`Next ${membershipCost === "80.00" ? "Yearly" : "Monthly"} Payment`}</Text>
-                                        <Text style={styles.paymentTextMembership}>{`$${membershipCost}`}</Text>
+            <ScrollView style={styles.workspaceContainer}>
+                        <View style={styles.membershipContainer}>
+                            <Text style={{ fontSize: 24, textAlign: 'left', color: "white", paddingBottom: 10, paddingTop: 20 }}>
+                                {`Membership Level  `}
+                                <Text style={{
+                                    fontWeight: '200',
+                                    marginLeft: 15,
+                                    textTransform: "none",
+                                }}>
+                                    {subscription?.current_subscription_string || "Free"}
+                                </Text>
+                                {membership === 0 && (
+                                    <Text
+                                        style={{
+                                            fontWeight: '150',
+                                            textTransform: "none",
+                                            fontSize: 12,
+                                            marginLeft: 3
+                                        }}
+                                    >
+                                        (lame)
+                                    </Text>
+                                )}
+                                {membership > 0 && inTrial && (!hasPaymentInfo || alreadyCancelled) && (
+                                    <Text
+                                        style={{
+                                            fontWeight: '200',
+                                            textTransform: "none",
+                                            fontSize: 14,
+                                            marginLeft: 3
+                                        }}
+                                    >
+                                        trial
+                                    </Text>
+                                )}
+                                {membership > 0 && !inTrial && (!hasPaymentInfo || alreadyCancelled) && (
+                                    <Text
+                                        style={{
+                                            fontWeight: '200',
+                                            textTransform: "none",
+                                            fontSize: 14,
+                                            marginLeft: 3
+                                        }}
+                                    >
+                                        cancelled
+                                    </Text>
+                                )}
+                            </Text>
+                            <Card style={{ borderRadius: 10, borderColor: "#29c18c", borderWidth: 1, backgroundColor: "transparent", paddingBottom: 5 }}>
+                                {membership > 0 ? (
+                                    <View style={styles.containerMembership}>
+                                        <Text style={styles.titleMembership}>Membership Details</Text>
+                                        <View style={styles.progressContainerMembership}>
+                                            <View style={styles.progressBarMembership}>
+                                                <View style={[styles.progressFillMembership, { width: `${percentageOfMembership * 100}%` }]} />
+                                            </View>
+                                        </View>
+                                        <View style={styles.detailsContainerMembership}>
+                                            <View style={styles.detailItemMembership}>
+                                                <Text style={styles.detailTitleMembership}>{inTrial ? "Trial Start" : "Last Payment"}</Text>
+                                                <Text style={styles.detailTextMembership}>{formatDate(membershipDates["last"])}</Text>
+                                            </View>
+                                            <View style={styles.detailItemMembership}>
+                                                <Text style={styles.detailTitleMembership}>{inTrial && !hasPaymentInfo ? "Trial End" : alreadyCancelled ? "End of Pro Access" : subscription?.scheduledDowngrade ? `Downgrade To ${proStatusToString(subscription?.scheduledDowngrade)}` : "Next Payment"}</Text>
+                                                <Text style={styles.detailTextMembership}>{formatDate(membershipDates["upcoming"])}</Text>
+                                            </View>
+                                        </View>
+                                        <View style={styles.paymentContainerMembership}>
+                                            {(!inTrial || hasPaymentInfo) && !alreadyCancelled && (
+                                                <View style={styles.paymentItemMembership}>
+                                                    <Text style={styles.paymentTextMembership}>{`Next ${membershipCost === "80.00" ? "Yearly" : "Monthly"} Payment`}</Text>
+                                                    <Text style={styles.paymentTextMembership}>{`$${membershipCost}`}</Text>
+                                                </View>
+                                            )}
+                                            <View style={styles.paymentItemMembership}>
+                                                <Text style={styles.paymentTextMembership}>Membership Start Date</Text>
+                                                <Text style={styles.paymentTextMembership}>{formatDate(membershipDates["start"])}</Text>
+                                            </View>
+                                        </View>
+                                    </View>
+                                ) : (
+                                    <View style={styles.exclusiveContainer}>
+                                      <Text style={styles.exclusiveTitle}>Why Go Pro?</Text>
+                                      <View style={styles.exclusiveCardContainer}>
+                                        <Card style={styles.exclusiveCard}>
+                                          <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Code Teacher" subtitle="Your personal AI tutor." />
+                                          <Card.Content>
+                                            <Text style={styles.exclusiveContentText}>
+                                              Get smarter Code Teacher to learn faster and more efficiently. Take advantage of your personal AI tutor to understand code and fix errors.
+                                            </Text>
+                                          </Card.Content>
+                                        </Card>
+                                        <Card style={styles.exclusiveCard}>
+                                          <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Private Projects" subtitle="Learn in stealth mode." />
+                                          <Card.Content>
+                                            <Text style={styles.exclusiveContentText}>
+                                              Create private projects that are accessible only to you.
+                                            </Text>
+                                          </Card.Content>
+                                        </Card>
+                                        <Card style={styles.exclusiveCard}>
+                                          <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="More DevSpace Resources" subtitle="8 CPU cores, 8GB RAM, 50GB disk space." />
+                                          <Card.Content>
+                                            <Text style={styles.exclusiveContentText}>
+                                              Increased CPU and memory allocation for running larger and more complex projects.
+                                            </Text>
+                                          </Card.Content>
+                                        </Card>
+                                        <Card style={styles.exclusiveCard}>
+                                          <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Concurrent DevSpaces" subtitle="Run up to 3 DevSpaces at once." />
+                                          <Card.Content>
+                                            <Text style={styles.exclusiveContentText}>
+                                              Run multiple DevSpaces at the same time for efficient multitasking.
+                                            </Text>
+                                          </Card.Content>
+                                        </Card>
+                                        <Card style={styles.exclusiveCard}>
+                                          <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Streak Freezes" subtitle="Preserve your streak." />
+                                          <Card.Content>
+                                            <Text style={styles.exclusiveContentText}>
+                                              Get 2 streak freezes a week to maintain your learning streak on days you don't log on.
+                                            </Text>
+                                          </Card.Content>
+                                        </Card>
+                                        <Card style={styles.exclusiveCard}>
+                                          <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Premium VSCode Theme" subtitle="Code like a pro." />
+                                          <Card.Content>
+                                            <Text style={styles.exclusiveContentText}>
+                                              Access to an exclusive Visual Studio Code theme to enhance your development experience.
+                                            </Text>
+                                          </Card.Content>
+                                        </Card>
+                                      </View>
                                     </View>
                                 )}
-                                <View style={styles.paymentItemMembership}>
-                                    <Text style={styles.paymentTextMembership}>Membership Start Date</Text>
-                                    <Text style={styles.paymentTextMembership}>{formatDate(membershipDates["start"])}</Text>
-                                </View>
-                            </View>
+                            </Card>
                         </View>
-                    ) : (
-                        <View style={styles.exclusiveContainer}>
-                          <Text style={styles.exclusiveTitle}>Why Go Pro?</Text>
-                          <View style={styles.exclusiveCardContainer}>
-                            <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Code Teacher" subtitle="Your personal AI tutor." />
-                              <Card.Content>
-                                <Text style={styles.exclusiveContentText}>
-                                  Get smarter Code Teacher to learn faster and more efficiently. Take advantage of your personal AI tutor to understand code and fix errors.
-                                </Text>
-                              </Card.Content>
-                            </Card>
-                            <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Private Projects" subtitle="Learn in stealth mode." />
-                              <Card.Content>
-                                <Text style={styles.exclusiveContentText}>
-                                  Create private projects that are accessible only to you.
-                                </Text>
-                              </Card.Content>
-                            </Card>
-                            <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="More DevSpace Resources" subtitle="8 CPU cores, 8GB RAM, 50GB disk space." />
-                              <Card.Content>
-                                <Text style={styles.exclusiveContentText}>
-                                  Increased CPU and memory allocation for running larger and more complex projects.
-                                </Text>
-                              </Card.Content>
-                            </Card>
-                            <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Concurrent DevSpaces" subtitle="Run up to 3 DevSpaces at once." />
-                              <Card.Content>
-                                <Text style={styles.exclusiveContentText}>
-                                  Run multiple DevSpaces at the same time for efficient multitasking.
-                                </Text>
-                              </Card.Content>
-                            </Card>
-                            <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Streak Freezes" subtitle="Preserve your streak." />
-                              <Card.Content>
-                                <Text style={styles.exclusiveContentText}>
-                                  Get 2 streak freezes a week to maintain your learning streak on days you don't log on.
-                                </Text>
-                              </Card.Content>
-                            </Card>
-                            <Card style={styles.exclusiveCard}>
-                              <Card.Title titleStyle={styles.exclusiveCardContentTitle} subtitleNumberOfLines={0} titleNumberOfLines={0} subtitleStyle={styles.exclusiveCardContentSubtitle} title="Premium VSCode Theme" subtitle="Code like a pro." />
-                              <Card.Content>
-                                <Text style={styles.exclusiveContentText}>
-                                  Access to an exclusive Visual Studio Code theme to enhance your development experience.
-                                </Text>
-                              </Card.Content>
-                            </Card>
-                          </View>
-                        </View>
-                    )}
-                </Card>
-            </View>
+            </ScrollView>
         );
     };
 
@@ -903,95 +908,103 @@ const AccountSettings = () => {
 
     const workspaceTab = () => {
         return (
-        <ScrollView style={styles.workspaceContainer}>
-            <Text style={styles.workspaceTitle}>Workspace Settings</Text>
-            <View style={styles.workspaceCard}>
-                <Text style={styles.workspaceSectionTitle}>Auto Git</Text>
-                <View style={styles.workspaceSwitchRow}>
+            <SafeAreaView style={styles.safeArea}>
+              <ScrollView style={styles.workspaceContainer}>
+                <Text style={styles.workspaceTitle}>Workspace Settings</Text>
+                <View style={styles.workspaceCard}>
+                  <Text style={styles.workspaceSectionTitle}>Auto Git</Text>
+                  <View style={styles.workspaceSwitchRow}>
                     <View style={styles.workspaceSwitchItem}>
-                        <Switch
-                            value={workspaceRunStart}
-                            onValueChange={(value) => handleSwitchChange(value, setWorkspaceRunStart)}
-                        />
-                        <Text style={styles.workspaceSwitchLabel}>Toggle Auto Git system inside DevSpaces</Text>
+                      <Text style={styles.workspaceSwitchLabel}>Toggle Auto Git system inside DevSpaces</Text>
+                      <Switch
+                        value={workspaceRunStart}
+                        onValueChange={(value) => handleSwitchChange(value, setWorkspaceRunStart)}
+                      />
                     </View>
+                     <View style={styles.separator}/>
                     <View style={styles.workspaceSwitchItem}>
-                        <Switch
-                            value={workspaceLogging}
-                            onValueChange={(value) => handleSwitchChange(value, setWorkspaceLogging)}
-                            disabled={!workspaceRunStart}
-                        />
-                        <Text style={styles.workspaceSwitchLabel}>Whether Auto Git will log commits to a local file</Text>
+                      <Text style={styles.workspaceSwitchLabel}>Whether Auto Git will log commits to a local file</Text>
+                      <Switch
+                        value={workspaceLogging}
+                        onValueChange={(value) => handleSwitchChange(value, setWorkspaceLogging)}
+                        disabled={!workspaceRunStart}
+                      />
                     </View>
+                                         <View style={styles.separator}/>
                     <View style={styles.workspaceSwitchItem}>
-                        <Switch
-                            value={workspaceSilent}
-                            onValueChange={(value) => handleSwitchChange(value, setWorkspaceSilent)}
-                            disabled={!workspaceRunStart}
-                        />
-                        <Text style={styles.workspaceSwitchLabel}>Disable alert popups for Auto Git actions</Text>
+                      <Text style={styles.workspaceSwitchLabel}>Disable alert popups for Auto Git actions</Text>
+                      <Switch
+                        value={workspaceSilent}
+                        onValueChange={(value) => handleSwitchChange(value, setWorkspaceSilent)}
+                        disabled={!workspaceRunStart}
+                      />
                     </View>
+                                         <View style={styles.separator}/>
                     <View style={styles.workspaceSwitchItem}>
-                        <TextInput
-                            style={styles.workspaceTextInput}
-                            value={workspaceUpdateInterval.toString()}
-                            onChangeText={(text) => handleInputChange(text, setWorkspaceUpdateInterval)}
-                            placeholder="Update Interval"
-                            editable={workspaceRunStart}
-                                                        placeholderTextColor="white"
-                        />
-                        <Text style={styles.workspaceSwitchLabel}>How frequently in seconds Auto Git will commit changes</Text>
+                      <Text style={styles.workspaceSwitchLabel}>How frequently in seconds Auto Git will commit changes</Text>
+                      <TextInput
+                        style={styles.workspaceTextInput}
+                        value={workspaceUpdateInterval.toString()}
+                        onChangeText={(text) => handleInputChange(text, setWorkspaceUpdateInterval)}
+                        placeholder="Update Interval"
+                        editable={workspaceRunStart}
+                        placeholderTextColor="white"
+                      />
                     </View>
+                                         <View style={styles.separator}/>
                     <View style={styles.workspaceSwitchItem}>
-                        <TextInput
-                            style={styles.workspaceTextInput}
-                            value={workspaceCommitMessage}
-                            onChangeText={(text) => handleInputChange(text, setWorkspaceCommitMessage)}
-                            placeholder="Commit Message"
-                            editable={workspaceRunStart}
-                                                        placeholderTextColor="white"
-                        />
-                        <Text style={styles.workspaceSwitchLabel}>Commit message that will be used by Auto Git</Text>
+                      <Text style={styles.workspaceSwitchLabel}>Commit message that will be used by Auto Git</Text>
+                      <TextInput
+                        style={styles.workspaceTextInput}
+                        value={workspaceCommitMessage}
+                        onChangeText={(text) => handleInputChange(text, setWorkspaceCommitMessage)}
+                        placeholder="Commit Message"
+                        editable={workspaceRunStart}
+                        placeholderTextColor="white"
+                      />
                     </View>
+                                         <View style={styles.separator}/>
                     <View style={styles.workspaceSwitchItem}>
-                        <TextInput
-                            style={styles.workspaceTextInput}
-                            value={workspaceLocale}
-                            onChangeText={(text) => handleInputChange(text, setWorkspaceLocale)}
-                            placeholder="Locale"
-                            editable={workspaceRunStart}
-                                                        placeholderTextColor="white"
-                        />
-                        <Text style={styles.workspaceSwitchLabel}>Locale to be used by Auto Git in commit messages</Text>
+                      <Text style={styles.workspaceSwitchLabel}>Locale to be used by Auto Git in commit messages</Text>
+                      <TextInput
+                        style={styles.workspaceTextInput}
+                        value={workspaceLocale}
+                        onChangeText={(text) => handleInputChange(text, setWorkspaceLocale)}
+                        placeholder="Locale"
+                        editable={workspaceRunStart}
+                        placeholderTextColor="white"
+                      />
                     </View>
+                                         <View style={styles.separator}/>
                     <View style={styles.workspaceSwitchItem}>
-                        <TextInput
-                            style={styles.workspaceTextInput}
-                            value={workspaceTimeZone}
-                            onChangeText={(text) => handleInputChange(text, setWorkspaceTimeZone)}
-                            placeholder="Time Zone"
-                            editable={workspaceRunStart}
-                            placeholderTextColor="white"
-                        />
-                        <Text style={styles.workspaceSwitchLabel}>Timezone used for Auto Git's log file</Text>
+                      <Text style={styles.workspaceSwitchLabel}>Timezone used for Auto Git's log file</Text>
+                      <TextInput
+                        style={styles.workspaceTextInput}
+                        value={workspaceTimeZone}
+                        onChangeText={(text) => handleInputChange(text, setWorkspaceTimeZone)}
+                        placeholder="Time Zone"
+                        editable={workspaceRunStart}
+                        placeholderTextColor="white"
+                      />
                     </View>
+                  </View>
                 </View>
-            </View>
-            <Text style={styles.workspaceSectionTitle}>Editor</Text>
-            <View style={styles.workspaceSwitchRow}>
-                <Switch
+                <Text style={styles.workspaceSectionTitle}>Editor</Text>
+                <View style={styles.workspaceSwitchRow}>
+                  <Text style={styles.workspaceSwitchLabel}>Toggle holiday themes in the editor</Text>
+                  <Switch
                     value={holidayPref}
                     onValueChange={(value) => handleSwitchChange(value, setHolidayPref)}
-                />
-                <Text style={styles.workspaceSwitchLabel}>Toggle holiday themes in the editor</Text>
-            </View>
-            <TouchableOpacity
-                style={styles.workspaceSubmitButton}
-                onPress={handleSubmit}
-            >
-                <Text style={styles.workspaceSubmitButtonText}>Submit</Text>
-            </TouchableOpacity>
-        </ScrollView>
+                  />
+                </View>
+                <TouchableOpacity
+                  style={styles.workspaceSubmitButton}
+                  onPress={handleSubmit}
+                >
+                  <Text style={styles.workspaceSubmitButtonText}>Submit</Text>
+                </TouchableOpacity>
+              </ScrollView>
+            </SafeAreaView>
         );
     };
 
@@ -1010,40 +1023,114 @@ const AccountSettings = () => {
                 return avatarTab();
         }
     };
+  const renderContent = () => {
+    switch (selectedTab) {
+      case 'User':
+        return userTab();
+      case 'WorkspaceSettings':
+        return workspaceTab();
+      case 'Membership':
+        return membershipTab();
+      case 'ExclusiveContentSetup':
+        return exclusiveContentTab();
+      default:
+        return userTab();
+    }
+  };
+
+//                   <View style={styles.tabsContainer}>
+//                       <View style={{marginTop: "-50%", marginBottom: "50%"}}>
+//                           <Text style={{fontSize: 20, color: "white"}}>
+//                               Account Settings
+//                           </Text>
+//                       </View>
+//                     <TouchableOpacity onPress={() => setSelectedTab('User')} style={styles.tabButton}>
+//                       <Text style={styles.tabText}>User</Text>
+//                     </TouchableOpacity>
+//                     <TouchableOpacity onPress={() => setSelectedTab('WorkspaceSettings')} style={styles.tabButton}>
+//                       <Text style={styles.tabText}>Workspace Settings</Text>
+//                     </TouchableOpacity>
+//                     <TouchableOpacity onPress={() => setSelectedTab('Membership')} style={styles.tabButton}>
+//                       <Text style={styles.tabText}>Membership</Text>
+//                     </TouchableOpacity>
+//                     <TouchableOpacity onPress={() => setSelectedTab('ExclusiveContentSetup')} style={styles.tabButton}>
+//                       <Text style={styles.tabText}>Exclusive Content Setup</Text>
+//                     </TouchableOpacity>
+//                   </View>
 
     return (
         <PaperProvider>
-            <View style={styles.mainContainer}>
-                <View style={styles.tabsContainer}>
-                    <TouchableOpacity onPress={() => setTab("user")} style={tab === "user" ? styles.tabButtonClicked : styles.tabButton}>
-                        <Text style={ tab === "user" ? styles.tabTextClicked : styles.tabText}>User</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setTab("workspace settings")} style={tab === "workspace settings" ? styles.tabButtonClicked : styles.tabButton}>
-                        <Text style={ tab === "workspace settings" ? styles.tabTextClicked : styles.tabText}>Workspace Settings</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setTab("membership")} style={tab === "membership" ? styles.tabButtonClicked : styles.tabButton}>
-                        <Text style={ tab === "membership" ? styles.tabTextClicked : styles.tabText}>Membership</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setTab("exclusive content setup")} style={tab === "exclusive content setup" ? styles.tabButtonClicked : styles.tabButton}>
-                        <Text style={ tab === "exclusive content setup" ? styles.tabTextClicked : styles.tabText}>Exclusive Content Setup</Text>
-                    </TouchableOpacity>
-                </View>
-                <ScrollView style={styles.contentContainer}>{tabDetermination()}</ScrollView>
-            </View>
+          <View style={styles.mainContainer}>
+            {selectedTab === "Main" ? (
+                    <LinearGradient colors={['#4d4d4d', '#3E5D52', '#2f6d58']} style={styles.gradient}>
+                        <View style={styles.tabsContainer}>
+                          <View style={{ marginTop: "-50%", marginBottom: "50%" }}>
+                            <Text style={{ fontSize: 20, color: "white" }}>
+                              Account Settings
+                            </Text>
+                          </View>
+                          <View style={styles.row}>
+                            <View style={styles.column}>
+                              <TouchableOpacity onPress={() => setSelectedTab('User')} style={styles.tabButton}>
+                                <Icon name="user" size={30} color="white" />
+                              </TouchableOpacity>
+                              <Text style={styles.tabText}>User</Text>
+                            </View>
+                            <View style={styles.column}>
+                              <TouchableOpacity onPress={() => setSelectedTab('WorkspaceSettings')} style={styles.tabButton}>
+                                <Icon name="cogs" size={30} color="white" />
+                              </TouchableOpacity>
+                              <Text style={styles.tabText}>Workspace Settings</Text>
+                            </View>
+                          </View>
+                          <View style={styles.row}>
+                            <View style={styles.column}>
+                              <TouchableOpacity onPress={() => setSelectedTab('Membership')} style={styles.tabButton}>
+                                <Icon name="group" size={30} color="white" />
+                              </TouchableOpacity>
+                              <Text style={styles.tabText}>Membership</Text>
+                            </View>
+                            <View style={styles.column}>
+                              <TouchableOpacity onPress={() => setSelectedTab('ExclusiveContentSetup')} style={styles.tabButton}>
+                                <Icon name="star" size={30} color="white" />
+                              </TouchableOpacity>
+                              <Text style={styles.tabText}>Exclusive Content Setup</Text>
+                            </View>
+                          </View>
+                        </View>
+                    </LinearGradient>
+            ) : (
+                        <View style={styles.container}>
+                          <TouchableOpacity onPress={() => setSelectedTab('Main')}>
+                            <Text style={styles.goBack}>Go Back</Text>
+                          </TouchableOpacity>
+                          <ScrollView contentContainerStyle={styles.scrollContainer}>
+                            {renderContent()}
+                          </ScrollView>
+                        </View>
+            )}
+          </View>
         </PaperProvider>
     );
 };
 
+const { width, height } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
     mainContainer: {
         flex: 1,
-        backgroundColor: "#1c1c1a", // black background
-        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#1c1c1a',
+        padding: 20,
     },
+      safeArea: {
+        flex: 1,
+      },
     centeredView: {
         flex: 1,
         justifyContent: 'flex-start', // Change this if you want to align items at the start
-        alignItems: 'center',
+        alignItems: 'center'
     },
     contentWrapper: {
         paddingTop: 50, // Adjust the padding as needed to move content down
@@ -1061,7 +1148,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     input: {
-        width: '80%',
+        width: '100%',
         height: 50,
         marginBottom: 20,
         borderRadius: 10,
@@ -1071,11 +1158,22 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(255, 255, 255, 0.2)',
         borderColor: "gray"
     },
+    rowWithSpacing: {
+        marginTop: 50
+    },
     buttonRow: {
         flexDirection: "row",
         justifyContent: "space-between",
         width: "60%"
     },
+      gradient: {
+        flex: 1,
+        width: Dimensions.get('window').width,
+        height: Dimensions.get('window').height,
+      },
+        container: {
+          flex: 1,
+        },
     card: {
         padding: 20,
         borderWidth: 1,
@@ -1152,10 +1250,14 @@ const styles = StyleSheet.create({
         textShadowRadius: 1,
     },
     tabsContainer: {
-        width: '25%',
-        backgroundColor: "#1c1c1a", // black background
-        paddingVertical: 20,
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
+      column: {
+        alignItems: 'center',
+        width: "50%"
+      },
     tabButtonClicked: {
         padding: 10,
         borderRightWidth: 1,
@@ -1163,15 +1265,24 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         width: "100%"
     },
+      row: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
+        width: '80%',
+        marginBottom: 20,
+      },
     tabButton: {
-        padding: 10,
-        borderRadius: 5,
-        marginBottom: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#27ab7c',
+        borderRadius: 10,
+        width: 80,
+        height: 80,
     },
     tabText: {
-        color: 'white', // blue text
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 1,
+        marginTop: 5,
+        fontSize: 14,
+        color: 'white',
         textAlign: 'center',
     },
     tabTextClicked: {
@@ -1219,12 +1330,14 @@ const styles = StyleSheet.create({
         borderRadius: 15,
     },
     detailsContainerMembership: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         justifyContent: 'space-between',
         marginBottom: 10,
     },
     detailItemMembership: {
         flex: 1,
+        flexDirection: "row",
+        justifyContent: 'space-between',
     },
     detailTitleMembership: {
         fontSize: 16,
@@ -1258,12 +1371,12 @@ const styles = StyleSheet.create({
         color: "#fff"
       },
       exclusiveCardContainer: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         flexWrap: 'wrap',
         justifyContent: 'space-between',
       },
       exclusiveCard: {
-        width: '48%',
+        width: '100%',
         marginBottom: 20,
         backgroundColor: '#282826'
       },
@@ -1273,15 +1386,17 @@ const styles = StyleSheet.create({
       exclusiveCardContentTitle: {
         color: '#fff', // White text color
         width: "100%",
+        fontSize: 20,
         flexWrap: "wrap"
       },
       exclusiveCardContentSubtitle: {
-        color: '#fff',
-        fontSize: 11,
+        color: '#27ab7c',
+        fontSize: 14,
         width: "100%",
         height: "auto",
-        lineHeight: 14, // adjust line height for better readability
-        paddingBottom: 10
+        lineHeight: 16, // adjust line height for better readability
+        paddingBottom: 10,
+        opacity: .5
       },
       exclusiveCardContentText: {
         color: '#fff', // White text color
@@ -1292,19 +1407,21 @@ const styles = StyleSheet.create({
         color: '#fff', // White text color
       },
     workspaceContainer: {
-        margin: 3,
-        padding: 3,
+        flexGrow: 1,
+        width: Dimensions.get('window').width - 50
     },
+      separator: {
+        height: 1,
+        backgroundColor: 'white',
+        marginVertical: 10,
+        opacity: 0.4
+      },
     workspaceTitle: {
         fontSize: 24,
         marginBottom: 16,
         color: 'white',
     },
     workspaceCard: {
-        borderWidth: 1,
-        borderColor: '#29c18c',
-        borderRadius: 10,
-        padding: 10,
         marginBottom: 16,
     },
     workspaceSectionTitle: {
@@ -1313,42 +1430,39 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: 'white',
     },
-    workspaceSwitchRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-        marginBottom: 16,
-    },
-    workspaceSwitchItem: {
-        width: '48%',
-    },
-    workspaceSwitchLabel: {
-        fontSize: 14,
-        marginBottom: 8,
-        color: 'white',
-    },
-    workspaceTextInput: {
-        borderWidth: 1,
-        borderColor: 'lightgray',
-        borderRadius: 5,
-        padding: 8,
-        marginBottom: 8,
-        color: 'white',
-        height: "auto",
-        width: "105%"
-    },
-    workspaceSubmitButton: {
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: '#29c18c',
-        borderRadius: 5,
-        padding: 10,
-        marginTop: 16,
-    },
-    workspaceSubmitButtonText: {
-        textAlign: 'center',
-        color: 'white',
-    },
+  workspaceSwitchRow: {
+    flexDirection: 'column',
+    marginBottom: 20,
+  },
+  workspaceSwitchItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  workspaceSwitchLabel: {
+    flex: 1,
+    fontSize: 16,
+    color: 'white',
+  },
+  workspaceTextInput: {
+    backgroundColor: '#2f6d58',
+    borderRadius: 5,
+    marginLeft: 5,
+    padding: 5, // Reduced padding to make the input smaller
+    width: 150, // Set a specific width to make it smaller
+    color: 'white',
+  },
+  workspaceSubmitButton: {
+    backgroundColor: '#27ab7c',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  workspaceSubmitButtonText: {
+    fontSize: 16,
+    color: 'white',
+    fontWeight: 'bold',
+  },
     connectButton: {
         color: "#29c18c"
     },
@@ -1374,6 +1488,13 @@ const styles = StyleSheet.create({
       bullet: {
         color: 'white', // Set bullet color to white
       },
+      goBack: {
+        color: "white"
+      },
+        membershipContainer: {
+          paddingVertical: 20,
+          width: '100%',
+        },
 });
 
 export default AccountSettings;

@@ -37,14 +37,14 @@ const App = () => {
         <NavigationContainer>
           <View style={styles.container}>
             <Stack.Navigator>
+                          <Stack.Screen
+                            name="AccountSettings"
+                            component={AccountSettings}
+                            options={{ headerShown: false }}
+                          />
             <Stack.Screen
                 name="Byte"
                 component={Byte}
-                options={{ headerShown: false }}
-              />
-              <Stack.Screen
-                name="AccountSettings"
-                component={AccountSettings}
                 options={{ headerShown: false }}
               />
               <Stack.Screen

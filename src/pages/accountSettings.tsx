@@ -760,6 +760,7 @@ const AccountSettings = () => {
                                                 <Text style={styles.detailTextMembership}>{formatDate(membershipDates["upcoming"])}</Text>
                                             </View>
                                         </View>
+                                                             <View style={styles.separator}/>
                                         <View style={styles.paymentContainerMembership}>
                                             {(!inTrial || hasPaymentInfo) && !alreadyCancelled && (
                                                 <View style={styles.paymentItemMembership}>
@@ -1101,9 +1102,10 @@ const AccountSettings = () => {
                     </LinearGradient>
             ) : (
                         <View style={styles.container}>
-                          <TouchableOpacity onPress={() => setSelectedTab('Main')}>
-                            <Text style={styles.goBack}>Go Back</Text>
-                          </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setSelectedTab('Main')} style={styles.goBackContainer}>
+                          <Icon name="arrow-left" size={20} color="white" style={styles.icon} />
+                          <Text style={styles.goBack}>Go Back</Text>
+                        </TouchableOpacity>
                           <ScrollView contentContainerStyle={styles.scrollContainer}>
                             {renderContent()}
                           </ScrollView>
@@ -1124,6 +1126,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#1c1c1a',
         padding: 20,
     },
+      goBackContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingBottom: 10
+      },
+      icon: {
+        marginRight: 5,
+      },
       safeArea: {
         flex: 1,
       },
@@ -1148,7 +1158,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     input: {
-        width: '100%',
+        width: Dimensions.get('window').width - 50,
         height: 50,
         marginBottom: 20,
         borderRadius: 10,
@@ -1455,7 +1465,7 @@ const styles = StyleSheet.create({
   workspaceSubmitButton: {
     backgroundColor: '#27ab7c',
     padding: 15,
-    borderRadius: 5,
+    borderRadius: 10,
     alignItems: 'center',
   },
   workspaceSubmitButtonText: {
@@ -1468,7 +1478,6 @@ const styles = StyleSheet.create({
     },
       exclusiveBulletsContainer: {
         marginVertical: 8,
-        paddingHorizontal: 16,
       },
       exclusiveBulletsParagraph: {
         fontSize: 16,

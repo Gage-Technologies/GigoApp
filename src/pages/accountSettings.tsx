@@ -579,16 +579,24 @@ const AccountSettings = () => {
                                 onChangeText={setConfirmPassword}
                             />
                             <View style={styles.buttonRow}>
-                                <Button title="Cancel" onPress={() => setEdit(false)} color="red" />
-                                <Button title="Submit" onPress={editUser} />
+                                <TouchableOpacity onPress={() => setEdit(false)} style={styles.cancelEditUser}>
+                                    <Text style={{color: "white"}}>Cancel</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity onPress={editUser} style={styles.submitEditUser}>
+                                    <Text style={{color: "white"}}>Submit</Text>
+                                </TouchableOpacity>
                             </View>
                         </>
                     )}
                     {!edit && (
-                        <Button title="Edit User Details" onPress={() => setEdit(true)} style={styles.editUserButton}/>
+                        <TouchableOpacity onPress={() => setEdit(true)} style={styles.editUserButton}>
+                            <Text style={{color: "white"}}>Edit User Details</Text>
+                        </TouchableOpacity>
                     )}
                     <View style={{ marginTop: 15 }}>
-                        <Button title="Delete Account" color="red" onPress={() => setDeleteAccount(true)} />
+                        <TouchableOpacity onPress={() => setDeleteAccount(true)} style={styles.deleteUserButton}>
+                            <Text style={{color: "white"}}>Delete Account</Text>
+                        </TouchableOpacity>
                         <Portal>
                             <Dialog visible={deleteAccount} onDismiss={() => setDeleteAccount(false)}>
                                 <Dialog.Title>Delete Account</Dialog.Title>
@@ -1174,7 +1182,7 @@ const styles = StyleSheet.create({
     buttonRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        width: "60%"
+        width: "100%"
     },
       gradient: {
         flex: 1,
@@ -1313,7 +1321,24 @@ const styles = StyleSheet.create({
     },
     editUserButton: {
         borderRadius: 30,
-        color: "green"
+        borderWidth: 1,
+        borderColor: '#27ab7c',
+        fontColor: "white",
+        width: "100%",
+        height: "auto",
+        alignItems: "center",
+        justifyContent: "center",
+        height: 50
+    },
+    deleteUserButton: {
+        borderRadius: 30,
+        borderWidth: 1,
+        borderColor: 'red',
+        fontColor: "white",
+        width: Dimensions.get('window').width / 1.12,
+        alignItems: "center",
+        justifyContent: "center",
+        height: 50
     },
     containerMembership: {
         marginTop: 20,
@@ -1504,6 +1529,24 @@ const styles = StyleSheet.create({
           paddingVertical: 20,
           width: '100%',
         },
+        cancelEditUser: {
+            borderColor: '#2f6d58',
+            borderRadius: 5,
+            borderWidth: 1,
+            width: "45%",
+            justifyContent: "center",
+            alignItems: "center",
+                        height: 40
+        },
+        submitEditUser: {
+            borderColor: '#2f6d58',
+            borderRadius: 5,
+            borderWidth: 1,
+            width: "45%",
+            justifyContent: "center",
+            alignItems: "center",
+            height: 40
+        }
 });
 
 export default AccountSettings;

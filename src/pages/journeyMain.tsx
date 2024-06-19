@@ -1,6 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { ScrollView, View, StyleSheet, ActivityIndicator, Alert, TouchableOpacity, Modal as RNModal } from 'react-native';
-import { Text, Button, useTheme } from 'react-native-paper';
+import React, {useState, useEffect} from 'react';
+import {
+  ScrollView,
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  Alert,
+  TouchableOpacity,
+  Modal as RNModal,
+} from 'react-native';
+import {Text, Button, useTheme} from 'react-native-paper';
 import Config from 'react-native-config';
 import JourneyMap from '../components/JourneyMap';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -9,7 +17,7 @@ import GetStarted from '../components/GetStarted';
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
   const [units, setUnits] = useState([]);
-  const [activeJourney, setActiveJourney] = useState(null); // Changed initial state to null
+  const [activeJourney, setActiveJourney] = useState(null);
   const [userId, setUserId] = useState(1684239109222039552);
   const [showHandout, setShowHandout] = useState(null);
   const [openDetourPop, setOpenDetourPop] = useState(false);
@@ -30,7 +38,9 @@ const JourneyMain = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch start of journey, status ${response.status}`);
+        throw new Error(
+          `Failed to fetch start of journey, status ${response.status}`,
+        );
       }
 
       let map = await response.json();
@@ -49,8 +59,8 @@ const JourneyMain = () => {
         body: JSON.stringify({
           user_id: userId,
           skip: units.length,
-          limit: 5
-        })
+          limit: 5,
+        }),
       });
 
       let res = await response.json();
@@ -65,43 +75,45 @@ const JourneyMain = () => {
         return;
       }
 
-      const fetchedUnits = await Promise.all(res.user_map.units.map(async (unit) => {
-        response = await fetch(`${API_URL}/api/journey/getTasksInUnit`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            user_id: userId,
-            unit_id: unit._id
-          })
-        });
+      const fetchedUnits = await Promise.all(
+        res.user_map.units.map(async (unit: {_id: any}) => {
+          const response = await fetch(`${API_URL}/api/journey/getTasksInUnit`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              user_id: userId,
+              unit_id: unit._id,
+            }),
+          });
 
-        let tasksResponse = await response.json();
-        if (!response.ok) {
-          throw new Error('Failed to fetch tasks in unit');
-        }
+          if (!response.ok) {
+            throw new Error('Failed to fetch tasks in unit');
+          }
 
-        const tasks = tasksResponse.data ? tasksResponse.data.tasks : [];
-        if (!tasks) {
-          console.error('No tasks array in the response for unit:', unit._id);
-          return { ...unit, tasks: [] };
-        }
+          const tasksResponse = await response.json();
+          const tasks = tasksResponse.data ? tasksResponse.data.tasks : [];
+          if (!tasks.length) {
+            console.error('No tasks array in the response for unit:', unit._id);
+            return { ...unit, tasks: [] };
+          }
 
-        const sortedTasks = tasks.sort((a, b) => {
-          if (a.node_above === null) return -1;
-          if (b.node_above === null) return 1;
-          return a.node_above - b.node_above;
-        });
+          const sortedTasks = tasks.sort((a, b) => {
+            if (a.node_above === null) return -1;
+            if (b.node_above === null) return 1;
+            return a.node_above - b.node_above;
+          });
 
-        return { ...unit, tasks: sortedTasks };
-      }));
+          return { ...unit, tasks: sortedTasks };
+        })
+      );
 
       setUnits(prevUnits => [...prevUnits, ...fetchedUnits]);
       setActiveJourney(true); // Journey has started
       setLoading(false);
     } catch (error) {
-      Alert.alert("Error", error.message || "Failed to fetch tasks. Please check your network connection.");
+      Alert.alert('Error', error.message || 'Failed to fetch tasks. Please check your network connection.');
       setLoading(false);
     }
   };

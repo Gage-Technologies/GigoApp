@@ -1,26 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useTheme, TextInput, Button } from 'react-native-paper';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, Alert, ScrollView } from 'react-native';
-import loginImage from "../components/img/login_background_cropped.jpg";
-import googleLogo from "../components/Icons/login/google_g.png"
-import googleName from "../components/Icons/login/google-logo-white.png";
-import githubName from "../components/Icons/login/gh_name_light.png";
-import { SvgXml } from 'react-native-svg';
-import { useNavigation } from '@react-navigation/native';
+import React, {useState, useRef} from 'react';
+import {useTheme, TextInput} from 'react-native-paper';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ImageBackground,
+  Dimensions,
+  Alert,
+} from 'react-native';
+import loginImage from '../components/img/login_background_cropped.jpg';
+import {SvgXml} from 'react-native-svg';
+import {useNavigation} from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
-const imageWidth = screenWidth * 0.10; // 15% of the screen width
-const { width, height } = Dimensions.get('window')
-import Config from 'react-native-config'
+const imageWidth = screenWidth * 0.1; // 15% of the screen width
+const {width, height} = Dimensions.get('window');
+import Config from 'react-native-config';
 
-
-const githubLogo = `
-<svg width="100%" height="100%" viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
-    <path fill-rule="evenodd" clip-rule="evenodd"
-          d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"
-          fill="#fff"/>
-</svg>
-`
+// const githubLogo = `
+// <svg width="100%" height="100%" viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
+//     <path fill-rule="evenodd" clip-rule="evenodd"
+//           d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"
+//           fill="#fff"/>
+// </svg>
+// `
 
 const finalGigoLogo = `
 <svg viewBox="0 0 115.86834 81.133166">
@@ -67,297 +71,349 @@ const finalGigoLogo = `
                     id="path896" />
     </g>
 </svg>
-`
+`;
 
 const ForgotPassword = () => {
-    const theme = useTheme();
+  const theme = useTheme();
 
-    const [email, setEmail] = useState('');
-    const [isEmailValid, setIsEmailValid] = useState(false);
-    const navigation = useNavigation();
-    const emailRef = useRef(null);
+  const [email, setEmail] = useState('');
+  const [isEmailValid, setIsEmailValid] = useState(false);
+  const navigation = useNavigation();
+  const emailRef = useRef(null);
 
-    const styles = StyleSheet.create({
-        container: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 20,
-        },
-        box: {
-            backgroundColor: 'black',
-            borderRadius: 10,
-            width: width * 0.99,  // 99% of screen width
-            height: height * 0.4,  // 70% of screen height
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 20,
-        },
-        header: {
-            fontSize: 24,
-            marginBottom: 20,
-            color: "white"
-        },
-        input: {
-            width: screenWidth * .8,
-            height: 30,
-            marginBottom: 20,
-            borderRadius: 10,
-            borderWidth: 1,
-            padding: 10,
-            color: "white",
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            borderColor: "gray"
-        },
-        signInWith: {
-            marginVertical: 20,
-            fontSize: 16,
-            color: "white",
-            alignSelf: "center"
-        },
-        socialLogin: {
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            width: '100%',
-        },
-        socialIcon: {
-            width: 50,
-            height: 50,
-        },
-          loginContainer: {
-        flexDirection: 'row',  // Align items in a column
-        alignItems: 'even',  // Align items in the center horizontally
-        justifyContent: 'space-evenly',
-        width: screenWidth * .8
-          },
-      button: {
-        padding: 10,
-        alignItems: 'center',  // Center content horizontally
-        justifyContent: 'center',  // Center content vertically
-        marginVertical: 5  // Provides vertical spacing between buttons
-      },
-          innerContainer: {
-        flexDirection: 'row',  // Align images horizontally
-        alignItems: 'center'
-          },
-          logo: {
-            width: imageWidth,
-            height: imageWidth,  // This assumes the image is square. Adjust as needed.
-            resizeMode: 'contain'
-          },
-            buttonExtra: {
-              backgroundColor: '#007BFF', // A default blue color for button background
-              padding: 10,
-              borderRadius: 10, // Rounded corners
-              alignItems: 'center',
-              marginBottom: 10, // Space between buttons
-              width: "70%"
-            },
-            firstButton: {
-              paddingBottom: 50, // Extra padding at the bottom for the first button
-            },
-            buttonText: {
-              color: 'white', // Text color for buttons
-              fontSize: 16, // Font size for text
-            },
-            buttonTextExtra: {
-            color: '#007BFF',
-            fontSize: 16
-            },
-            disabledButton: {
-              backgroundColor: '#CCCCCC', // Grey out the button when it's disabled
-            },
-            accountText: {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            width: screenWidth * .8
-            },
-                externalContainer: {
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                },
-                externalBox: {
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: width > 1000 ? '35%' : '70%',
-                    borderRadius: 10,
-                    backgroundColor: '#fff', // Adjust according to your theme color
-                    paddingVertical: width > 1000 ? 15 : 30
-                },
-                externalHeader: {
-                    fontSize: 20,
-                    marginBottom: 10,
-                },
-                externalInput: {
-                    width: '100%',
-                    height: 40,
-                    marginVertical: 10,
-                    borderWidth: 1,
-                    paddingHorizontal: 10,
-                },
-                externalButton: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: theme.colors.accent,
-                    padding: 10,
-                    borderRadius: 5,
-                    justifyContent: 'center',
-                    minHeight: 35,
-                    width: '50%',
-                    marginTop: 10,
-                },
-                externalButtonText: {
-                    color: theme.fonts.regular,
-                    marginLeft: 10,
-                },
-                externalSubText: {
-                    fontSize: 14,
-                    marginTop: 20,
-                },
-                    footerText: {
-                        fontSize: 16,
-                        marginTop: 20,
-                        color: "white"
-                    },
-                        helperText: {
-                            fontSize: 14,
-                            color: 'grey',
-                            marginBottom: 20
-                        }
-    });
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    box: {
+      backgroundColor: 'black',
+      borderRadius: 10,
+      width: width * 0.99, // 99% of screen width
+      height: height * 0.4, // 70% of screen height
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 20,
+    },
+    header: {
+      fontSize: 24,
+      marginBottom: 20,
+      color: 'white',
+    },
+    input: {
+      width: screenWidth * 0.8,
+      height: 30,
+      marginBottom: 20,
+      borderRadius: 10,
+      borderWidth: 1,
+      padding: 10,
+      color: 'white',
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      borderColor: 'gray',
+    },
+    signInWith: {
+      marginVertical: 20,
+      fontSize: 16,
+      color: 'white',
+      alignSelf: 'center',
+    },
+    socialLogin: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      width: '100%',
+    },
+    socialIcon: {
+      width: 50,
+      height: 50,
+    },
+    loginContainer: {
+      flexDirection: 'row', // Align items in a column
+      alignItems: 'even', // Align items in the center horizontally
+      justifyContent: 'space-evenly',
+      width: screenWidth * 0.8,
+    },
+    button: {
+      padding: 10,
+      alignItems: 'center', // Center content horizontally
+      justifyContent: 'center', // Center content vertically
+      marginVertical: 5, // Provides vertical spacing between buttons
+    },
+    innerContainer: {
+      flexDirection: 'row', // Align images horizontally
+      alignItems: 'center',
+    },
+    logo: {
+      width: imageWidth,
+      height: imageWidth, // This assumes the image is square. Adjust as needed.
+      resizeMode: 'contain',
+    },
+    buttonExtra: {
+      backgroundColor: '#007BFF', // A default blue color for button background
+      padding: 10,
+      borderRadius: 10, // Rounded corners
+      alignItems: 'center',
+      marginBottom: 10, // Space between buttons
+      width: '70%',
+    },
+    firstButton: {
+      paddingBottom: 50, // Extra padding at the bottom for the first button
+    },
+    buttonText: {
+      color: 'white', // Text color for buttons
+      fontSize: 16, // Font size for text
+    },
+    buttonTextExtra: {
+      color: '#007BFF',
+      fontSize: 16,
+    },
+    disabledButton: {
+      backgroundColor: '#CCCCCC', // Grey out the button when it's disabled
+    },
+    accountText: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: screenWidth * 0.8,
+    },
+    externalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    externalBox: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: width > 1000 ? '35%' : '70%',
+      borderRadius: 10,
+      backgroundColor: '#fff', // Adjust according to your theme color
+      paddingVertical: width > 1000 ? 15 : 30,
+    },
+    externalHeader: {
+      fontSize: 20,
+      marginBottom: 10,
+    },
+    externalInput: {
+      width: '100%',
+      height: 40,
+      marginVertical: 10,
+      borderWidth: 1,
+      paddingHorizontal: 10,
+    },
+    externalButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.accent,
+      padding: 10,
+      borderRadius: 5,
+      justifyContent: 'center',
+      minHeight: 35,
+      width: '50%',
+      marginTop: 10,
+    },
+    externalButtonText: {
+      color: theme.fonts.regular,
+      marginLeft: 10,
+    },
+    externalSubText: {
+      fontSize: 14,
+      marginTop: 20,
+    },
+    footerText: {
+      fontSize: 16,
+      marginTop: 20,
+      color: 'white',
+    },
+    helperText: {
+      fontSize: 14,
+      color: 'grey',
+      marginBottom: 20,
+    },
+  });
 
-    // Email validation function
-    function isValidEmail(email) {
-        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-        return re.test(String(email).toLowerCase());
+  // Email validation function
+  // eslint-disable-next-line @typescript-eslint/no-shadow
+  function isValidEmail(email) {
+    const re =
+      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  }
+
+  const handleEmailChange = (newEmail: React.SetStateAction<string> | null) => {
+    // @ts-ignore
+    setEmail(newEmail);
+    setIsEmailValid(isValidEmail(newEmail));
+    // @ts-ignore
+    emailRef.current = newEmail;
+  };
+
+  const API_URL = Config.API_URL;
+
+  const sendResetValidation = async () => {
+    const currentEmail = emailRef.current;
+
+    if (!currentEmail || currentEmail.length < 5) {
+      Alert.alert(
+        'Invalid Credentials',
+        'Please enter your email you used to sign up',
+      );
+      return;
     }
 
-    const handleEmailChange = (newEmail) => {
-        setEmail(newEmail);
-        setIsEmailValid(isValidEmail(newEmail));
-        emailRef.current = newEmail;
-    };
+    try {
+      console.log('url is: ', `${API_URL}/api/user/forgotPasswordValidation`);
+      let response = await fetch(
+        `${API_URL}/api/user/forgotPasswordValidation`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({email: currentEmail, url: 'www.gigo.dev'}),
+        },
+      );
 
-    const API_URL = Config.API_URL
+      const responseText = await response.text(); // Get the response as text first
 
-    const sendResetValidation = async () => {
-        const currentEmail = emailRef.current;
+      try {
+        let res = JSON.parse(responseText); // Then try parsing it as JSON
+        console.log('Parsed JSON:', res); // Log the parsed JSON
 
-        if (!currentEmail || currentEmail.length < 5) {
-            Alert.alert("Invalid Credentials", "Please enter your email you used to sign up");
-            return;
+        if (!res || !res.message) {
+          Alert.alert(
+            'Server Error',
+            "We are unable to connect with the servers at this time. We're sorry for the inconvenience!",
+          );
+          return;
         }
 
-        try {
-            console.log("url is: ", `${API_URL}/api/user/forgotPasswordValidation`)
-            let response = await fetch(`${API_URL}/api/user/forgotPasswordValidation`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email: currentEmail, url: 'www.gigo.dev' })
-            });
-
-            const responseText = await response.text(); // Get the response as text first
-
-            try {
-                let res = JSON.parse(responseText); // Then try parsing it as JSON
-                console.log("Parsed JSON:", res); // Log the parsed JSON
-
-                if (!res || !res.message) {
-                    Alert.alert("Server Error", "We are unable to connect with the servers at this time. We're sorry for the inconvenience!");
-                    return;
-                }
-
-                switch (res.message) {
-                    case "must provide email for password recovery":
-                    case "account not found":
-                        Alert.alert("Account Not Found", "We could not find an account with that email address. Please try again, or create an account if you don't already have one.");
-                        break;
-                    case "failed to store reset token":
-                    case "failed to send password reset email":
-                        Alert.alert("Server Error", "We are having an issue at this time. We're sorry for the inconvenience! Please try again later.");
-                        break;
-                    case "Password reset email sent":
-                        Alert.alert("Check your Email", "We have sent an email with instructions on how to reset your password.");
-                        navigation.navigate("Login");
-                        break;
-                    default:
-                        Alert.alert("Error", "An unexpected error occurred.");
-                        break;
-                }
-            } catch (parseError) {
-                console.error("Error parsing JSON:", parseError); // Log any errors during JSON parsing
-            }
-        } catch (error) {
-            console.log("error is: ", error)
-            Alert.alert("Network Error", "Unable to connect. Check your network settings.");
+        switch (res.message) {
+          case 'must provide email for password recovery':
+          case 'account not found':
+            Alert.alert(
+              'Account Not Found',
+              "We could not find an account with that email address. Please try again, or create an account if you don't already have one.",
+            );
+            break;
+          case 'failed to store reset token':
+          case 'failed to send password reset email':
+            Alert.alert(
+              'Server Error',
+              "We are having an issue at this time. We're sorry for the inconvenience! Please try again later.",
+            );
+            break;
+          case 'Password reset email sent':
+            Alert.alert(
+              'Check your Email',
+              'We have sent an email with instructions on how to reset your password.',
+            );
+            // @ts-ignore
+            navigation.navigate('Login');
+            break;
+          default:
+            Alert.alert('Error', 'An unexpected error occurred.');
+            break;
         }
-    };
+      } catch (parseError) {
+        console.error('Error parsing JSON:', parseError); // Log any errors during JSON parsing
+      }
+    } catch (error) {
+      console.log('error is: ', error);
+      Alert.alert(
+        'Network Error',
+        'Unable to connect. Check your network settings.',
+      );
+    }
+  };
 
-    return (
-        <ImageBackground
-            source={loginImage}
-            style={[styles.container, { backgroundColor: theme.colors.background.default }]}
-        >
-            <View style={{
-                position: 'absolute',
-                top: 20, // Adjust the top position as needed
-                left: 35, // Adjust the left position as needed
-                flexDirection: "row"
+  // @ts-ignore
+  return (
+    <ImageBackground
+      source={loginImage}
+      style={[
+        styles.container,
+        {backgroundColor: theme.colors.background.default},
+      ]}>
+      <View
+        style={{
+          position: 'absolute',
+          top: 20, // Adjust the top position as needed
+          left: 35, // Adjust the left position as needed
+          flexDirection: 'row',
+        }}>
+        <SvgXml
+          xml={finalGigoLogo}
+          width={imageWidth}
+          height={imageWidth}
+          color="white"
+        />
+        <Text
+          style={{
+            paddingTop: 15,
+            paddingLeft: 15,
+            fontWeight: 'bold', // Customize the text style
+            fontSize:
+              Dimensions.get('window').width > 1000
+                ? 32
+                : Dimensions.get('window').width * 0.05, // Adjust the font size
+            color: 'white',
+          }}>
+          works on our machine.
+        </Text>
+      </View>
+      <View style={styles.box}>
+        <View style={styles.container}>
+          <Text style={styles.header}>Forgot Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            onChangeText={handleEmailChange}
+            value={email}
+          />
+          <Text style={styles.helperText}>
+            Please enter the email associated with your account
+          </Text>
+          <TouchableOpacity
+            onPress={sendResetValidation}
+            style={styles.buttonExtra}
+            disabled={!isEmailValid}
+            activeOpacity={0.7}>
+            <Text style={styles.buttonText}>Submit</Text>
+          </TouchableOpacity>
+          <View
+            style={{
+              flexDirection: 'row',
+              marginTop: 10,
+              justifyContent: 'space-evenly',
+              width: screenWidth * 0.65,
             }}>
-                <SvgXml xml={finalGigoLogo} width={imageWidth} height={imageWidth} color="white"/>
-                <Text
-                    style={{
-                        paddingTop: 15,
-                        paddingLeft: 15,
-                        fontWeight: 'bold', // Customize the text style
-                        fontSize: Dimensions.get('window').width > 1000 ? 32 : Dimensions.get('window').width * 0.05, // Adjust the font size
-                        color: 'white',
-                    }}
-                >
-                    works on our machine.
-                </Text>
-            </View>
-                          <View style={styles.box}>
-            <View style={styles.container}>
-                <Text style={styles.header}>Forgot Password</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Email"
-                    onChangeText={handleEmailChange}
-                    value={email}
-                />
-                <Text style={styles.helperText}>
-                    Please enter the email associated with your account
-                </Text>
-                <TouchableOpacity
-                  onPress={sendResetValidation}
-                    style={styles.buttonExtra}
-                    disabled={!isEmailValid}
-                    activeOpacity={0.7}
-                >
-                  <Text style={styles.buttonText}>Submit</Text>
-                </TouchableOpacity>
-                <View style={{flexDirection: "row", marginTop: 10, justifyContent: "space-evenly", width: screenWidth * .65}}>
-                                <TouchableOpacity
-                                  onPress={() => navigation.navigate('Login')}
-                                >
-                                  <Text style={{            color: '#007BFF',
-                                                            fontSize: 16, marginLeft: 10, lineHeight: 18}}>Login</Text>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                  onPress={() => navigation.navigate('SignUp')}
-                                >
-                                  <Text style={{            color: '#007BFF',
-                                                            fontSize: 16, marginLeft: 10, lineHeight: 18}}>Signup</Text>
-                                </TouchableOpacity>
-                </View>
-            </View>
-                          </View>
-        </ImageBackground>
-    );
-}
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text
+                style={{
+                  color: '#007BFF',
+                  fontSize: 16,
+                  marginLeft: 10,
+                  lineHeight: 18,
+                }}>
+                Login
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+              <Text
+                style={{
+                  color: '#007BFF',
+                  fontSize: 16,
+                  marginLeft: 10,
+                  lineHeight: 18,
+                }}>
+                Signup
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </View>
+    </ImageBackground>
+  );
+};
 
 export default ForgotPassword;

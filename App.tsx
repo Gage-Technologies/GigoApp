@@ -1,9 +1,12 @@
 import React, {useEffect, useRef} from 'react';
-import { Provider as PaperProvider } from 'react-native-paper';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { Provider as ReduxProvider } from 'react-redux';
-import { View, StyleSheet, Linking, Alert } from 'react-native';
+import {Provider as PaperProvider} from 'react-native-paper';
+import {
+  NavigationContainer,
+  NavigationContainerRef,
+} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {Provider as ReduxProvider} from 'react-redux';
+import {View, StyleSheet} from 'react-native';
 import store from './src/reducers/store';
 import Home from './src/pages/home';
 import Login from './src/pages/login';
@@ -14,23 +17,21 @@ import JourneyMain from './src/pages/journeyMain';
 import Profile from './src/pages/profile';
 import Byte from './src/pages/byte';
 import SpeedDial from './src/components/SpeedDial';
-import { theme } from './src/theme';
-import BottomBar from './src/components/BottomBar';
-import { GoogleOAuthProvider } from '@react-oauth/google';
+import {theme} from './src/theme';
 import {handleDeepLink} from './deepLinking.tsx';
 
 const Stack = createNativeStackNavigator();
 
 const App = () => {
-    const navigationRef = useRef<NavigationContainerRef>(null);
+  const navigationRef = useRef<NavigationContainerRef<any>>(null);
 
-    useEffect(() => {
-        console.log("app page about to call deep link")
-        handleDeepLink(navigationRef);
-        return () => {
-//             Linking.removeEventListener('url');
-        };
-    }, []);
+  useEffect(() => {
+    console.log('app page about to call deep link');
+    handleDeepLink(navigationRef);
+    return () => {
+      //             Linking.removeEventListener('url');
+    };
+  }, []);
   return (
     <ReduxProvider store={store}>
       <PaperProvider theme={theme}>
@@ -38,44 +39,44 @@ const App = () => {
           <View style={styles.container}>
             <Stack.Navigator>
               <Stack.Screen
+                name="Login"
+                component={Login}
+                options={{headerShown: false}}
+              />
+              <Stack.Screen
                 name="Byte"
                 component={Byte}
-                options={{ headerShown: false }}
+                options={{headerShown: false}}
               />
               <Stack.Screen
                 name="AccountSettings"
                 component={AccountSettings}
-                options={{ headerShown: false }}
+                options={{headerShown: false}}
               />
               <Stack.Screen
                 name="Profile"
                 component={Profile}
-                options={{ headerShown: false }}
+                options={{headerShown: false}}
               />
               <Stack.Screen
                 name="Home"
                 component={Home}
-                options={{ headerShown: false }}
+                options={{headerShown: false}}
               />
-                <Stack.Screen
-                  name="Login"
-                  component={Login}
-                  options={{ headerShown: false }}
-                />
               <Stack.Screen
                 name="SignUp"
                 component={CreateNewAccount}
-                options={{ headerShown: false }}
+                options={{headerShown: false}}
               />
               <Stack.Screen
                 name="JourneyMain"
                 component={JourneyMain}
-                options={{ headerShown: false }}
+                options={{headerShown: false}}
               />
               <Stack.Screen
                 name="ForgotPassword"
                 component={ForgotPassword}
-                options={{ headerShown: false }}
+                options={{headerShown: false}}
               />
             </Stack.Navigator>
             <SpeedDial />

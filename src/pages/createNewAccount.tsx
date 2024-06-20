@@ -1,58 +1,52 @@
-import React, { useState, useEffect } from 'react';
-import { useTheme, TextInput, Button } from 'react-native-paper';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ImageBackground, Dimensions, Alert, ScrollView } from 'react-native';
-import loginImage from "../components/img/login_background_cropped.jpg";
-import googleLogo from "../components/Icons/login/google_g.png"
-import googleName from "../components/Icons/login/google-logo-white.png";
-import githubName from "../components/Icons/login/gh_name_light.png";
-import { SvgXml } from 'react-native-svg';
-import { useNavigation } from '@react-navigation/native';
-import debounce from 'lodash/debounce';
-import LoginGithub from "../components/Login/Github/LoginGithub"
-// import Avataaar from "../components/Avatar/avatar.js"
-import profilePic from "../components/Avatar/profile-pic.svg"
-import Config from 'react-native-config'
-import { useDispatch } from 'react-redux';
-import {v4 as uuidv4} from 'uuid';
-import {useGoogleLogin} from "@react-oauth/google";
-import { authorizeGithub, authorizeGoogle} from "../services/auth.js"
-import {authorize} from "../../auth.js"
+import React, {useState} from 'react';
+import {useTheme, TextInput, Button} from 'react-native-paper';
 import {
-  GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
-import { initialAuthStateUpdate, updateAuthState} from "../reducers/auth.ts"
-import fetchWithUpload from "../services/api-call.tsx"
-import RNFetchBlob from 'rn-fetch-blob';
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ImageBackground,
+  Dimensions,
+  Alert,
+  ScrollView,
+} from 'react-native';
+import loginImage from '../components/img/login_background_cropped.jpg';
+import googleLogo from '../components/Icons/login/google_g.png';
+import {SvgXml} from 'react-native-svg';
+import {useNavigation} from '@react-navigation/native';
+import debounce from 'lodash/debounce';
+import LoginGithub from '../components/Login/Github/LoginGithub';
+// import Avataaar from "../components/Avatar/avatar.js"
+import profilePic from '../components/Avatar/profile-pic.svg';
+import Config from 'react-native-config';
+import {useDispatch} from 'react-redux';
+import {authorizeGithub, authorizeGoogle} from '../services/auth.js';
+import {authorize} from '../../auth.js';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import {initialAuthStateUpdate, updateAuthState} from '../reducers/auth.ts';
+import fetchWithUpload from '../services/api-call.tsx';
 
 const screenWidth = Dimensions.get('window').width;
-const imageWidth = screenWidth * 0.10; // 15% of the screen width
-const { width, height } = Dimensions.get('window')
+const imageWidth = screenWidth * 0.1; // 15% of the screen width
+const {width, height} = Dimensions.get('window');
 import moment from 'moment-timezone';
 
 const API_URL = Config.API_URL;
-const GOOGLE_ANDROID_CLIENT_ID = Config.GOOGLE_ANDROID_CLIENT_ID
-const GOOGLE_WEB_CLIENT_ID = Config.GOOGLE_WEB_CLIENT_ID
-
 
 interface TimezoneOption {
-    value: string;
-    label: string;
+  value: string;
+  label: string;
 }
 
 const formatTz = (tz: string): TimezoneOption => {
-    const tzOffset = moment.tz(tz).format('Z');
-    const value = parseFloat(
-        tzOffset.replace(':00','.00').replace(':15','.25').replace(':30','.50').replace(':45','.75')
-    ).toFixed(2);
+  const tzOffset = moment.tz(tz).format('Z');
 
-    return {
-        label: `${tz} (GMT${tzOffset})`,
-        value: tz,
-    };
+  return {
+    label: `${tz} (GMT${tzOffset})`,
+    value: tz,
+  };
 };
-
 
 const githubLogo = `
 <svg width="100%" height="100%" viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
@@ -60,7 +54,7 @@ const githubLogo = `
           d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z"
           fill="#fff"/>
 </svg>
-`
+`;
 
 const finalGigoLogo = `
 <svg viewBox="0 0 115.86834 81.133166">
@@ -107,1144 +101,1207 @@ const finalGigoLogo = `
                     id="path896" />
     </g>
 </svg>
-`
+`;
 
 const CreateNewAccount = () => {
-    const theme = useTheme();
+  const theme = useTheme();
 
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [external, setExternal] = React.useState(false)
-    const [externalLogin, setExternalLogin] = React.useState("")
-    const [externalToken, setExternalToken] = React.useState("")
-    const [confirmPass, setConfirmPass] = useState('');
-    const [missingUser, setMissingUser] = React.useState<boolean>(false)
-    const [invalidUsername, setInvalidUsername] = React.useState<boolean>(false)
-    const [missingEmail, setMissingEmail] = React.useState<boolean>(false)
-    const [missingPhone, setMissingPhone] = React.useState<boolean>(false)
-    const [missingPassword, setMissingPassword] = React.useState<boolean>(false)
-    const [missingConfirm, setMissingConfirm] = React.useState<boolean>(false)
-    const [loading, setLoading] = React.useState(false)
-    const [avatarRef, setAvatarRef] = React.useState({})
-    const [timezone, setTimezone] = React.useState<TimezoneOption | null>(formatTz(moment.tz.guess()))
-    const [firstName, setFirstName] = React.useState("")
-    const [lastName, setLastName] = React.useState("")
-    const [forcePass, setForcePass] = React.useState<boolean>(false)
-    const [step, setStep] = React.useState(0)
-    const [showPass, setShowPass] = React.useState(false)
-    const [Attributes, setAttributes] = useState({
-        topType: "Hijab",
-        accessoriesType: "Blank",
-        avatarRef: {},
-        hairColor: "BrownDark",
-        facialHairType: "Blank",
-        clotheType: "ShirtCrewNeck",
-        clotheColor: "PastelOrange",
-        eyeType: "Surprised",
-        eyebrowType: "UpDown",
-        mouthType: "Serious",
-        avatarStyle: "Circle",
-        skinColor: "Pale",
-    });
-    const dispatch = useDispatch();
-    const navigation = useNavigation();
-    const [isAvatarInitialized, setIsAvatarInitialized] = useState<number>(0)
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [external, setExternal] = React.useState(false);
+  const [externalLogin, setExternalLogin] = React.useState('');
+  const [externalToken, setExternalToken] = React.useState('');
+  const [confirmPass, setConfirmPass] = useState('');
+  const [missingUser, setMissingUser] = React.useState<boolean>(false);
+  const [invalidUsername, setInvalidUsername] = React.useState<boolean>(false);
+  const [missingEmail, setMissingEmail] = React.useState<boolean>(false);
+  const [missingPhone, setMissingPhone] = React.useState<boolean>(false);
+  const [missingPassword, setMissingPassword] = React.useState<boolean>(false);
+  const [missingConfirm, setMissingConfirm] = React.useState<boolean>(false);
+  const [loading, setLoading] = React.useState(false);
+  const [avatarRef, setAvatarRef] = React.useState({});
+  const [timezone, setTimezone] = React.useState<TimezoneOption | null>(
+    formatTz(moment.tz.guess()),
+  );
+  const [firstName, setFirstName] = React.useState('');
+  const [lastName, setLastName] = React.useState('');
+  const [forcePass, setForcePass] = React.useState<boolean>(false);
+  const [step, setStep] = React.useState(0);
+  const [showPass, setShowPass] = React.useState(false);
+  const [Attributes, setAttributes] = useState({
+    topType: 'Hijab',
+    accessoriesType: 'Blank',
+    avatarRef: {},
+    hairColor: 'BrownDark',
+    facialHairType: 'Blank',
+    clotheType: 'ShirtCrewNeck',
+    clotheColor: 'PastelOrange',
+    eyeType: 'Surprised',
+    eyebrowType: 'UpDown',
+    mouthType: 'Serious',
+    avatarStyle: 'Circle',
+    skinColor: 'Pale',
+  });
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const [isAvatarInitialized, setIsAvatarInitialized] = useState<number>(0);
 
-    const styles = StyleSheet.create({
-        container: {
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-            padding: 20,
-        },
-        box: {
-            backgroundColor: 'black',
-            borderRadius: 10,
-            width: width * 0.99,  // 99% of screen width
-            height: height * 0.7,  // 70% of screen height
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: 20,
-        },
-        header: {
-            fontSize: 24,
-            marginBottom: 20,
-            color: "white"
-        },
-        input: {
-            width: '80%',
-            height: 30,
-            marginBottom: 20,
-            borderRadius: 10,
-            borderWidth: 1,
-            padding: 10,
-            color: "white",
-            backgroundColor: 'rgba(255, 255, 255, 0.2)',
-            borderColor: "gray"
-        },
-        signInWith: {
-            marginVertical: 20,
-            fontSize: 16,
-            color: "white",
-            alignSelf: "center"
-        },
-        socialLogin: {
-            flexDirection: 'row',
-            justifyContent: 'space-around',
-            width: '100%',
-        },
-        socialIcon: {
-            width: 50,
-            height: 50,
-        },
-          loginContainer: {
-        flexDirection: 'row',  // Align items in a column
-        alignItems: 'even',  // Align items in the center horizontally
-        justifyContent: 'space-evenly',
-        width: screenWidth * .8
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    box: {
+      backgroundColor: 'black',
+      borderRadius: 10,
+      width: width * 0.99, // 99% of screen width
+      height: height * 0.7, // 70% of screen height
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: 20,
+    },
+    header: {
+      fontSize: 24,
+      marginBottom: 20,
+      color: 'white',
+    },
+    input: {
+      width: '80%',
+      height: 30,
+      marginBottom: 20,
+      borderRadius: 10,
+      borderWidth: 1,
+      padding: 10,
+      color: 'white',
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      borderColor: 'gray',
+    },
+    signInWith: {
+      marginVertical: 20,
+      fontSize: 16,
+      color: 'white',
+      alignSelf: 'center',
+    },
+    socialLogin: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      width: '100%',
+    },
+    socialIcon: {
+      width: 50,
+      height: 50,
+    },
+    loginContainer: {
+      flexDirection: 'row', // Align items in a column
+      alignItems: 'even', // Align items in the center horizontally
+      justifyContent: 'space-evenly',
+      width: screenWidth * 0.8,
+    },
+    button: {
+      padding: 10,
+      alignItems: 'center', // Center content horizontally
+      justifyContent: 'center', // Center content vertically
+      marginVertical: 5, // Provides vertical spacing between buttons
+    },
+    innerContainer: {
+      flexDirection: 'row', // Align images horizontally
+      alignItems: 'center',
+    },
+    logo: {
+      width: imageWidth,
+      height: imageWidth, // This assumes the image is square. Adjust as needed.
+      resizeMode: 'contain',
+    },
+    buttonExtra: {
+      backgroundColor: '#007BFF', // A default blue color for button background
+      padding: 10,
+      borderRadius: 10, // Rounded corners
+      alignItems: 'center',
+      marginBottom: 10, // Space between buttons
+      width: '70%',
+    },
+    firstButton: {
+      paddingBottom: 50, // Extra padding at the bottom for the first button
+    },
+    buttonText: {
+      color: 'white', // Text color for buttons
+      fontSize: 16, // Font size for text
+    },
+    buttonTextExtra: {
+      color: '#007BFF',
+      fontSize: 16,
+    },
+    disabledButton: {
+      backgroundColor: '#CCCCCC', // Grey out the button when it's disabled
+    },
+    accountText: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      width: screenWidth * 0.8,
+    },
+    externalContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    externalBox: {
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: width > 1000 ? '35%' : '70%',
+      borderRadius: 10,
+      backgroundColor: '#fff', // Adjust according to your theme color
+      paddingVertical: width > 1000 ? 15 : 30,
+    },
+    externalHeader: {
+      fontSize: 20,
+      marginBottom: 10,
+    },
+    externalInput: {
+      width: '100%',
+      height: 40,
+      marginVertical: 10,
+      borderWidth: 1,
+      paddingHorizontal: 10,
+    },
+    externalButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: theme.colors.accent,
+      padding: 10,
+      borderRadius: 5,
+      justifyContent: 'center',
+      minHeight: 35,
+      width: '50%',
+      marginTop: 10,
+    },
+    externalButtonText: {
+      color: theme.fonts.regular,
+      marginLeft: 10,
+    },
+    externalSubText: {
+      fontSize: 14,
+      marginTop: 20,
+    },
+    footerText: {
+      fontSize: 16,
+      marginTop: 20,
+      color: 'white',
+    },
+  });
+
+  // const RenderExternal = ({
+  //   navigation,
+  //   setPassword,
+  //   showPass,
+  //   password,
+  //   loading,
+  //   externalLogin,
+  //   googleSignIn,
+  //   githubConfirm,
+  //   forwardPath,
+  // }) => {
+  //   const width = Dimensions.get('window').width; // Get window width to adjust styles dynamically
+  //
+  //   return (
+  //     <ScrollView contentContainerStyle={styles.container}>
+  //       <View>
+  //         <Text style={styles.header}>Create a Password</Text>
+  //         <TextInput
+  //           style={styles.input}
+  //           placeholder="Password"
+  //           secureTextEntry={!showPass}
+  //           value={password}
+  //           onChangeText={setPassword}
+  //         />
+  //         <TextInput
+  //           style={styles.input}
+  //           placeholder="Confirm Password"
+  //           secureTextEntry={!showPass}
+  //           value={confirmPass}
+  //           onChangeText={setConfirmPass}
+  //         />
+  //         <Button
+  //           title="Create Account"
+  //           onPress={handleCreateAccount}
+  //           disabled={loading}
+  //         />
+  //         <Text style={styles.footerText}>Already linked your account?</Text>
+  //         <Button
+  //           title="Sign in"
+  //           onPress={() => navigation.navigate('Login')} // Make sure the route is correctly defined in your navigator
+  //         />
+  //       </View>
+  //     </ScrollView>
+  //   );
+  // };
+
+  //     useEffect(() => {
+  //         const configureGoogleSignIn = async () => {
+  //             const scopes = ['openid', 'email', 'profile'];
+  //             await GoogleSignin.configure({
+  //                 androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+  //                 scopes: scopes
+  //             });
+  //             console.log("Configured scopes:", scopes);
+  //         };
+  //
+  //         configureGoogleSignIn();
+  //     }, []);
+
+  // const setAvatar = (
+  //   e:
+  //     | {
+  //         topType: string;
+  //         accessoriesType: string;
+  //         avatarRef: {};
+  //         hairColor: string;
+  //         facialHairType: string;
+  //         clotheType: string;
+  //         clotheColor: string;
+  //         eyeType: string;
+  //         eyebrowType: string;
+  //         mouthType: string;
+  //         avatarStyle: string;
+  //         skinColor: string;
+  //       }
+  //     | ((prevState: {
+  //         topType: string;
+  //         accessoriesType: string;
+  //         avatarRef: {};
+  //         hairColor: string;
+  //         facialHairType: string;
+  //         clotheType: string;
+  //         clotheColor: string;
+  //         eyeType: string;
+  //         eyebrowType: string;
+  //         mouthType: string;
+  //         avatarStyle: string;
+  //         skinColor: string;
+  //       }) => {
+  //         topType: string;
+  //         accessoriesType: string;
+  //         avatarRef: {};
+  //         hairColor: string;
+  //         facialHairType: string;
+  //         clotheType: string;
+  //         clotheColor: string;
+  //         eyeType: string;
+  //         eyebrowType: string;
+  //         mouthType: string;
+  //         avatarStyle: string;
+  //         skinColor: string;
+  //       })
+  //     | ((prevState: {
+  //         topType: string;
+  //         accessoriesType: string;
+  //         avatarRef: object;
+  //         hairColor: string;
+  //         facialHairType: string;
+  //         clotheType: string;
+  //         clotheColor: string;
+  //         eyeType: string;
+  //         eyebrowType: string;
+  //         mouthType: string;
+  //         avatarStyle: string;
+  //         skinColor: string;
+  //       }) => {
+  //         topType: string;
+  //         accessoriesType: string;
+  //         avatarRef: object;
+  //         hairColor: string;
+  //         facialHairType: string;
+  //         clotheType: string;
+  //         clotheColor: string;
+  //         eyeType: string;
+  //         eyebrowType: string;
+  //         mouthType: string;
+  //         avatarStyle: string;
+  //         skinColor: string;
+  //       }),
+  // ) => {
+  //   setAttributes(e);
+  //
+  //   setAvatarRef(e.avatarRef.current);
+  //   setIsAvatarInitialized(isAvatarInitialized + 1);
+  //   // setLastStepDisabled(false)
+  // };
+
+  const onSuccessGoogle = async (usr: React.SetStateAction<string> | null) => {
+    setExternal(true);
+    // @ts-ignore
+    setExternalToken(usr);
+    setExternalLogin('Google');
+  };
+
+  const onSuccessGithub = async (gh: {code: React.SetStateAction<string>}) => {
+    console.log('here in success');
+
+    setExternalToken(gh.code);
+    setExternalLogin('Github');
+    setLoading(true);
+  };
+
+  const createLogin = async () => {
+    let auth = await authorize(username, password);
+    // @ts-ignore
+    if (auth.user !== undefined) {
+      let authState = Object.assign({}, initialAuthStateUpdate);
+      authState.authenticated = true;
+      // @ts-ignore
+      authState.expiration = auth.exp;
+      // @ts-ignore
+      authState.id = auth.user;
+      // @ts-ignore
+      authState.role = auth.user_status;
+      authState.email = auth.email;
+      authState.phone = auth.phone;
+      authState.userName = auth.user_name;
+      authState.thumbnail = auth.thumbnail;
+      authState.exclusiveContent = auth.exclusive_account;
+      authState.exclusiveAgreement = auth.exclusive_agreement;
+      // authState.tutorialState = DefaultTutorialState;
+      dispatch(updateAuthState(authState));
+
+      await sleep(1000);
+
+      setLoading(false);
+    } else {
+      if (sessionStorage.getItem('alive') === null) {
+        //@ts-ignore
+        swal('Sorry, we failed to log you in, please try again on login page');
+      }
+      setLoading(false);
+    }
+  };
+
+  const githubCreate = async () => {
+    if (!ghConfirm) {
+      Alert.alert('Error', 'BAD');
+      setLoading(false);
+      return;
+    }
+
+    const svgString = profilePic;
+
+    setLoading(true);
+    try {
+      const svgBlob = await svgToBlob(svgString);
+      let create = await fetchWithUpload(
+        `${API_URL}/api/auth/confirmLoginWithGithub`,
+        svgBlob,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
           },
-      button: {
-        padding: 10,
-        alignItems: 'center',  // Center content horizontally
-        justifyContent: 'center',  // Center content vertically
-        marginVertical: 5  // Provides vertical spacing between buttons
+          body: JSON.stringify(params),
+          credentials: 'include',
+        },
+        (res: any) => {
+          if (res.message !== 'Google User Added.') {
+            Alert.alert('Something went wrong here...', res.message);
+          }
+
+          if (res === undefined) {
+            Alert.alert('Network Error', 'Unable to connect to the server.');
+          }
+
+          if (res.message === 'Google User Added.') {
+            authorizeGithub(password).then(auth => {
+              // @ts-ignore
+              if (auth.user !== undefined) {
+                let authState = Object.assign({}, initialAuthStateUpdate);
+                authState.authenticated = true;
+                // @ts-ignore
+                authState.expiration = auth.exp;
+                // @ts-ignore
+                authState.id = auth.user;
+                // @ts-ignore
+                authState.role = auth.user_status;
+                authState.email = auth.email;
+                authState.phone = auth.phone;
+                authState.userName = auth.user_name;
+                authState.thumbnail = auth.thumbnail;
+                authState.backgroundColor = auth.color_palette;
+                authState.backgroundName = auth.name;
+                authState.backgroundRenderInFront = auth.render_in_front;
+                authState.exclusiveContent = auth.exclusive_account;
+                authState.exclusiveAgreement = auth.exclusive_agreement;
+                authState.tutorialState = auth.tutorials as TutorialState;
+                authState.tier = auth.tier;
+                authState.inTrial = auth.in_trial;
+                authState.alreadyCancelled = auth.already_cancelled;
+                authState.hasPaymentInfo = auth.has_payment_info;
+                authState.hasSubscription = auth.has_subscription;
+                authState.usedFreeTrial = auth.used_free_trial;
+                dispatch(updateAuthState(authState));
+
+                // this makes sure the dispatch occurs
+                sleep(1000).then(() => {
+                  navigation.navigate('home');
+                });
+              } else {
+                Alert.alert(
+                  'Sorry, we failed to log you in, please try again on login page.',
+                );
+              }
+            });
+          }
+        },
+      );
+      //             let res = await call("/api/auth/confirmLoginWithGithub", "post", {
+      //                 password: password, // Ensure password is managed correctly
+      //             });
+      //
+      //             let auth = await authorizeGithub(password);
+      //             await AsyncStorage.setItem("loginXP", JSON.stringify(res["xp"]));
+      //
+      //             if (auth.user) {
+      //                 let authState = {
+      //                     ...initialAuthStateUpdate,
+      //                     authenticated: true,
+      //                     ...auth,
+      //                 };
+      //                 dispatch(updateAuthState(authState));
+      //
+      //                 setTimeout(() => {
+      //                     navigation.navigate("home");
+      //                 }, 1000);
+      //             } else {
+      //                 Alert.alert("Login Failed", "The provided username or password is incorrect.");
+      //             }
+    } catch (error) {
+      Alert.alert('Login Error', 'An error occurred during the login process.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onFailureGithub = () => {
+    Alert.alert('Login Failed', 'GitHub login failed. Please try again.');
+  };
+
+  //     const googleSignUp = async () => {
+  //         console.log("hello in signup")
+  //     }
+
+  const googleSignUp = async () => {
+    setLoading(true);
+    try {
+      //             await GoogleSignin.configure({
+      //                       androidClientId: GOOGLE_ANDROID_CLIENT_ID,
+      //                       webClientId: GOOGLE_WEB_CLIENT_ID,
+      //             });
+      //             const {idToken} = await GoogleSignin.signIn();
+      //             console.log("id token: ", idToken)
+      const userInfo = await GoogleSignin.signIn();
+      const idToken = userInfo.idToken;
+
+      onSuccessGoogle(idToken);
+    } catch (error) {
+      Alert.alert('Sign-Up Error', 'Failed to authenticate with Google.');
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const sleep = (milliseconds: number | undefined): Promise<void> => {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, milliseconds);
+    });
+  };
+
+  const googleCreate = async () => {
+    setLoading(true);
+
+    if (password !== confirmPass || password.length < 5) {
+      Alert.alert('Error', 'Passwords do not match or too short');
+      setLoading(false);
+      return;
+    }
+
+    if (!timezone) {
+      Alert.alert('Error', 'Timezone must be filled');
+      setLoading(false);
+      return;
+    }
+
+    const svgString = profilePic;
+
+    let params = {
+      external_auth: externalToken,
+      password: password,
+      start_user_info: {
+        usage: 'I want to learn how to code by doing really cool projects.',
+        proficiency: 'Beginner',
+        tags: 'python,javascript,golang,web development,game development,machine learning,artificial intelligence',
+        preferred_language: 'Python, Javascript, Golang, Typescript',
       },
-          innerContainer: {
-        flexDirection: 'row',  // Align images horizontally
-        alignItems: 'center'
-          },
-          logo: {
-            width: imageWidth,
-            height: imageWidth,  // This assumes the image is square. Adjust as needed.
-            resizeMode: 'contain'
-          },
-            buttonExtra: {
-              backgroundColor: '#007BFF', // A default blue color for button background
-              padding: 10,
-              borderRadius: 10, // Rounded corners
-              alignItems: 'center',
-              marginBottom: 10, // Space between buttons
-              width: "70%"
-            },
-            firstButton: {
-              paddingBottom: 50, // Extra padding at the bottom for the first button
-            },
-            buttonText: {
-              color: 'white', // Text color for buttons
-              fontSize: 16, // Font size for text
-            },
-            buttonTextExtra: {
-            color: '#007BFF',
-            fontSize: 16
-            },
-            disabledButton: {
-              backgroundColor: '#CCCCCC', // Grey out the button when it's disabled
-            },
-            accountText: {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            width: screenWidth * .8
-            },
-                externalContainer: {
-                    flex: 1,
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                },
-                externalBox: {
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: width > 1000 ? '35%' : '70%',
-                    borderRadius: 10,
-                    backgroundColor: '#fff', // Adjust according to your theme color
-                    paddingVertical: width > 1000 ? 15 : 30
-                },
-                externalHeader: {
-                    fontSize: 20,
-                    marginBottom: 10,
-                },
-                externalInput: {
-                    width: '100%',
-                    height: 40,
-                    marginVertical: 10,
-                    borderWidth: 1,
-                    paddingHorizontal: 10,
-                },
-                externalButton: {
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    backgroundColor: theme.colors.accent,
-                    padding: 10,
-                    borderRadius: 5,
-                    justifyContent: 'center',
-                    minHeight: 35,
-                    width: '50%',
-                    marginTop: 10,
-                },
-                externalButtonText: {
-                    color: theme.fonts.regular,
-                    marginLeft: 10,
-                },
-                externalSubText: {
-                    fontSize: 14,
-                    marginTop: 20,
-                },
-                    footerText: {
-                        fontSize: 16,
-                        marginTop: 20,
-                        color: "white"
-                    },
-    });
+      timezone: timezone ? timezone.value : 'America/Chicago',
+      avatar_settings: {
+        topType: Attributes.topType,
+        accessoriesType: Attributes.accessoriesType,
+        hairColor: Attributes.hairColor,
+        facialHairType: Attributes.facialHairType,
+        clotheType: Attributes.clotheType,
+        clotheColor: Attributes.clotheColor,
+        eyeType: Attributes.eyeType,
+        eyebrowType: Attributes.eyebrowType,
+        mouthType: Attributes.mouthType,
+        avatarStyle: Attributes.avatarStyle,
+        skinColor: Attributes.skinColor,
+      },
+    };
 
-    const RenderExternal = ({ navigation, setPassword, showPass, password, loading, externalLogin, googleSignIn, githubConfirm, forwardPath }) => {
-        const width = Dimensions.get('window').width; // Get window width to adjust styles dynamically
+    try {
+      const svgBlob = await svgToBlob(svgString);
+      let create = await fetchWithUpload(
+        `${API_URL}/api/user/createNewGoogleUserApp`,
+        svgBlob,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(params),
+          credentials: 'include',
+        },
+        (res: any) => {
+          if (res.message !== 'Google User Added.') {
+            Alert.alert('Something went wrong here...', res.message);
+          }
 
-        return (
-                <ScrollView contentContainerStyle={styles.container}>
-                    <View style={styles.formContainer}>
-                        <Text style={styles.header}>Create a Password</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Password"
-                            secureTextEntry={!showPass}
-                            value={password}
-                            onChangeText={setPassword}
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Confirm Password"
-                            secureTextEntry={!showPass}
-                            value={confirmPass}
-                            onChangeText={setConfirmPass}
-                        />
-                        <Button
-                            title="Create Account"
-                            onPress={handleCreateAccount}
-                            disabled={loading}
-                        />
-                        <Text style={styles.footerText}>Already linked your account?</Text>
-                        <Button
-                            title="Sign in"
-                            onPress={() => navigation.navigate('Login')} // Make sure the route is correctly defined in your navigator
-                        />
-                    </View>
-                </ScrollView>
+          if (res === undefined) {
+            Alert.alert('Network Error', 'Unable to connect to the server.');
+          }
+
+          if (res.message === 'Google User Added.') {
+            authorizeGoogle(externalToken, password).then(auth => {
+              // @ts-ignore
+              if (auth.user !== undefined) {
+                let authState = Object.assign({}, initialAuthStateUpdate);
+                authState.authenticated = true;
+                // @ts-ignore
+                authState.expiration = auth.exp;
+                // @ts-ignore
+                authState.id = auth.user;
+                // @ts-ignore
+                authState.role = auth.user_status;
+                authState.email = auth.email;
+                authState.phone = auth.phone;
+                authState.userName = auth.user_name;
+                authState.thumbnail = auth.thumbnail;
+                authState.backgroundColor = auth.color_palette;
+                authState.backgroundName = auth.name;
+                authState.backgroundRenderInFront = auth.render_in_front;
+                authState.exclusiveContent = auth.exclusive_account;
+                authState.exclusiveAgreement = auth.exclusive_agreement;
+                authState.tutorialState = auth.tutorials as TutorialState;
+                authState.tier = auth.tier;
+                authState.inTrial = auth.in_trial;
+                authState.alreadyCancelled = auth.already_cancelled;
+                authState.hasPaymentInfo = auth.has_payment_info;
+                authState.hasSubscription = auth.has_subscription;
+                authState.usedFreeTrial = auth.used_free_trial;
+                dispatch(updateAuthState(authState));
+
+                // this makes sure the dispatch occurs
+                sleep(1000).then(() => {
+                  navigation.navigate('home');
+                });
+              } else {
+                Alert.alert(
+                  'Sorry, we failed to log you in, please try again on login page.',
+                );
+              }
+            });
+          }
+        },
+      );
+    } catch (error) {
+      Alert.alert('Error', 'Network request failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  function hasLetters(str: string): boolean {
+    return /[a-zA-Z]/.test(str);
+  }
+
+  const verifyEmail = async (emailParam: string) => {
+    if (emailParam === '') {
+      Alert.alert('You must input a valid email', '', [
+        {text: 'OK', style: 'cancel'},
+      ]);
+      return false; // Directly return false when emailParam is empty
+    }
+
+    try {
+      let res = await fetch(`${API_URL}/api/email/verify`, {
+        // Corrected template string
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({email: emailParam}),
+      });
+      res = await res.json();
+
+      // @ts-ignore
+      if (res.valid === undefined) {
+        Alert.alert(
+          'An unexpected error has occurred',
+          "We're sorry, we'll get right on that!",
+          [{text: 'OK', style: 'cancel'}],
         );
-    };
+        return false;
+      } else if (res.valid === false) {
+        Alert.alert(
+          'Invalid Email Address',
+          'Please enter a valid email address and retry',
+          [{text: 'OK', style: 'cancel'}],
+        );
+        return false;
+      } else if (res.valid === true) {
+        return true; // Ensure returning true when valid
+      }
+    } catch (error) {
+      console.log('error: ', error); // Log the error
+      Alert.alert('Network Error', 'Unable to connect to the server.', [
+        {text: 'OK', style: 'cancel'},
+      ]);
+      return false;
+    }
+  };
 
-//     useEffect(() => {
-//         const configureGoogleSignIn = async () => {
-//             const scopes = ['openid', 'email', 'profile'];
-//             await GoogleSignin.configure({
-//                 androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-//                 scopes: scopes
-//             });
-//             console.log("Configured scopes:", scopes);
-//         };
-//
-//         configureGoogleSignIn();
-//     }, []);
+  const validateUser = async () => {
+    setLoading(true);
 
-
-    const setAvatar = (e: {
-        topType: string;
-        accessoriesType: string;
-        avatarRef: {};
-        hairColor: string;
-        facialHairType: string;
-        clotheType: string;
-        clotheColor: string;
-        eyeType: string;
-        eyebrowType: string;
-        mouthType: string;
-        avatarStyle: string;
-        skinColor: string;
-    } | ((prevState: {
-        topType: string;
-        accessoriesType: string;
-        avatarRef: {};
-        hairColor: string;
-        facialHairType: string;
-        clotheType: string;
-        clotheColor: string;
-        eyeType: string;
-        eyebrowType: string;
-        mouthType: string;
-        avatarStyle: string;
-        skinColor: string;
-    }) => {
-        topType: string;
-        accessoriesType: string;
-        avatarRef: {};
-        hairColor: string;
-        facialHairType: string;
-        clotheType: string;
-        clotheColor: string;
-        eyeType: string;
-        eyebrowType: string;
-        mouthType: string;
-        avatarStyle: string;
-        skinColor: string;
-    }) | ((prevState: {
-        topType: string;
-        accessoriesType: string;
-        avatarRef: object;
-        hairColor: string;
-        facialHairType: string;
-        clotheType: string;
-        clotheColor: string;
-        eyeType: string;
-        eyebrowType: string;
-        mouthType: string;
-        avatarStyle: string;
-        skinColor: string;
-    }) => {
-        topType: string;
-        accessoriesType: string;
-        avatarRef: object;
-        hairColor: string;
-        facialHairType: string;
-        clotheType: string;
-        clotheColor: string;
-        eyeType: string;
-        eyebrowType: string;
-        mouthType: string;
-        avatarStyle: string;
-        skinColor: string;
-    })) => {
-
-        setAttributes(e)
-
-
-        setAvatarRef(e.avatarRef.current)
-        setIsAvatarInitialized(isAvatarInitialized + 1)
-        // setLastStepDisabled(false)
+    let missingFields = [];
+    if (username === '') {
+      setMissingUser(true);
+      missingFields.push('Username');
+    }
+    if (email === '') {
+      setMissingEmail(true);
+      missingFields.push('Email');
+    }
+    if (password === '') {
+      setMissingPassword(true);
+      missingFields.push('Password');
+    }
+    if (confirmPass === '') {
+      setMissingConfirm(true);
+      missingFields.push('Confirm Password');
+    }
+    if (missingFields.length > 0) {
+      setLoading(false);
+      Alert.alert(
+        'Please fill in the following fields:',
+        missingFields.join(', '),
+      );
+      return false;
     }
 
-    const onSuccessGoogle = async (usr) => {
-        setExternal(true)
-        setExternalToken(usr)
-        setExternalLogin("Google")
+    if (!hasLetters(username)) {
+      Alert.alert(
+        'Username Invalid',
+        'Username must contain at least one letter!',
+      );
+      setLoading(false);
+      return false;
     }
 
-    const onSuccessGithub = async (gh) => {
-        console.log("here in success")
-
-        setExternalToken(gh["code"]);
-        setExternalLogin("Github");
-        setLoading(true);
-    };
-
-    const createLogin = async (newUser: boolean | null) => {
-        let auth = await authorize(username, password);
-        // @ts-ignore
-        if (auth["user"] !== undefined) {
-            let authState = Object.assign({}, initialAuthStateUpdate)
-            authState.authenticated = true
-            // @ts-ignore
-            authState.expiration = auth["exp"]
-            // @ts-ignore
-            authState.id = auth["user"]
-            // @ts-ignore
-            authState.role = auth["user_status"]
-            authState.email = auth["email"]
-            authState.phone = auth["phone"]
-            authState.userName = auth["user_name"]
-            authState.thumbnail = auth["thumbnail"]
-            authState.exclusiveContent = auth["exclusive_account"]
-            authState.exclusiveAgreement = auth["exclusive_agreement"]
-            authState.tutorialState = DefaultTutorialState
-            dispatch(updateAuthState(authState))
-
-            await sleep(1000)
-
-
-            setLoading(false)
-        } else {
-            if (sessionStorage.getItem("alive") === null)
-                //@ts-ignore
-                swal("Sorry, we failed to log you in, please try again on login page");
-            setLoading(false)
-        }
+    if (password !== confirmPass) {
+      Alert.alert('Error', 'Passwords do not match');
+      setLoading(false);
+      return false;
     }
 
-    const githubCreate = async () => {
-        if (!ghConfirm) {
-            Alert.alert("Error", "BAD");
-            setLoading(false);
-            return;
-        }
-
-        const svgString = profilePic;
-
-        setLoading(true);
-        try {
-            const svgBlob = await svgToBlob(svgString);
-            let create = await fetchWithUpload(
-                `${API_URL}/api/auth/confirmLoginWithGithub`,
-                svgBlob,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(params),
-                    credentials: 'include'
-                },
-                (res: any) => {
-                    if (res["message"] !== "Google User Added.") {
-                        Alert.alert("Something went wrong here...", res["message"]);
-                    }
-
-                    if (res === undefined) {
-                        Alert.alert("Network Error", "Unable to connect to the server.");
-                    }
-
-                    if (res["message"] === "Google User Added.") {
-                        authorizeGithub(password).then(auth => {
-                            // @ts-ignore
-                            if (auth["user"] !== undefined) {
-                                let authState = Object.assign({}, initialAuthStateUpdate)
-                                authState.authenticated = true
-                                // @ts-ignore
-                                authState.expiration = auth["exp"]
-                                // @ts-ignore
-                                authState.id = auth["user"]
-                                // @ts-ignore
-                                authState.role = auth["user_status"]
-                                authState.email = auth["email"]
-                                authState.phone = auth["phone"]
-                                authState.userName = auth["user_name"]
-                                authState.thumbnail = auth["thumbnail"]
-                                authState.backgroundColor = auth["color_palette"]
-                                authState.backgroundName = auth["name"]
-                                authState.backgroundRenderInFront = auth["render_in_front"]
-                                authState.exclusiveContent = auth["exclusive_account"]
-                                authState.exclusiveAgreement = auth["exclusive_agreement"]
-                                authState.tutorialState = auth["tutorials"] as TutorialState
-                                authState.tier = auth["tier"]
-                                authState.inTrial = auth["in_trial"]
-                                authState.alreadyCancelled = auth["already_cancelled"]
-                                authState.hasPaymentInfo = auth["has_payment_info"]
-                                authState.hasSubscription = auth["has_subscription"]
-                                authState.usedFreeTrial = auth["used_free_trial"]
-                                dispatch(updateAuthState(authState))
-
-                                // this makes sure the dispatch occurs
-                                sleep(1000).then(() => {
-                                    navigation.navigate("home");
-                                })
-                            } else {
-                                Alert.alert("Sorry, we failed to log you in, please try again on login page.")
-                            }
-                        })
-                    }
-                }
-            )
-//             let res = await call("/api/auth/confirmLoginWithGithub", "post", {
-//                 password: password, // Ensure password is managed correctly
-//             });
-//
-//             let auth = await authorizeGithub(password);
-//             await AsyncStorage.setItem("loginXP", JSON.stringify(res["xp"]));
-//
-//             if (auth.user) {
-//                 let authState = {
-//                     ...initialAuthStateUpdate,
-//                     authenticated: true,
-//                     ...auth,
-//                 };
-//                 dispatch(updateAuthState(authState));
-//
-//                 setTimeout(() => {
-//                     navigation.navigate("home");
-//                 }, 1000);
-//             } else {
-//                 Alert.alert("Login Failed", "The provided username or password is incorrect.");
-//             }
-        } catch (error) {
-            Alert.alert("Login Error", "An error occurred during the login process.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const onFailureGithub = (error) => {
-        Alert.alert("Login Failed", "GitHub login failed. Please try again.");
-    };
-
-//     const googleSignUp = async () => {
-//         console.log("hello in signup")
-//     }
-
-     const googleSignUp = async () => {
-        setLoading(true);
-        try {
-//             await GoogleSignin.configure({
-//                       androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-//                       webClientId: GOOGLE_WEB_CLIENT_ID,
-//             });
-//             const {idToken} = await GoogleSignin.signIn();
-//             console.log("id token: ", idToken)
-          const userInfo = await GoogleSignin.signIn();
-          const idToken = userInfo.idToken;
-
-          onSuccessGoogle(idToken)
-
-        } catch (error) {
-          Alert.alert('Sign-Up Error', 'Failed to authenticate with Google.');
-          console.error(error);
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      const sleep = (milliseconds): Promise<void> => {
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve();
-            }, milliseconds);
-        });
-      };
-
-    const googleCreate = async () => {
-        setLoading(true);
-
-        if (password !== confirmPass || password.length < 5) {
-            Alert.alert("Error", "Passwords do not match or too short");
-            setLoading(false);
-            return;
-        }
-
-        if (!timezone) {
-            Alert.alert("Error", "Timezone must be filled");
-            setLoading(false);
-            return;
-        }
-
-        const svgString = profilePic;
-
-
-        let params = {
-            external_auth: externalToken,
-            password: password,
-            start_user_info: {
-                usage: "I want to learn how to code by doing really cool projects.",
-                proficiency: "Beginner",
-                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence",
-                preferred_language: "Python, Javascript, Golang, Typescript"
-            },
-            timezone: timezone ? timezone.value : "America/Chicago",
-            avatar_settings: {
-                topType: Attributes.topType,
-                accessoriesType: Attributes.accessoriesType,
-                hairColor: Attributes.hairColor,
-                facialHairType: Attributes.facialHairType,
-                clotheType: Attributes.clotheType,
-                clotheColor: Attributes.clotheColor,
-                eyeType: Attributes.eyeType,
-                eyebrowType: Attributes.eyebrowType,
-                mouthType: Attributes.mouthType,
-                avatarStyle: Attributes.avatarStyle,
-                skinColor: Attributes.skinColor
-            }
-        }
-
-        try {
-            const svgBlob = await svgToBlob(svgString);
-            let create = await fetchWithUpload(
-                `${API_URL}/api/user/createNewGoogleUserApp`,
-                svgBlob,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(params),
-                    credentials: 'include'
-                },
-                (res: any) => {
-                    if (res["message"] !== "Google User Added.") {
-                        Alert.alert("Something went wrong here...", res["message"]);
-                    }
-
-                    if (res === undefined) {
-                        Alert.alert("Network Error", "Unable to connect to the server.");
-                    }
-
-                    if (res["message"] === "Google User Added.") {
-                        authorizeGoogle(externalToken, password).then(auth => {
-                            // @ts-ignore
-                            if (auth["user"] !== undefined) {
-                                let authState = Object.assign({}, initialAuthStateUpdate)
-                                authState.authenticated = true
-                                // @ts-ignore
-                                authState.expiration = auth["exp"]
-                                // @ts-ignore
-                                authState.id = auth["user"]
-                                // @ts-ignore
-                                authState.role = auth["user_status"]
-                                authState.email = auth["email"]
-                                authState.phone = auth["phone"]
-                                authState.userName = auth["user_name"]
-                                authState.thumbnail = auth["thumbnail"]
-                                authState.backgroundColor = auth["color_palette"]
-                                authState.backgroundName = auth["name"]
-                                authState.backgroundRenderInFront = auth["render_in_front"]
-                                authState.exclusiveContent = auth["exclusive_account"]
-                                authState.exclusiveAgreement = auth["exclusive_agreement"]
-                                authState.tutorialState = auth["tutorials"] as TutorialState
-                                authState.tier = auth["tier"]
-                                authState.inTrial = auth["in_trial"]
-                                authState.alreadyCancelled = auth["already_cancelled"]
-                                authState.hasPaymentInfo = auth["has_payment_info"]
-                                authState.hasSubscription = auth["has_subscription"]
-                                authState.usedFreeTrial = auth["used_free_trial"]
-                                dispatch(updateAuthState(authState))
-
-                                // this makes sure the dispatch occurs
-                                sleep(1000).then(() => {
-                                    navigation.navigate("home");
-                                })
-                            } else {
-                                Alert.alert("Sorry, we failed to log you in, please try again on login page.")
-                            }
-                        })
-                    }
-                }
-            )
-            } catch (error) {
-                Alert.alert("Error", "Network request failed");
-            } finally {
-                setLoading(false);
-            }
-    };
-
-    function hasLetters(str: string): boolean {
-        return /[a-zA-Z]/.test(str);
+    if (password.length < 5) {
+      Alert.alert('Sorry!', 'Your password is too short. Try Another!');
+      setLoading(false);
+      return false;
     }
 
-    const verifyEmail = async (emailParam) => {
-        if (emailParam === "") {
-            Alert.alert("You must input a valid email", "", [{ text: "OK", style: "cancel" }]);
-            return false; // Directly return false when emailParam is empty
-        }
-
-
-        try {
-            let res = await fetch(`${API_URL}/api/email/verify`, { // Corrected template string
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email: emailParam }),
-            });
-            res = await res.json();
-
-            if (res["valid"] === undefined) {
-                Alert.alert("An unexpected error has occurred", "We're sorry, we'll get right on that!", [{ text: "OK", style: "cancel" }]);
-                return false;
-            } else if (res["valid"] === false) {
-                Alert.alert("Invalid Email Address", "Please enter a valid email address and retry", [{ text: "OK", style: "cancel" }]);
-                return false;
-            } else if (res["valid"] === true) {
-                return true; // Ensure returning true when valid
-            }
-        } catch (error) {
-            console.log("error: ", error); // Log the error
-            Alert.alert("Network Error", "Unable to connect to the server.", [{ text: "OK", style: "cancel" }]);
-            return false;
-        }
-    }
-
-
-    const validateUser = async () => {
-        setLoading(true);
-
-        let missingFields = [];
-        if (username === "") {
-            setMissingUser(true);
-            missingFields.push('Username');
-        }
-        if (email === "") {
-            setMissingEmail(true);
-            missingFields.push('Email');
-        }
-        if (password === "") {
-            setMissingPassword(true);
-            missingFields.push('Password');
-        }
-        if (confirmPass === "") {
-            setMissingConfirm(true);
-            missingFields.push('Confirm Password');
-        }
-        if (missingFields.length > 0) {
-            setLoading(false);
-            Alert.alert("Please fill in the following fields:", missingFields.join(', '));
-            return false;
-        }
-
-        if (!hasLetters(username)) {
-            Alert.alert("Username Invalid", "Username must contain at least one letter!");
-            setLoading(false)
-            return false;
-        }
-
-        if (password !== confirmPass) {
-            Alert.alert("Error", "Passwords do not match");
-            setLoading(false);
-            return false;
-        }
-
-        if (password.length < 5) {
-            Alert.alert("Sorry!", "Your password is too short. Try Another!");
-            setLoading(false);
-            return false;
-        }
-
-        if (email !== "") {
-            const emailIsValid = await verifyEmail(email);
-            if (!emailIsValid) {
-                setLoading(false);
-                return false;
-            }
-        }
-
-
-        try {
-            let res = await fetch(`${API_URL}/api/user/validateUser`, { // Use backticks for template literals
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    user_name: username,
-                    password: password,
-                    email: email,
-                    phone: "N/A",
-                    timezone: timezone ? timezone.value : "America/Chicago",
-                    force_pass: forcePass
-                }),
-            });
-
-            if (!res.ok) {
-                console.error("Network response was not ok", res.statusText); // Log error if response is not ok
-                throw new Error(`HTTP error! Status: ${res.status}`);
-            }
-            res = await res.json();
-
-            if (res["message"]) {
-                setLoading(false);
-                if (res["message"].includes("required")) {
-                    if (res["message"].includes("username")) setMissingUser(true);
-                    if (res["message"].includes("password")) setMissingPassword(true);
-                    if (res["message"].includes("email")) setMissingEmail(true);
-                    if (res["message"].includes("phone number")) setMissingPhone(true);
-                }
-                return res["message"] === "User Cleared.";
-            }
-        } catch (error) {
-            Alert.alert("Network Error", "Unable to connect to the server.");
-        }
-
+    if (email !== '') {
+      const emailIsValid = await verifyEmail(email);
+      if (!emailIsValid) {
         setLoading(false);
         return false;
-    }
-//todo add later
-//     let {name} = useParams();
-
-    const handleCreateAccount = async () => {
-        const isValid = await validateUser();
-        if (isValid) {
-            // Implement account creation logic
-            console.log('Account creation initiated');
-        }
-    };
-
-//     const fileToBlob = async (uri) => {
-//         try {
-//             console.log("1: ", uri);
-//
-//             let path = uri;
-//             if (uri.startsWith('file://')){
-//                 path = uri.replace('file://', '')
-//             }
-//
-//             // Read the file as base64
-//             const response = await RNFetchBlob.fs.readFile(path, 'base64');
-//             console.log("2");
-//
-//             // Convert base64 string to byte array
-//             const byteCharacters = atob(response);
-//             const byteNumbers = new Array(byteCharacters.length);
-//             for (let i = 0; i < byteCharacters.length; i++) {
-//                 byteNumbers[i] = byteCharacters.charCodeAt(i);
-//             }
-//             const byteArray = new Uint8Array(byteNumbers);
-//
-//             // Create Blob from byte array
-//             const blob = new Blob([byteArray], { type: 'application/octet-stream' });
-//             console.log("3");
-//
-//             return blob;
-//         } catch (error) {
-//             console.error('Error converting file to Blob:', error);
-//             throw error;
-//         }
-//     };
-
-    const svgToBlob = async (svgString) => {
-        try {
-//             const byteCharacters = atob(svgString);
-//             const byteNumbers = new Array(byteCharacters.length);
-//             for (let i = 0; i < byteCharacters.length; i++){
-//                 byteNumbers[i] = byteCharacters.charCodeAt(i)
-//             }
-//             const byteArray = new Uint8Array(byteNumbers);
-            const blob = new Blob([svgString], { type: 'image/svg+xml' });
-            return blob
-        } catch (error) {
-            console.error('Error converting svg to Blob:', error);
-            throw error;
-        }
-    };
-
-
-    const accountCreation = async () => {
-        setLoading(true);
-
-        const svgString = profilePic;
-
-//         const formData = new FormData();
-//         formData.append('image', {
-//             uri: profilePic,
-//             type: 'image/jpeg', // or the appropriate type based on your image
-//             name: 'image.jpg', // or the name of your image file
-//         });
-//         formData.append('avatar', {
-//             uri: svgUri, // You need to generate this URI from your SVG component
-//             type: 'image/svg+xml',
-//             name: 'avatar.svg'
-//         });
-//
-
-
-        if (password !== confirmPass) {
-            Alert.alert("Error", "Passwords do not match");
-            setLoading(false);
-            return;
-        }
-
-        if (password.length < 5) {
-            //@ts-ignore
-            Alert.alert("Passwords do not match")
-            setLoading(false)
-            return
-        }
-
-        if (timezone === null) {
-            //@ts-ignore
-            Alert.alert("Timezone must be filled")
-            setLoading(false)
-            return
-        }
-
-        if (username.length > 50) {
-            Alert.alert("Username must be less than 50 characters.")
-            return
-        }
-
-        // More validations...
-
-
-        let params = {
-            user_name: username,
-            password: password,
-            email: email,
-            phone: "N/A",
-            status: "basic",
-            pfp_path: "",
-            badges: [],
-            tier: "1",
-            coffee: "0",
-            rank: "0",
-            bio: "",
-            first_name: firstName,
-            last_name: lastName,
-            external_auth: "",
-            start_user_info: {
-                usage: "I want to learn how to code by doing really cool projects.",
-                proficiency: "Beginner",
-                tags: "python,javascript,golang,web development,game development,machine learning,artificial intelligence",
-                preferred_language: "Python, Javascript, Golang, Typescript"
-            },
-            timezone: timezone ? timezone.value : "America/Chicago",
-            avatar_settings: {
-                topType: Attributes.topType,
-                accessoriesType: Attributes.accessoriesType,
-                hairColor: Attributes.hairColor,
-                facialHairType: Attributes.facialHairType,
-                clotheType: Attributes.clotheType,
-                clotheColor: Attributes.clotheColor,
-                eyeType: Attributes.eyeType,
-                eyebrowType: Attributes.eyebrowType,
-                mouthType: Attributes.mouthType,
-                avatarStyle: Attributes.avatarStyle,
-                skinColor: Attributes.skinColor
-            },
-            force_pass: forcePass
-        }
-
-
-
-        try {
-            const svgBlob = await svgToBlob(svgString);
-            let create = await fetchWithUpload(
-                `${API_URL}/api/user/createNewUser`,
-                svgBlob,
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(params),
-                    credentials: 'include'
-                },
-                (res: any) => {
-                    if (res["message"] !== "User Created.") {
-                        Alert.alert("Something went wrong...", res["message"]);
-                    }
-
-                    if (res === undefined) {
-                        Alert.alert("Network Error", "Unable to connect to the server.");
-                    }
-
-                    if (res["message"] === "User Created.") {
-//                         payload = {
-//                             host: window.location.host,
-//                             event: WebTrackingEvent.Signup,
-//                             timespent: 0,
-//                             path: location.pathname,
-//                             latitude: null,
-//                             longitude: null,
-//                             metadata: {
-//                                 mobile: isMobile,
-//                                 width: window.innerWidth,
-//                                 height: window.innerHeight,
-//                                 user_agent: navigator.userAgent,
-//                                 referrer: document.referrer,
-//                             },
-//                         }
-//                         trackEvent(payload);
-                        createLogin(true)
-
-                        navigation.navigate("home");
-                    }
-                }
-            )
-        } catch (error) {
-            Alert.alert("Network Error", "Unable to connect to the server.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const debouncedAccountCreation = debounce(accountCreation, 3000);
-
-      const renderExternal = () => {
-        return step === 0 ? (
-          <View style={styles.container}>
-            <View style={styles.box}>
-              <Text style={styles.title}>Create a Password</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  { borderColor: password.length > 5 && password !== '' ? 'green' : 'red' }
-                ]}
-                placeholder="Password"
-                secureTextEntry={!showPass}
-                value={password}
-                onChangeText={setPassword}
-              />
-              <TextInput
-                style={[
-                  styles.input,
-                  { borderColor: password === confirmPass && password !== '' ? 'green' : 'red' }
-                ]}
-                placeholder="Confirm Password"
-                secureTextEntry={!showPass}
-                value={confirmPass}
-                onChangeText={setConfirmPass}
-                onSubmitEditing={() => {
-                  externalLogin === 'Google' ? googleCreate() : githubCreate();
-                }}
-              />
-              <Text style={styles.helperText}>
-                We use this password to encrypt sensitive information.
-              </Text>
-              <Button
-                onPress={() => {
-                  externalLogin === 'Google' ? googleCreate() : githubCreate();
-                }}
-                title="Create Account"
-                disabled={loading}
-                style={styles.buttonExtra}
-              >
-                <Text style={styles.buttonText}>Create Account</Text>
-              </Button>
-              <Text style={styles.signInWith}>
-                Already linked your account?
-              </Text>
-              <Button
-                onPress={() => {
-                  navigation.navigate('Login')
-                }}
-                title="Sign In"
-                color="blue"
-                style={{color: "blue"}}
-              >
-                <Text>Sign In</Text>
-              </Button>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.centeredContainer}>
-            <View style={styles.box}>
-              {/* Render questions or other content */}
-            </View>
-          </View>
-        );
-      };
-
-
-    let renderCreateForm = () => {
-        return (
-            <View style={styles.box}>
-                    <ScrollView contentContainerStyle={styles.container}>
-                        <Text style={styles.header}>Create Account</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Username"
-                            value={username}
-                            onChangeText={setUsername}
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Email"
-                            value={email}
-                            onChangeText={setEmail}
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Password"
-                            secureTextEntry={true}
-                            value={password}
-                            onChangeText={setPassword}
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Confirm Password"
-                            secureTextEntry={true}
-                            value={confirmPass}
-                            onChangeText={setConfirmPass}
-                        />
-                        <TouchableOpacity
-                          onPress={async () => {
-                            let ok = await validateUser()
-                            if (ok){
-                                console.log("content")
-                                debouncedAccountCreation()
-                            }
-                          }}
-                            style={styles.buttonExtra}
-                            activeOpacity={0.7}
-                            disabled={(
-                                missingEmail ||
-                                missingPassword ||
-                                missingConfirm ||
-                                invalidUsername ||
-                                username === "" ||
-                                email === "" ||
-                                password === "" ||
-                                confirmPass === "" ||
-                                password !== confirmPass
-                            )}
-                        >
-                          <Text style={styles.buttonText}>Create Account</Text>
-                        </TouchableOpacity>
-                        <View style={styles.socialLogin}>
-                        <View style={{flexDirection: "column"}}>
-                            <Text style={styles.signInWith}>Or Register With:</Text>
-                                <View style={styles.loginContainer}>
-                                  <TouchableOpacity onPress={() => googleSignUp()} style={styles.button}>
-                                    <View style={styles.innerContainer}>
-                                      <Image
-                                        style={styles.logo}
-                                        source={googleLogo}
-                                      />
-                                    </View>
-                                  </TouchableOpacity>
-                                  <LoginGithub
-                                      color={"primary"}
-                                      sx={{
-                                          // width: window.innerWidth > 1000 ? '7vw' : '25vw',
-                                          justifyContent: "center",
-                                          padding: "15px"
-                                      }}
-                                      clientId="Ov23liWncdWCkys9HUil"
-                                      // this redirect URI is for production, testing on dev will not work
-                                      redirectUri={"gigoApp://auth/github/callback"}
-                                      onSuccess={onSuccessGithub}
-                                      onFailure={onFailureGithub}
-                                  >
-                                      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                        <SvgXml xml={githubLogo} width={imageWidth} height={imageWidth}/>
-                                      </View>
-                                  </LoginGithub>
-                                </View>
-                            </View>
-                        </View>
-                        <View style={{flexDirection: "row", alignItems: "center", marginTop: 10}}>
-                            <Text style={{color: "white", fontSize: 16, lineHeight: 18}}>Already have an account?</Text>
-                            <TouchableOpacity
-                              onPress={() => navigation.navigate('Login')}
-                            >
-                              <Text style={{            color: '#007BFF',
-                                                        fontSize: 16, marginLeft: 10, lineHeight: 18}}>Login</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </ScrollView>
-            </View>
-        );
+      }
     }
 
-    return (
-        <ImageBackground
-            source={loginImage}
-            style={[styles.container, { backgroundColor: theme.colors.background.default }]}
-        >
-            <View style={{
-                position: 'absolute',
-                top: 20, // Adjust the top position as needed
-                left: 35, // Adjust the left position as needed
-                flexDirection: "row"
-            }}>
-                <SvgXml xml={finalGigoLogo} width={imageWidth} height={imageWidth} color="white"/>
-                <Text
-                    style={{
-                        paddingTop: 15,
-                        paddingLeft: 15,
-                        fontWeight: 'bold', // Customize the text style
-                        fontSize: Dimensions.get('window').width > 1000 ? 32 : Dimensions.get('window').width * 0.05, // Adjust the font size
-                        color: 'white',
-                    }}
-                >
-                    works on our machine.
-                </Text>
-            </View>
-              {(!external) ? renderCreateForm() : renderExternal()}
-        </ImageBackground>
+    try {
+      let res = await fetch(`${API_URL}/api/user/validateUser`, {
+        // Use backticks for template literals
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_name: username,
+          password: password,
+          email: email,
+          phone: 'N/A',
+          timezone: timezone ? timezone.value : 'America/Chicago',
+          force_pass: forcePass,
+        }),
+      });
+
+      if (!res.ok) {
+        console.error('Network response was not ok', res.statusText); // Log error if response is not ok
+        throw new Error(`HTTP error! Status: ${res.status}`);
+      }
+      res = await res.json();
+
+      if (res.message) {
+        setLoading(false);
+        if (res.message.includes('required')) {
+          if (res.message.includes('username')) {
+            setMissingUser(true);
+          }
+          if (res.message.includes('password')) {
+            setMissingPassword(true);
+          }
+          if (res.message.includes('email')) {
+            setMissingEmail(true);
+          }
+          if (res.message.includes('phone number')) {
+            setMissingPhone(true);
+          }
+        }
+        return res.message === 'User Cleared.';
+      }
+    } catch (error) {
+      Alert.alert('Network Error', 'Unable to connect to the server.');
+    }
+
+    setLoading(false);
+    return false;
+  };
+  //todo add later
+  //     let {name} = useParams();
+
+  // const handleCreateAccount = async () => {
+  //   const isValid = await validateUser();
+  //   if (isValid) {
+  //     // Implement account creation logic
+  //     console.log('Account creation initiated');
+  //   }
+  // };
+
+  //     const fileToBlob = async (uri) => {
+  //         try {
+  //             console.log("1: ", uri);
+  //
+  //             let path = uri;
+  //             if (uri.startsWith('file://')){
+  //                 path = uri.replace('file://', '')
+  //             }
+  //
+  //             // Read the file as base64
+  //             const response = await RNFetchBlob.fs.readFile(path, 'base64');
+  //             console.log("2");
+  //
+  //             // Convert base64 string to byte array
+  //             const byteCharacters = atob(response);
+  //             const byteNumbers = new Array(byteCharacters.length);
+  //             for (let i = 0; i < byteCharacters.length; i++) {
+  //                 byteNumbers[i] = byteCharacters.charCodeAt(i);
+  //             }
+  //             const byteArray = new Uint8Array(byteNumbers);
+  //
+  //             // Create Blob from byte array
+  //             const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+  //             console.log("3");
+  //
+  //             return blob;
+  //         } catch (error) {
+  //             console.error('Error converting file to Blob:', error);
+  //             throw error;
+  //         }
+  //     };
+
+  const svgToBlob = async (svgString: string | Blob) => {
+    try {
+      //             const byteCharacters = atob(svgString);
+      //             const byteNumbers = new Array(byteCharacters.length);
+      //             for (let i = 0; i < byteCharacters.length; i++){
+      //                 byteNumbers[i] = byteCharacters.charCodeAt(i)
+      //             }
+      //             const byteArray = new Uint8Array(byteNumbers);
+      // @ts-ignore
+      const blob = new Blob([svgString], {type: 'image/svg+xml'});
+      return blob;
+    } catch (error) {
+      console.error('Error converting svg to Blob:', error);
+      throw error;
+    }
+  };
+
+  const accountCreation = async () => {
+    setLoading(true);
+
+    const svgString = profilePic;
+
+    //         const formData = new FormData();
+    //         formData.append('image', {
+    //             uri: profilePic,
+    //             type: 'image/jpeg', // or the appropriate type based on your image
+    //             name: 'image.jpg', // or the name of your image file
+    //         });
+    //         formData.append('avatar', {
+    //             uri: svgUri, // You need to generate this URI from your SVG component
+    //             type: 'image/svg+xml',
+    //             name: 'avatar.svg'
+    //         });
+    //
+
+    if (password !== confirmPass) {
+      Alert.alert('Error', 'Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 5) {
+      //@ts-ignore
+      Alert.alert('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    if (timezone === null) {
+      //@ts-ignore
+      Alert.alert('Timezone must be filled');
+      setLoading(false);
+      return;
+    }
+
+    if (username.length > 50) {
+      Alert.alert('Username must be less than 50 characters.');
+      return;
+    }
+
+    // More validations...
+
+    let params = {
+      user_name: username,
+      password: password,
+      email: email,
+      phone: 'N/A',
+      status: 'basic',
+      pfp_path: '',
+      badges: [],
+      tier: '1',
+      coffee: '0',
+      rank: '0',
+      bio: '',
+      first_name: firstName,
+      last_name: lastName,
+      external_auth: '',
+      start_user_info: {
+        usage: 'I want to learn how to code by doing really cool projects.',
+        proficiency: 'Beginner',
+        tags: 'python,javascript,golang,web development,game development,machine learning,artificial intelligence',
+        preferred_language: 'Python, Javascript, Golang, Typescript',
+      },
+      timezone: timezone ? timezone.value : 'America/Chicago',
+      avatar_settings: {
+        topType: Attributes.topType,
+        accessoriesType: Attributes.accessoriesType,
+        hairColor: Attributes.hairColor,
+        facialHairType: Attributes.facialHairType,
+        clotheType: Attributes.clotheType,
+        clotheColor: Attributes.clotheColor,
+        eyeType: Attributes.eyeType,
+        eyebrowType: Attributes.eyebrowType,
+        mouthType: Attributes.mouthType,
+        avatarStyle: Attributes.avatarStyle,
+        skinColor: Attributes.skinColor,
+      },
+      force_pass: forcePass,
+    };
+
+    try {
+      const svgBlob = await svgToBlob(svgString);
+      let create = await fetchWithUpload(
+        `${API_URL}/api/user/createNewUser`,
+        svgBlob,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(params),
+          credentials: 'include',
+        },
+        (res: any) => {
+          if (res.message !== 'User Created.') {
+            Alert.alert('Something went wrong...', res.message);
+          }
+
+          if (res === undefined) {
+            Alert.alert('Network Error', 'Unable to connect to the server.');
+          }
+
+          if (res.message === 'User Created.') {
+            //                         payload = {
+            //                             host: window.location.host,
+            //                             event: WebTrackingEvent.Signup,
+            //                             timespent: 0,
+            //                             path: location.pathname,
+            //                             latitude: null,
+            //                             longitude: null,
+            //                             metadata: {
+            //                                 mobile: isMobile,
+            //                                 width: window.innerWidth,
+            //                                 height: window.innerHeight,
+            //                                 user_agent: navigator.userAgent,
+            //                                 referrer: document.referrer,
+            //                             },
+            //                         }
+            //                         trackEvent(payload);
+            createLogin();
+
+            // @ts-ignore
+            navigation.navigate('home');
+          }
+        },
+      );
+    } catch (error) {
+      Alert.alert('Network Error', 'Unable to connect to the server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const debouncedAccountCreation = debounce(accountCreation, 3000);
+
+  const renderExternal = () => {
+    // @ts-ignore
+    // @ts-ignore
+    return step === 0 ? (
+      <View style={styles.container}>
+        <View style={styles.box}>
+          <Text>Create a Password</Text>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                borderColor:
+                  password.length > 5 && password !== '' ? 'green' : 'red',
+              },
+            ]}
+            placeholder="Password"
+            secureTextEntry={!showPass}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TextInput
+            style={[
+              styles.input,
+              {
+                borderColor:
+                  password === confirmPass && password !== '' ? 'green' : 'red',
+              },
+            ]}
+            placeholder="Confirm Password"
+            secureTextEntry={!showPass}
+            value={confirmPass}
+            onChangeText={setConfirmPass}
+            onSubmitEditing={() => {
+              externalLogin === 'Google' ? googleCreate() : githubCreate();
+            }}
+          />
+          <Text>We use this password to encrypt sensitive information.</Text>
+          <Button
+            onPress={() => {
+              externalLogin === 'Google' ? googleCreate() : githubCreate();
+            }}
+            title="Create Account"
+            disabled={loading}
+            style={styles.buttonExtra}>
+            <Text style={styles.buttonText}>Create Account</Text>
+          </Button>
+          <Text style={styles.signInWith}>Already linked your account?</Text>
+          <Button
+            onPress={() => {
+              // @ts-ignore
+              navigation.navigate('Login');
+            }}
+            title="Sign In"
+            color="blue"
+            style={{color: "blue"}}>
+            <Text>Sign In</Text>
+          </Button>
+        </View>
+      </View>
+    ) : (
+      <View>
+        <View style={styles.box}>
+          {/* Render questions or other content */}
+        </View>
+      </View>
     );
-}
+  };
+
+  let renderCreateForm = () => {
+    // @ts-ignore
+      // @ts-ignore
+      return (
+      <View style={styles.box}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.header}>Create Account</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            secureTextEntry={true}
+            value={password}
+            onChangeText={setPassword}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm Password"
+            secureTextEntry={true}
+            value={confirmPass}
+            onChangeText={setConfirmPass}
+          />
+          <TouchableOpacity
+            onPress={async () => {
+              let ok = await validateUser();
+              if (ok) {
+                console.log('content');
+                debouncedAccountCreation();
+              }
+            }}
+            style={styles.buttonExtra}
+            activeOpacity={0.7}
+            disabled={
+              missingEmail ||
+              missingPassword ||
+              missingConfirm ||
+              invalidUsername ||
+              username === '' ||
+              email === '' ||
+              password === '' ||
+              confirmPass === '' ||
+              password !== confirmPass
+            }>
+            <Text style={styles.buttonText}>Create Account</Text>
+          </TouchableOpacity>
+          <View style={styles.socialLogin}>
+            <View style={{flexDirection: 'column'}}>
+              <Text style={styles.signInWith}>Or Register With:</Text>
+              <View style={styles.loginContainer}>
+                <TouchableOpacity
+                  onPress={() => googleSignUp()}
+                  style={styles.button}>
+                  <View style={styles.innerContainer}>
+                    <Image style={styles.logo} source={googleLogo} />
+                  </View>
+                </TouchableOpacity>
+                <LoginGithub
+                  color={'primary'}
+                  sx={{
+                    // width: window.innerWidth > 1000 ? '7vw' : '25vw',
+                    justifyContent: 'center',
+                    padding: '15px',
+                  }}
+                  clientId="Ov23liWncdWCkys9HUil"
+                  // this redirect URI is for production, testing on dev will not work
+                  redirectUri={'gigoApp://auth/github/callback'}
+                  onSuccess={onSuccessGithub}
+                  onFailure={onFailureGithub}>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <SvgXml
+                      xml={githubLogo}
+                      width={imageWidth}
+                      height={imageWidth}
+                    />
+                  </View>
+                </LoginGithub>
+              </View>
+            </View>
+          </View>
+          <View
+            style={{flexDirection: 'row', alignItems: 'center', marginTop: 10}}>
+            <Text style={{color: 'white', fontSize: 16, lineHeight: 18}}>
+              Already have an account?
+            </Text>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+              <Text
+                style={{
+                  color: '#007BFF',
+                  fontSize: 16,
+                  marginLeft: 10,
+                  lineHeight: 18,
+                }}>
+                Login
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  };
+
+  return (
+    <ImageBackground
+      source={loginImage}
+      style={[
+        styles.container,
+        {backgroundColor: theme.colors.background.default},
+      ]}>
+      <View
+        style={{
+          position: 'absolute',
+          top: 20, // Adjust the top position as needed
+          left: 35, // Adjust the left position as needed
+          flexDirection: 'row',
+        }}>
+        <SvgXml
+          xml={finalGigoLogo}
+          width={imageWidth}
+          height={imageWidth}
+          color="white"
+        />
+        <Text
+          style={{
+            paddingTop: 15,
+            paddingLeft: 15,
+            fontWeight: 'bold', // Customize the text style
+            fontSize:
+              Dimensions.get('window').width > 1000
+                ? 32
+                : Dimensions.get('window').width * 0.05, // Adjust the font size
+            color: 'white',
+          }}>
+          works on our machine.
+        </Text>
+      </View>
+      {!external ? renderCreateForm() : renderExternal()}
+    </ImageBackground>
+  );
+};
 
 export default CreateNewAccount;

@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect, useRef} from 'react';
 import {
   View,
@@ -118,7 +119,6 @@ const Byte: React.FC = () => {
       <View
         style={[
           styles.container,
-          // eslint-disable-next-line react-native/no-inline-styles
           {justifyContent: 'center', alignItems: 'center'},
         ]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -135,69 +135,62 @@ const Byte: React.FC = () => {
         executingCode={executingCode}
         executeCode={executeCode}
       />
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        <View style={styles.mainContent}>
-          <SideBar theme={theme} />
-          <View style={styles.editorSection} ref={editorContainerRef}>
-            <Editor
-              language="python"
-              code={code}
-              onChange={handleCodeChange}
-              theme={theme.dark ? 'dark' : 'light'}
-            />
-            {output && <Text style={styles.output}>{output}</Text>}
-          </View>
+      <View style={styles.mainContent}>
+        <SideBar theme={theme} />
+        <View style={styles.editorSection} ref={editorContainerRef}>
+          <Editor language="python" code={code} onChange={handleCodeChange} />
+          {output && <Text style={styles.output}>{output}</Text>}
         </View>
-        <Modal
-          visible={newFilePopup}
-          transparent={true}
-          onRequestClose={() => setNewFilePopup(false)}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Create New File</Text>
-            <TextInput
-              style={styles.modalInput}
-              label="File Name"
-              value={newFileName}
-              onChangeText={setNewFileName}
-            />
-            <Button
-              onPress={() => {
-                setNewFilePopup(false);
-                setActiveFile(newFileName);
-                setCode('');
-              }}>
-              Create
-            </Button>
-            <Button onPress={() => setNewFilePopup(false)}>Cancel</Button>
-          </View>
-        </Modal>
-        <Modal
-          visible={deleteFileRequest !== null}
-          transparent={true}
-          onRequestClose={() => setDeleteFileRequest(null)}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalTitle}>Delete File</Text>
-            <Text>
-              Are you sure you want to delete the file {deleteFileRequest}?
-            </Text>
-            <Button
-              onPress={() => {
-                setDeleteFileRequest(null);
-                setCode('');
-                setActiveFile(null);
-              }}>
-              Delete
-            </Button>
-            <Button onPress={() => setDeleteFileRequest(null)}>Cancel</Button>
-          </View>
-        </Modal>
-        {terminalVisible && (
-          <View style={styles.terminal}>
-            <Text style={styles.terminalText}>{output}</Text>
-            <Button onPress={handleCloseTerminal}>Close</Button>
-          </View>
-        )}
-      </ScrollView>
+      </View>
+      <Modal
+        visible={newFilePopup}
+        transparent={true}
+        onRequestClose={() => setNewFilePopup(false)}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Create New File</Text>
+          <TextInput
+            style={styles.modalInput}
+            label="File Name"
+            value={newFileName}
+            onChangeText={setNewFileName}
+          />
+          <Button
+            onPress={() => {
+              setNewFilePopup(false);
+              setActiveFile(newFileName);
+              setCode('');
+            }}>
+            Create
+          </Button>
+          <Button onPress={() => setNewFilePopup(false)}>Cancel</Button>
+        </View>
+      </Modal>
+      <Modal
+        visible={deleteFileRequest !== null}
+        transparent={true}
+        onRequestClose={() => setDeleteFileRequest(null)}>
+        <View style={styles.modalView}>
+          <Text style={styles.modalTitle}>Delete File</Text>
+          <Text>
+            Are you sure you want to delete the file {deleteFileRequest}?
+          </Text>
+          <Button
+            onPress={() => {
+              setDeleteFileRequest(null);
+              setCode('');
+              setActiveFile(null);
+            }}>
+            Delete
+          </Button>
+          <Button onPress={() => setDeleteFileRequest(null)}>Cancel</Button>
+        </View>
+      </Modal>
+      {terminalVisible && (
+        <View style={styles.terminal}>
+          <Text style={styles.terminalText}>{output}</Text>
+          <Button onPress={handleCloseTerminal}>Close</Button>
+        </View>
+      )}
     </View>
   );
 };
@@ -245,6 +238,8 @@ const styles = StyleSheet.create({
   mainContent: {
     flexDirection: 'row',
     flex: 1,
+    margin: 0,
+    padding: 0,
   },
   chatSection: {
     flex: 1,
@@ -255,8 +250,7 @@ const styles = StyleSheet.create({
   },
   editorSection: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    margin: 0,
     padding: 0,
   },
   description: {

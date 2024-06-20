@@ -29,8 +29,8 @@ const Editor: React.FC<EditorProps> = ({language, code, onChange}) => {
         <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/${language}/${language}.min.js"></script>
         <style>
-          body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; }
-          .CodeMirror { height: 100%; width: 100%; border: 0; }
+          body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #282a36; }
+          .CodeMirror { height: 100%; width: 100%; border: none; box-sizing: border-box; }
         </style>
       </head>
       <body>
@@ -61,12 +61,26 @@ const Editor: React.FC<EditorProps> = ({language, code, onChange}) => {
     onChange(newCode);
   };
 
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      margin: 0,
+      padding: 0,
+    },
+    webView: {
+      flex: 1,
+      margin: 0,
+      padding: 0,
+    },
+  });
+
   return (
     <View style={styles.container}>
       <WebView
         originWhitelist={['*']}
         source={{html: htmlContent}}
         javaScriptEnabled={true}
+        domStorageEnabled={true}
         mixedContentMode="always"
         onError={syntheticEvent => {
           const {nativeEvent} = syntheticEvent;
@@ -77,21 +91,10 @@ const Editor: React.FC<EditorProps> = ({language, code, onChange}) => {
           console.error('HTTP error status code: ', nativeEvent.statusCode);
         }}
         onMessage={handleMessage}
-        // eslint-disable-next-line react-native/no-inline-styles
-        style={{flex: 1}}
+        style={styles.webView}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    borderColor: 'gray',
-    borderWidth: 1,
-    margin: 0,
-    padding: 0,
-  },
-});
 
 export default Editor;

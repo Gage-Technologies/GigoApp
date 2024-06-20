@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { WebView } from 'react-native-webview';
+import React, {useState, useEffect} from 'react';
+import {View, StyleSheet} from 'react-native';
+import {WebView} from 'react-native-webview';
 
 interface EditorProps {
   language: string;
@@ -8,11 +8,15 @@ interface EditorProps {
   onChange: (newCode: string) => void;
 }
 
-const Editor: React.FC<EditorProps> = ({ language, code, onChange }) => {
+const Editor: React.FC<EditorProps> = ({language, code, onChange}) => {
   const [htmlContent, setHtmlContent] = useState('');
 
   useEffect(() => {
-    // Load the initial HTML content for the webview
+    // Always use the dark theme URL
+    const editorThemeUrl =
+      'https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css';
+
+    // HTML content that includes CodeMirror setup
     const initialHtml = `
       <!DOCTYPE html>
       <html lang="en">
@@ -21,24 +25,29 @@ const Editor: React.FC<EditorProps> = ({ language, code, onChange }) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>CodeMirror</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+        <link rel="stylesheet" href="${editorThemeUrl}">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/${language}/${language}.min.js"></script>
         <style>
-          body { margin: 0; height: 100vh; display: flex; }
-          .CodeMirror { flex: 1; }
+          body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; }
+          .CodeMirror { height: 100%; width: 100%; border: 0; }
         </style>
       </head>
       <body>
-        <textarea id="code" name="code">${code}</textarea>
+        <textarea id="code" name="code"># Example Python code</textarea>
         <script>
-          const editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+          console.log('Loading scripts and styles...');
+          const textarea = document.getElementById('code');
+          console.log('Textarea element:', textarea);
+          const editor = CodeMirror.fromTextArea(textarea, {
             lineNumbers: true,
             mode: '${language}',
+            theme: 'dracula' 
           });
-
-          editor.on('change', () => {
-            const code = editor.getValue();
-            window.ReactNativeWebView.postMessage(code);
+          console.log('Editor initialized:', editor);
+          editor.on('change', (cm) => {
+            const newCode = cm.getValue();
+            window.ReactNativeWebView.postMessage(newCode);
           });
         </script>
       </body>
@@ -49,18 +58,27 @@ const Editor: React.FC<EditorProps> = ({ language, code, onChange }) => {
 
   const handleMessage = (event: any) => {
     const newCode = event.nativeEvent.data;
-    if (onChange) {
-      onChange(newCode);
-    }
+    onChange(newCode);
   };
 
   return (
     <View style={styles.container}>
       <WebView
         originWhitelist={['*']}
-        source={{ html: htmlContent }}
-        javaScriptEnabled
+        source={{html: htmlContent}}
+        javaScriptEnabled={true}
+        mixedContentMode="always"
+        onError={syntheticEvent => {
+          const {nativeEvent} = syntheticEvent;
+          console.error('WebView error: ', nativeEvent);
+        }}
+        onHttpError={syntheticEvent => {
+          const {nativeEvent} = syntheticEvent;
+          console.error('HTTP error status code: ', nativeEvent.statusCode);
+        }}
         onMessage={handleMessage}
+        // eslint-disable-next-line react-native/no-inline-styles
+        style={{flex: 1}}
       />
     </View>
   );
@@ -71,6 +89,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderColor: 'gray',
     borderWidth: 1,
+    margin: 0,
+    padding: 0,
   },
 });
 

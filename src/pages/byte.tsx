@@ -58,6 +58,13 @@ const TopBar: React.FC<TopBarProps> = ({
   </View>
 );
 
+const SideBar: React.FC<{theme: any}> = ({theme}) => (
+  <View style={[styles.sideBar, {backgroundColor: theme.colors.background}]}>
+    <Text style={{ color: theme.colors.text }}>SideBar Content</Text>
+    {/* Additional buttons or content can be added here */}
+  </View>
+);
+
 const Byte: React.FC = () => {
   const theme = useTheme();
   const [loading, setLoading] = useState(true);
@@ -130,25 +137,15 @@ const Byte: React.FC = () => {
       />
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.mainContent}>
-          <View style={styles.chatSection}>
-            <Text style={[styles.description, {color: theme.colors.text}]}>
-              {byteData?.description}
-            </Text>
-          </View>
-          <View
-            style={[styles.editorSection, {borderColor: theme.colors.border}]}
-            ref={editorContainerRef}>
-            <View style={styles.languageBadge}>
-              <Text style={[styles.languageText, {color: theme.colors.text}]}>
-                Python
-              </Text>
-            </View>
-            <Editor language="python" code={code} onChange={handleCodeChange} />
-            {output && (
-              <Text style={[styles.output, {color: theme.colors.text}]}>
-                {output}
-              </Text>
-            )}
+          <SideBar theme={theme} />
+          <View style={styles.editorSection} ref={editorContainerRef}>
+            <Editor
+              language="python"
+              code={code}
+              onChange={handleCodeChange}
+              theme={theme.dark ? 'dark' : 'light'}
+            />
+            {output && <Text style={styles.output}>{output}</Text>}
           </View>
         </View>
         <Modal
@@ -257,11 +254,10 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   editorSection: {
-    flex: 2,
+    flex: 1,
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    position: 'relative',
+    borderColor: '#ddd',
+    padding: 0,
   },
   description: {
     fontSize: 16,
@@ -321,6 +317,11 @@ const styles = StyleSheet.create({
   },
   terminalText: {
     color: '#fff',
+  },
+  sideBar: {
+    width: 30,
+    backgroundColor: '#ccc',
+    padding: 10,
   },
 });
 

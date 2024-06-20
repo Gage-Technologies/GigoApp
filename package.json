@@ -20,6 +20,7 @@
     "@react-navigation/stack": "^6.3.29",
     "@react-oauth/google": "^0.12.1",
     "@reduxjs/toolkit": "^2.2.3",
+    "@uiw/codemirror-theme-copilot": "^4.22.2",
     "Buffer": "^0.0.0",
     "avataaars": "^2.0.0",
     "base64-arraybuffer": "^1.0.2",

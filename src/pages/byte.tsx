@@ -30,34 +30,34 @@ interface TopBarProps {
   executeCode: () => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({
-  theme,
-  byteData,
-  executingCode,
-  executeCode,
-}) => (
-  <View style={[styles.topBar, {backgroundColor: theme.colors.background}]}>
-    <Text style={[styles.title, {color: theme.colors.text}]}>
-      {byteData?.name}
-    </Text>
-    <View style={styles.fileManagement}>
-      <TouchableOpacity onPress={() => setNewFilePopup(true)}>
-        <Ionicons name="add" size={20} color={theme.colors.primary} />
-      </TouchableOpacity>
-      <TouchableOpacity onPress={() => setDeleteFileRequest(activeFile)}>
-        <Ionicons name="close" size={20} color={theme.colors.primary} />
-      </TouchableOpacity>
-    </View>
-    <IconButton
-      icon="play"
-      iconColor={theme.colors.secondary}
-      size={30}
-      onPress={executeCode}
-      disabled={executingCode}
-      style={styles.iconButton}
-    />
-  </View>
-);
+// const TopBar: React.FC<TopBarProps> = ({
+//   theme,
+//   byteData,
+//   executingCode,
+//   executeCode,
+// }) => (
+//   <View style={[styles.topBar, {backgroundColor: theme.colors.background}]}>
+//     <Text style={[styles.title, {color: theme.colors.text}]}>
+//       {byteData?.name}
+//     </Text>
+//     <View style={styles.fileManagement}>
+//       <TouchableOpacity onPress={() => setNewFilePopup(true)}>
+//         <Ionicons name="add" size={20} color={theme.colors.primary} />
+//       </TouchableOpacity>
+//       <TouchableOpacity onPress={() => setDeleteFileRequest(activeFile)}>
+//         <Ionicons name="close" size={20} color={theme.colors.primary} />
+//       </TouchableOpacity>
+//     </View>
+//     <IconButton
+//       icon="play"
+//       iconColor={theme.colors.secondary}
+//       size={30}
+//       onPress={executeCode}
+//       disabled={executingCode}
+//       style={styles.iconButton}
+//     />
+//   </View>
+// );
 
 const SideBar: React.FC<{theme: any}> = ({theme}) => (
   <View style={[styles.sideBar, {backgroundColor: theme.colors.background}]}>
@@ -66,8 +66,15 @@ const SideBar: React.FC<{theme: any}> = ({theme}) => (
   </View>
 );
 
-const Byte: React.FC = () => {
+const Byte: React.FC<{ route: { params: { byteId: string, isJourney: boolean } } }> = ({ route }) => {
   const theme = useTheme();
+
+  const { byteId, isJourney } = route.params;
+
+  console.log("byteId: ", byteId);
+  console.log("isJourney: ", isJourney);
+
+
   const [loading, setLoading] = useState(true);
   const [byteData, setByteData] = useState<{
     name: string;
@@ -129,12 +136,12 @@ const Byte: React.FC = () => {
   return (
     // eslint-disable-next-line react-native/no-inline-styles
     <View style={{flex: 1, backgroundColor: theme.colors.background}}>
-      <TopBar
+      {/* <TopBar
         theme={theme}
         byteData={byteData}
         executingCode={executingCode}
         executeCode={executeCode}
-      />
+      /> */}
       <View style={styles.mainContent}>
         <SideBar theme={theme} />
         <View style={styles.editorSection} ref={editorContainerRef}>

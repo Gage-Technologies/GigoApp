@@ -5,17 +5,21 @@ import { Button, useTheme } from 'react-native-paper';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // For clipboard icon
 import Config from 'react-native-config';
+import { useNavigation } from '@react-navigation/native';
+import { Task } from '../models/Journey';
 
-const JourneyMap = ({ unitId }) => {
-  const [tasks, setTasks] = useState([]);
+const JourneyMap = ({ unitId }: { unitId: string }) => {
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedTask, setSelectedTask] = useState(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [handoutVisible, setHandoutVisible] = useState(false);
   const [handoutContent, setHandoutContent] = useState('');
   const [unitTitle, setUnitTitle] = useState(''); // New state for unit title
   const API_URL = Config.API_URL;
   const theme = useTheme();
+
+  const navigation = useNavigation();
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -32,14 +36,19 @@ const JourneyMap = ({ unitId }) => {
         const result = await response.json();
 
         if (response.ok && result.success) {
-          const fetchedTasks = result.data.tasks.sort((a, b) => (a.node_above ?? 0) - (b.node_above ?? 0));
+          const fetchedTasks = result.data.tasks.sort((a: Task, b: Task) => {
+            // parse node_above to numbers, defaulting to 0 if null or undefined
+            const aNodeAbove = a.node_above ? parseInt(a.node_above, 10) : 0;
+            const bNodeAbove = b.node_above ? parseInt(b.node_above, 10) : 0;
+            return aNodeAbove - bNodeAbove;
+          });
           setTasks(fetchedTasks);
           setHandoutContent(result.data.handout);
           setUnitTitle(result.data.unitTitle); // Set the unit title
         } else {
           Alert.alert('Error', 'Failed to fetch tasks');
         }
-      } catch (error) {
+      } catch (error: any) {
         Alert.alert('Error', error.message || 'Failed to fetch tasks');
       } finally {
         setLoading(false);
@@ -49,16 +58,18 @@ const JourneyMap = ({ unitId }) => {
     fetchTasks();
   }, [unitId]);
 
-  const handlePressTask = (task) => {
-    setSelectedTask(task);
-    setModalVisible(true);
+  const handlePressTask = (task: Task) => {
+    // navigate to the byte page
+    console.log(JSON.stringify(task));
+    // @ts-ignore
+    navigation.navigate('Byte', { byteId: task.code_source_id, isJourney: true });
   };
 
   const toggleHandout = () => {
     setHandoutVisible(!handoutVisible);
   };
 
-  const renderTaskIcon = (task, index) => {
+  const renderTaskIcon = (task: Task, index: number) => {
     if (task.completed) {
       return (
         <View style={[styles.iconContainer, styles.completedIcon]}>
@@ -89,7 +100,7 @@ const JourneyMap = ({ unitId }) => {
     >
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
-          <Text style={styles.modalTextTitle}>{selectedTask?.title}</Text>
+          <Text style={styles.modalTextTitle}>{selectedTask?.name}</Text>
           <Text style={styles.modalTextDescription}>{selectedTask?.description}</Text>
           <Button mode="contained" onPress={() => setModalVisible(false)}>Close</Button>
         </View>
@@ -97,7 +108,7 @@ const JourneyMap = ({ unitId }) => {
     </Modal>
   );
 
-  const CurvedPath = ({ points }) => {
+  const CurvedPath = ({ points }: { points: { x: number; y: number }[] }) => {
     const d = points.map((point, i) => {
       if (i === 0) {
         return `M${point.x},${point.y}`;
@@ -154,7 +165,7 @@ const JourneyMap = ({ unitId }) => {
         <>
           <View style={styles.unitHeader}>
           </View>
-          <Text style={[styles.unitTitle, { fontFamily: theme.fonts.medium.fontFamily }]}>
+          <Text style={styles.unitTitle}>
             {unitTitle}
           </Text>
           {handoutVisible ? (

@@ -70,7 +70,10 @@ export async function authorize(username, password) {
   await AsyncStorage.setItem("alive", "true");
 //  await AsyncStorage.setItem("loginXP", JSON.stringify(res.xp));
 
-  return decodedToken;
+  return {
+    token: res.token,
+    data: decodedToken
+  };
 }
 
 export async function authorizeGithub(password) {
@@ -84,7 +87,10 @@ export async function authorizeGithub(password) {
   await AsyncStorage.setItem("user", JSON.stringify(decodedToken.user));
   await AsyncStorage.setItem("alive", "true");
 
-  return decodedToken;
+  return {
+    token: res.token,
+    data: decodedToken
+  };
 }
 
 export async function authorizeGoogle(externalToken, password) {
@@ -102,7 +108,10 @@ export async function authorizeGoogle(externalToken, password) {
   await AsyncStorage.setItem("user", JSON.stringify(decodedToken.user));
   await AsyncStorage.setItem("alive", "true");
 
-  return decodedToken;
+  return {
+    token: res.token,
+    data: decodedToken
+  };
 }
 
 export async function validate2FA(code) {

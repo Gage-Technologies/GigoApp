@@ -265,7 +265,9 @@ const Login = () => {
     setLoading(true);
     try {
       //           const userInfo = await GoogleSignin.signIn();
-      const auth = await authorizeGoogle(externalToken, password); // Adjust this function to your backend
+      const res = await authorizeGoogle(externalToken, password); // Adjust this function to your backend
+      let auth = res.data;
+      let token = res.token;
 
       if (auth === 'User not found') {
         Alert.alert(
@@ -280,6 +282,7 @@ const Login = () => {
         let authState = {
           ...initialAuthStateUpdate, // Define this according to your auth state structure
           authenticated: true,
+          token: token,
           ...auth,
         };
         dispatch(updateAuthState(authState));
@@ -342,14 +345,17 @@ const Login = () => {
       let res = await call('/api/auth/confirmLoginWithGithub', 'post', {
         password: password, // Ensure password is managed correctly
       });
-
-      let auth = await authorizeGithub(password);
       await AsyncStorage.setItem('loginXP', JSON.stringify(res.xp));
+
+      res = await authorizeGithub(password);
+      let auth = res.data;
+      let token = res.token;
 
       if (auth.user) {
         let authState = {
           ...initialAuthStateUpdate,
           authenticated: true,
+          token: token,
           ...auth,
         };
         dispatch(updateAuthState(authState));
@@ -386,11 +392,14 @@ const Login = () => {
     //         trackEvent(payload);
 
     try {
-      let auth = await authorize(username, password);
+      let res = await authorize(username, password);
+      let auth = res.data;
+      let token = res.token;
 
       if (auth.user !== undefined) {
         let authState = {
           ...initialAuthStateUpdate,
+          token: token,
           authenticated: true,
           expiration: auth.exp,
           id: auth.user,

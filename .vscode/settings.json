@@ -1,3 +1,22 @@
 {
-    "java.compile.nullAnalysis.mode": "automatic"
+    "terminal.integrated.env.linux": {
+        "ANDROID_HOME": "${env:HOME}/Android/Sdk",
+        "PATH": "${env:ANDROID_HOME}/cmdline-tools/bin:${env:ANDROID_HOME}/emulator:${env:ANDROID_HOME}/platform-tools:${env:PATH}",
+        "JAVA_HOME": "${env:HOME}/.jdks/corretto-17.0.9"
+    },
+    "terminal.integrated.env.osx": {
+        "ANDROID_HOME": "${env:HOME}/Android/Sdk",
+        "PATH": "${env:ANDROID_HOME}/cmdline-tools/bin:${env:ANDROID_HOME}/emulator:${env:ANDROID_HOME}/platform-tools:${env:PATH}",
+        "JAVA_HOME": "${env:HOME}/.jdks/corretto-17.0.9"
+    },
+    "terminal.integrated.env.windows": {
+        "ANDROID_HOME": "${env:USERPROFILE}\\Android\\Sdk",
+        "PATH": "${env:ANDROID_HOME}\\cmdline-tools\\bin;${env:ANDROID_HOME}\\emulator;${env:ANDROID_HOME}\\platform-tools;${env:PATH}",
+        "JAVA_HOME": "${env:USERPROFILE}\\.jdks\\corretto-17.0.9"
+    },
+    "emulator.emulatorPath": "~/Library/Android/sdk/emulator",
+    "emulator.emulatorPathMac": "~/Library/Android/sdk/emulator",
+    "emulator.emulatorPathLinux": "~/Android/Sdk/emulator",
+    "emulator.emulatorPathWindows": "${env:ANDROID_HOME}\\Sdk\\emulator",
+    "emulator.emulatorColdBoot": true
 }

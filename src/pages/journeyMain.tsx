@@ -13,11 +13,12 @@ import Config from 'react-native-config';
 import JourneyMap from '../components/JourneyMap';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import GetStarted from '../components/GetStarted';
+import MarkdownRenderer from '../components/Markdown/MarkdownRenderer';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
   const [units, setUnits] = useState([]);
-  const [activeJourney, setActiveJourney] = useState(null);
+  const [activeJourney, setActiveJourney] = useState<boolean | null>(null);
   const [userId, setUserId] = useState(1684239109222039552);
   const [showHandout, setShowHandout] = useState(null);
   const [openDetourPop, setOpenDetourPop] = useState(false);
@@ -151,7 +152,7 @@ const JourneyMain = () => {
             </Text>
           </TouchableOpacity>
           {showHandout === index ? (
-            <Text style={[styles.handoutText, { color: getTextColor(unit.color) }]}>{unit.handout}</Text>
+            <MarkdownRenderer style={styles.handoutText} markdown={unit.handout} textColor={getTextColor(unit.color)}/>
           ) : (
             <JourneyMap unitId={unit._id} />
           )}
@@ -265,7 +266,7 @@ const styles = StyleSheet.create({
   handoutText: {
     marginTop: 20,
     fontSize: 14,
-    maxWidth: '90%',
+    maxWidth: '100%',
   },
   unitHeader: {
     position: 'absolute',

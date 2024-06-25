@@ -2,20 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, StyleSheet, Alert, Dimensions } from 'react-native';
 import { Svg, Path } from 'react-native-svg';
 import { Button, useTheme } from 'react-native-paper';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import Ionicons from 'react-native-vector-icons/Ionicons'; // For clipboard icon
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // For modern icons
 import Config from 'react-native-config';
 import { useNavigation } from '@react-navigation/native';
 import { Task } from '../models/Journey';
 
-const JourneyMap = ({ unitId }: { unitId: string }) => {
+const JourneyMap = ({ unitId, unitIndex }: { unitId: string, unitIndex: number }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [handoutVisible, setHandoutVisible] = useState(false);
   const [handoutContent, setHandoutContent] = useState('');
-  const [unitTitle, setUnitTitle] = useState(''); // New state for unit title
+  const [unitTitle, setUnitTitle] = useState(''); // new state for unit title
   const API_URL = Config.API_URL;
   const theme = useTheme();
 
@@ -42,14 +41,19 @@ const JourneyMap = ({ unitId }: { unitId: string }) => {
             const bNodeAbove = b.node_above ? parseInt(b.node_above, 10) : 0;
             return aNodeAbove - bNodeAbove;
           });
+          fetchedTasks.push(...fetchedTasks);
+          fetchedTasks.push(...fetchedTasks);
+          fetchedTasks.push(...fetchedTasks);
+          fetchedTasks.push(...fetchedTasks);
+          fetchedTasks.push(...fetchedTasks);
           setTasks(fetchedTasks);
           setHandoutContent(result.data.handout);
-          setUnitTitle(result.data.unitTitle); // Set the unit title
+          setUnitTitle(result.data.unitTitle); // set the unit title
         } else {
-          Alert.alert('Error', 'Failed to fetch tasks');
+          Alert.alert('error', 'failed to fetch tasks');
         }
       } catch (error: any) {
-        Alert.alert('Error', error.message || 'Failed to fetch tasks');
+        Alert.alert('error', error.message || 'failed to fetch tasks');
       } finally {
         setLoading(false);
       }
@@ -73,19 +77,19 @@ const JourneyMap = ({ unitId }: { unitId: string }) => {
     if (task.completed) {
       return (
         <View style={[styles.iconContainer, styles.completedIcon]}>
-          <FontAwesome name="check" size={40} color="white" />
+          <MaterialIcons name="check-circle" size={40} color="white" />
         </View>
       );
     } else if (task.inProgress || index === 0) {
       return (
-        <View style={[styles.iconContainer, styles.unlockedIcon, { backgroundColor: theme.colors.secondary }]}>
-          <FontAwesome name="unlock" size={40} color="white" />
+        <View style={[styles.iconContainer, styles.unlockedIcon]}>
+          <MaterialIcons name="lock-open" size={40} color="white" />
         </View>
       );
     } else {
       return (
         <View style={[styles.iconContainer, styles.lockedIcon]}>
-          <FontAwesome name="question" size={40} color="white" />
+          <MaterialIcons name="lock" size={40} color="white" />
         </View>
       );
     }
@@ -102,56 +106,67 @@ const JourneyMap = ({ unitId }: { unitId: string }) => {
         <View style={styles.modalView}>
           <Text style={styles.modalTextTitle}>{selectedTask?.name}</Text>
           <Text style={styles.modalTextDescription}>{selectedTask?.description}</Text>
-          <Button mode="contained" onPress={() => setModalVisible(false)}>Close</Button>
+          <Button mode="contained" onPress={() => setModalVisible(false)}>close</Button>
         </View>
       </View>
     </Modal>
   );
 
-  const CurvedPath = ({ points }: { points: { x: number; y: number }[] }) => {
-    const d = points.map((point, i) => {
-      if (i === 0) {
-        return `M${point.x},${point.y}`;
-      } else {
-        return `L${point.x},${point.y}`;
-      }
-    }).join(' ');
-
-    return (
-      <Svg height="100%" width="100%">
-        <Path d={d} stroke="#008866" strokeWidth="3" fill="none" />
-      </Svg>
-    );
-  };
-
   const JourneyStops = () => {
+    const buttonSpacing = 50; // space between buttons
     const screenWidth = Dimensions.get('window').width;
-    const buttonSize = 100;
-    const shiftLeft = 30;
 
-    const points = tasks.map((task, index) => ({
-      x: index % 2 === 0 ? screenWidth * 0.25 - shiftLeft : screenWidth * 0.75 - shiftLeft,
-      y: index * 80 - 20,
-    }));
+    // calculate the offset for each task button
+    const calculateOffset = (index: number, totalTasks: number) => {
+      const maxOffset = (screenWidth / 2) - 10; // maximum offset from center
+      const offsetBase = totalTasks >= 6 ? 6 : 3;
+      let offset = 0;
 
-    const containerHeight = points.length * 80;
+      if (index === 0) {
+        return offset;
+      }
+
+      // find the first number at or below index that is divisible evenly by offsetBase and determine the direction
+      let lastCenter = index;
+      while (lastCenter > 0 && lastCenter % offsetBase !== 0) {
+        lastCenter--;
+      }
+      console.log(lastCenter);
+      const inverse = unitIndex % 2 === 0 ? (lastCenter / offsetBase) % 2 === 0 : lastCenter % offsetBase !== 0;
+
+      // determine the scaling factor to determine how much of the maxOffset to use
+      let scalingFactor = (index - lastCenter) / 3;
+      if (index % offsetBase > Math.floor(offsetBase / 2)) {
+        // calculate steps from midpoint
+        let stepsFromMidpoint = index % offsetBase - Math.floor(offsetBase / 2);
+        // invert scaling factor to move closer to center
+        scalingFactor = 1 - (stepsFromMidpoint / (offsetBase / 2));
+      }
+
+      // calculate offset to create a zigzag pattern
+      offset = inverse ? maxOffset : -maxOffset;
+
+      return offset * scalingFactor;
+    };
 
     return (
-      <View style={[styles.pathContainer, { height: containerHeight }]}>
-        <CurvedPath points={points} />
+      <View style={styles.pathContainer}>
         {tasks.map((task, index) => (
-          <TouchableOpacity
-            key={task._id}
-            style={{
-              ...styles.taskButton,
-              left: points[index].x - buttonSize / 2,
-              top: points[index].y - buttonSize / 2,
-              backgroundColor: task.completed ? '#29C18C' : (task.inProgress || index === 0 ? theme.colors.secondary : '#808080'),
-            }}
-            onPress={() => (task.inProgress || index === 0) && handlePressTask(task)}
-          >
-            {renderTaskIcon(task, index)}
-          </TouchableOpacity>
+          <View key={task._id + index} style={[styles.taskButtonWrapper, { marginBottom: buttonSpacing }]}>
+            <TouchableOpacity
+              style={[
+                styles.taskButton,
+                {
+                  backgroundColor: task.completed ? '#29C18C' : (task.inProgress || index === 0 ? theme.colors.secondary : '#808080'),
+                  marginLeft: calculateOffset(index, tasks.length),
+                }
+              ]}
+              onPress={() => (task.inProgress || index === 0) && handlePressTask(task)}
+            >
+              {renderTaskIcon(task, index)}
+            </TouchableOpacity>
+            <Text style={styles.taskName}>{task.name}</Text>
+          </View>
         ))}
       </View>
     );
@@ -160,9 +175,9 @@ const JourneyMap = ({ unitId }: { unitId: string }) => {
   return (
     <ScrollView contentContainerStyle={styles.scrollView}>
       {loading ? (
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       ) : (
-        <>
+        <View style={styles.contentContainer}>
           <View style={styles.unitHeader}>
           </View>
           <Text style={styles.unitTitle}>
@@ -177,7 +192,7 @@ const JourneyMap = ({ unitId }: { unitId: string }) => {
           ) : (
             <JourneyStops />
           )}
-        </>
+        </View>
       )}
       {selectedTask && <TaskModal />}
     </ScrollView>
@@ -227,51 +242,52 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   pathContainer: {
-    position: 'relative',
-    width: '100%',
+    alignItems: 'center',
+  },
+  taskButtonWrapper: {
+    alignItems: 'center',
   },
   taskButton: {
-    position: 'absolute',
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 50,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderRadius: 40,
+    elevation: 6,
+    borderWidth: 0,
+  },
+  taskName: {
+    marginTop: 10,
+    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   iconContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 2,
-    elevation: 4,
+    width: 60,
+    height: 60,
+    backgroundColor: 'transparent',
   },
   completedIcon: {
-    backgroundColor: '#29C18C',
+    backgroundColor: 'transparent',
   },
   inProgressIcon: {
-    backgroundColor: '#FFA500',
+    backgroundColor: 'transparent',
   },
   lockedIcon: {
-    backgroundColor: '#808080',
+    backgroundColor: 'transparent',
   },
   unlockedIcon: {
-    backgroundColor: '#FFA500',
+    backgroundColor: 'transparent',
   },
   scrollView: {
+    flexGrow: 1, // allows the scroll view to grow
+  },
+  contentContainer: {
+    flex: 1, // takes up all available space
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start', // aligns content to the top
     paddingVertical: 20,
   },
   unitTitle: {

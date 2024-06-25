@@ -14,13 +14,14 @@ import JourneyMap from '../components/JourneyMap';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import GetStarted from '../components/GetStarted';
 import MarkdownRenderer from '../components/Markdown/MarkdownRenderer';
+import { Unit } from '../models/Journey';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
-  const [units, setUnits] = useState([]);
+  const [units, setUnits] = useState<Unit[]>([]);
   const [activeJourney, setActiveJourney] = useState<boolean | null>(null);
   const [userId, setUserId] = useState(1684239109222039552);
-  const [showHandout, setShowHandout] = useState(null);
+  const [showHandout, setShowHandout] = useState<number | null>(null);
   const [openDetourPop, setOpenDetourPop] = useState(false);
 
   const API_URL = Config.API_URL;
@@ -100,7 +101,7 @@ const JourneyMain = () => {
             return { ...unit, tasks: [] };
           }
 
-          const sortedTasks = tasks.sort((a, b) => {
+          const sortedTasks = tasks.sort((a: any, b: any) => {
             if (a.node_above === null) return -1;
             if (b.node_above === null) return 1;
             return a.node_above - b.node_above;
@@ -113,7 +114,7 @@ const JourneyMain = () => {
       setUnits(prevUnits => [...prevUnits, ...fetchedUnits]);
       setActiveJourney(true); // Journey has started
       setLoading(false);
-    } catch (error) {
+    } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to fetch tasks. Please check your network connection.');
       setLoading(false);
     }
@@ -124,7 +125,7 @@ const JourneyMain = () => {
     getTasks();
   }, []);
 
-  const getTextColor = (backgroundColor) => {
+  const getTextColor = (backgroundColor: string) => {
     const color = backgroundColor.substring(1);
     const rgb = parseInt(color, 16);
     const r = (rgb >> 16) & 0xff;
@@ -134,7 +135,7 @@ const JourneyMain = () => {
     return brightness > 186 ? '#000000' : '#FFFFFF';
   };
 
-  const handleMap = (unit, index) => {
+  const handleMap = (unit: Unit, index: number) => {
     const isLastIndex = index === units.length - 1;
     const allCompleted = unit.tasks.every(task => task.completed);
 
@@ -147,14 +148,14 @@ const JourneyMain = () => {
             </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={() => setShowHandout(showHandout === index ? null : index)}>
-            <Text style={[styles.unitTitle, { color: getTextColor(unit.color), fontFamily: theme.fonts.medium.fontFamily }]}>
+            <Text style={[styles.unitTitle, { color: getTextColor(unit.color) }]}>
               {unit.name}
             </Text>
           </TouchableOpacity>
           {showHandout === index ? (
             <MarkdownRenderer style={styles.handoutText} markdown={unit.handout} textColor={getTextColor(unit.color)}/>
           ) : (
-            <JourneyMap unitId={unit._id} />
+            <JourneyMap unitId={unit._id} unitIndex={index} />
           )}
         </View>
         {isLastIndex && (
@@ -187,7 +188,7 @@ const JourneyMain = () => {
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Text style={[styles.header, { color: theme.colors.text }]}>Your Journey</Text>
+      <Text style={[styles.header, { color: theme.colors.onBackground }]}>Your Journey</Text>
       {activeJourney ? (
         units.map((unit, index) => (
           <View key={unit._id} style={{ marginBottom: 20 }}>

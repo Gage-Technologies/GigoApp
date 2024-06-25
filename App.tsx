@@ -2,8 +2,8 @@ import React, {useEffect, useRef} from 'react';
 import {Provider as PaperProvider} from 'react-native-paper';
 import {
   NavigationContainer,
-  NavigationContainerRef,
-} from '@react-navigation/native';
+  NavigationContainerRef, useNavigationState, useRoute
+} from "@react-navigation/native";
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {Provider as ReduxProvider} from 'react-redux';
 import {View, StyleSheet} from 'react-native';
@@ -28,16 +28,34 @@ const App = () => {
   useEffect(() => {
     console.log('app page about to call deep link');
     handleDeepLink(navigationRef);
+    getCurrentRouteName()
     return () => {
       //             Linking.removeEventListener('url');
     };
   }, []);
+
+  const getCurrentRouteName = () => {
+    const state = navigationRef.current?.getRootState();
+    console.log("state is: ", state)
+    console.log("info is: ", state?.routes[state.index]?.name)
+    setCurrentRouteName(state?.routes[state.index]?.name)
+  };
+
+  const [currentRouteName, setCurrentRouteName] = React.useState('');
   return (
     <ReduxProvider store={store}>
       <PaperProvider theme={theme}>
-        <NavigationContainer>
+        <NavigationContainer
+          ref={navigationRef}
+          onStateChange={() => getCurrentRouteName()}
+        >
           <View style={styles.container}>
             <Stack.Navigator>
+              <Stack.Screen
+                name="SignUp"
+                component={CreateNewAccount}
+                options={{headerShown: false}}
+              />
               <Stack.Screen
                 name="Login"
                 component={Login}
@@ -64,11 +82,6 @@ const App = () => {
                 options={{headerShown: false}}
               />
               <Stack.Screen
-                name="SignUp"
-                component={CreateNewAccount}
-                options={{headerShown: false}}
-              />
-              <Stack.Screen
                 name="JourneyMain"
                 component={JourneyMain}
                 options={{headerShown: false}}
@@ -79,12 +92,21 @@ const App = () => {
                 options={{headerShown: false}}
               />
             </Stack.Navigator>
-            <SpeedDial />
+            <ConditionalSpeedDial currentRouteName={currentRouteName}/>
           </View>
         </NavigationContainer>
       </PaperProvider>
     </ReduxProvider>
   );
+};
+
+const ConditionalSpeedDial = ({ currentRouteName }) => {
+  console.log("current route: ", currentRouteName)
+  if (currentRouteName === 'Login' || currentRouteName === 'SignUp') {
+    return null;
+  }
+
+  return <SpeedDial />;
 };
 
 const styles = StyleSheet.create({

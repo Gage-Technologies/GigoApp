@@ -1,49 +1,56 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, FlatList, TouchableOpacity, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  FlatList,
+  TouchableOpacity,
+  SafeAreaView,
+} from 'react-native';
 
 const projects: Project[] = [
-  { id: '1', title: 'Typing Tester', image: 'path_to_image' },
-  { id: '2', title: 'Rock Paper Scissors', image: 'path_to_image' },
-  { id: '3', title: 'Tic Tac Toe', image: 'path_to_image' },
-  { id: '4', title: 'Budget Tracker', image: 'path_to_image' },
+  {id: '1', title: 'Typing Tester', image: 'path_to_image'},
+  {id: '2', title: 'Rock Paper Scissors', image: 'path_to_image'},
+  {id: '3', title: 'Tic Tac Toe', image: 'path_to_image'},
+  {id: '4', title: 'Budget Tracker', image: 'path_to_image'},
 ];
 
 const Profile: React.FC = () => {
+  const apiLoad = async () => {
+    let userData = await fetch(`${API_URL}/api/user/profilePage`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({author_id: ''}),
+    });
 
-    const apiLoad = async() => {
-        let userData = await fetch(`${API_URL}/api/user/profilePage`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({author_id: ""})
-        })
-
-        if (!userData.ok){
-            console.log("user data is: ", userData)
-            console.log("user id: ", userId)
-            throw new Error('Network response was not ok')
-        }
-
-        const resUser = await userData.json()
-        console.log("res here is: ", res)
-
-        if (resUser !== undefined && resUser["user"] !== undefined){
-            setUserData(resUser["user"])
-        }
+    if (!userData.ok) {
+      console.log('user data is: ', userData);
+      console.log('user id: ', userId);
+      throw new Error('Network response was not ok');
     }
 
-      const renderProject = ({ item }: { item: Project }) => (
-        <View style={styles.projectCard}>
-          <Image source={{ uri: item.image }} style={styles.projectImage} />
-          <Text style={styles.projectTitle}>{item.title}</Text>
-        </View>
-      );
+    const resUser = await userData.json();
+    console.log('res here is: ', res);
+
+    if (resUser !== undefined && resUser.user !== undefined) {
+      setUserData(resUser.user);
+    }
+  };
+
+  const renderProject = ({item}: {item: Project}) => (
+    <View style={styles.projectCard}>
+      <Image source={{uri: item.image}} style={styles.projectImage} />
+      <Text style={styles.projectTitle}>{item.title}</Text>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Image source={{ uri: 'path_to_avatar' }} style={styles.avatar} />
+        <Image source={{uri: 'path_to_avatar'}} style={styles.avatar} />
         <Text style={styles.name}>Megan</Text>
         <Text style={styles.renown}>Renown 10</Text>
         <Text style={styles.level}>Level 10</Text>
@@ -52,7 +59,7 @@ const Profile: React.FC = () => {
       <FlatList
         data={projects}
         renderItem={renderProject}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         contentContainerStyle={styles.projectsList}
       />
     </SafeAreaView>

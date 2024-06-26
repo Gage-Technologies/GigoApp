@@ -6,6 +6,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // For mode
 import Config from 'react-native-config';
 import { useNavigation } from '@react-navigation/native';
 import { Task } from '../models/Journey';
+import AwesomeButton from "react-native-really-awesome-button";
 
 const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitIndex: number, taskOffset: number }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -41,6 +42,7 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
             const bNodeAbove = b.node_above ? parseInt(b.node_above, 10) : 0;
             return aNodeAbove - bNodeAbove;
           });
+          console.log("fetchedTasks", fetchedTasks);
           setTasks(fetchedTasks);
           setHandoutContent(result.data.handout);
           setUnitTitle(result.data.unitTitle); // set the unit title
@@ -68,23 +70,23 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
     setHandoutVisible(!handoutVisible);
   };
 
-  const renderTaskIcon = (task: Task, index: number) => {
+  const renderTaskIcon = (task: Task, index: number, previousTask: Task | null) => {
     if (task.completed) {
       return (
         <View style={[styles.iconContainer, styles.completedIcon]}>
-          <MaterialIcons name="check-circle" size={40} color="white" />
+          <MaterialIcons name="check-circle" size={60} color="white" />
         </View>
       );
-    } else if (task.inProgress || index === 0) {
+    } else if (index === 0 || (previousTask && previousTask.completed)) {
       return (
         <View style={[styles.iconContainer, styles.unlockedIcon]}>
-          <MaterialIcons name="lock-open" size={40} color="white" />
+          <MaterialIcons name="lock-open" size={60} color="white" />
         </View>
       );
     } else {
       return (
         <View style={[styles.iconContainer, styles.lockedIcon]}>
-          <MaterialIcons name="lock" size={40} color="white" />
+          <MaterialIcons name="lock" size={60} color="white" />
         </View>
       );
     }
@@ -116,7 +118,7 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
       // update the index relative to the taskOffset
       index += taskOffset;
 
-      const maxOffset = (screenWidth/1.8); // maximum offset from center
+      const maxOffset = (screenWidth / 2); // maximum offset from center
       const offsetBase = 4;
       let offset = 0;
 
@@ -131,42 +133,66 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
       let scalingFactor = (index - lastCenter) / (offsetBase / 2);
       if (index % offsetBase > Math.floor(offsetBase / 2)) {
         // calculate steps from midpoint
-        let stepsFromMidpoint = index % offsetBase - Math.floor(offsetBase / 2);        
-  
+        let stepsFromMidpoint = index % offsetBase - Math.floor(offsetBase / 2);
+
         // calculate the scaling factor for this position inverse from the midpoint
-        console.log(index, stepsFromMidpoint, lastCenter, index - stepsFromMidpoint - lastCenter);
         scalingFactor = Math.abs(index - (stepsFromMidpoint * 2) - lastCenter) / (offsetBase / 2);
       }
+
+      console.log(index, scalingFactor)
 
       // calculate offset to create a zigzag pattern
       offset = inverse ? maxOffset : -maxOffset;
 
-      console.log(index, offset, scalingFactor, offset * scalingFactor);
-
       return offset * scalingFactor;
     };
 
-    console.log("========================================");
+    // function to determine button colors and offset based on task and index
+    const getButtonStyles = (task: any, index: number) => {
+      // determine the button color based on task completion and previous task status
+      const buttonColor = task.completed
+        ? '#29C18C'
+        : index === 0 || (index > 0 && tasks[index - 1].completed)
+          ? theme.colors.secondary
+          : '#808080';
+
+      // determine the awesome button offset colors
+      const offsetColor = index === 0 || (index > 0 && tasks[index - 1].completed) ? '#1E8F69' : '#5D5D5D';
+
+
+      return [buttonColor, offsetColor];
+    };
 
     return (
       <View style={styles.pathContainer}>
-        {tasks.map((task, index) => (
-          <View key={task._id + index} style={[styles.taskButtonWrapper, { marginBottom: buttonSpacing }]}>
-            <TouchableOpacity
-              style={[
-                styles.taskButton,
-                {
-                  backgroundColor: task.completed ? '#29C18C' : (task.inProgress || index === 0 ? theme.colors.secondary : '#808080'),
-                  marginLeft: calculateOffset(index),
-                }
-              ]}
-              onPress={() => (task.inProgress || index === 0) && handlePressTask(task)}
-            >
-              {renderTaskIcon(task, index)}
-            </TouchableOpacity>
-            {/* <Text style={styles.taskName}>{task.name}</Text> */}
-          </View>
-        ))}
+        {tasks.map((task, index) => {
+          let c = getButtonStyles(task, index);
+          return (
+            <View key={task._id + index} style={[styles.taskButtonWrapper, { marginBottom: buttonSpacing, marginLeft: calculateOffset(index) }]}>
+              <AwesomeButton
+                borderRadius={100}
+                height={100}
+                width={100}
+                paddingHorizontal={0}
+                raiseLevel={10}
+                backgroundColor={c[0]}
+                backgroundActive={c[0]}
+                backgroundPlaceholder={c[0]}
+                backgroundProgress={c[0]}
+                backgroundDarker={c[1]}
+                disabled={!(index === 0 || (index > 0 && tasks[index - 1].completed))}
+                onPress={() => {
+                  if (index === 0 || (index > 0 && tasks[index - 1].completed)) {
+                    handlePressTask(task);
+                  }
+                }}
+              >
+                {renderTaskIcon(task, index, index > 0 ? tasks[index - 1] : null)}
+              </AwesomeButton>
+              {/* <Text style={styles.taskName}>{task.name}</Text> */}
+            </View>
+          );
+        })}
       </View>
     );
   };
@@ -247,13 +273,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   taskButton: {
-    width: 80,
-    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 40,
-    elevation: 6,
-    borderWidth: 0,
   },
   taskName: {
     marginTop: 10,

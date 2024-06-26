@@ -32,6 +32,7 @@ const screenWidth = Dimensions.get('window').width;
 const imageWidth = screenWidth * 0.1; // 15% of the screen width
 const {width, height} = Dimensions.get('window');
 import moment from 'moment-timezone';
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const API_URL = Config.API_URL;
 
@@ -332,6 +333,21 @@ const CreateNewAccount = () => {
     gorillaLogo: {
       width: 100,
       height: 100,
+    },
+    goBackContainer: {
+      flexDirection: 'row', // Align items in a row
+      alignItems: 'center', // Center items vertically
+      justifyContent: 'flex-start', // Align items to the start (left) of the container
+      padding: 10, // Add some padding for touch area
+      backgroundColor: 'transparent', // Make the background transparent
+      width: "100%",
+    },
+    icon: {
+      marginRight: 5, // Add some space between the icon and the text
+    },
+    goBack: {
+      color: 'white', // Set text color to white
+      fontSize: 16, // Adjust font size as needed
     },
   });
 
@@ -1256,6 +1272,17 @@ const CreateNewAccount = () => {
           <View>
             <Image source={require('../img/ghostJungle.png')} />
             <View style={styles.creationBox}>
+              <TouchableOpacity
+                onPress={() => setCreationStep(0)}
+                style={styles.goBackContainer}>
+                <Icon
+                  name="arrow-left"
+                  size={20}
+                  color="white"
+                  style={styles.icon}
+                />
+                <Text style={styles.goBack}>Go Back</Text>
+              </TouchableOpacity>
               <ScrollView contentContainerStyle={styles.container}>
                 <Text style={styles.header}>Create Account</Text>
                 <TextInput

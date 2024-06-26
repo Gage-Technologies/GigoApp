@@ -7,8 +7,8 @@ import {
   TouchableOpacity,
   ImageBackground,
   Dimensions,
-  Alert,
-} from 'react-native';
+  Alert, Image
+} from "react-native";
 import loginImage from '../components/img/login_background_cropped.jpg';
 import {SvgXml} from 'react-native-svg';
 import {useNavigation} from '@react-navigation/native';
@@ -83,10 +83,15 @@ const ForgotPassword = () => {
 
   const styles = StyleSheet.create({
     container: {
-      flex: 1,
-      justifyContent: 'center',
+      backgroundColor: '#1c3f30',
+      borderRadius: 20,
+      width: width, // 90% of screen width
+      height: height * 0.35, // 25% of screen height
       alignItems: 'center',
+      justifyContent: 'center',
       padding: 20,
+      position: 'absolute',
+      bottom: 24,
     },
     box: {
       backgroundColor: 'black',
@@ -150,7 +155,7 @@ const ForgotPassword = () => {
       resizeMode: 'contain',
     },
     buttonExtra: {
-      backgroundColor: '#007BFF', // A default blue color for button background
+      backgroundColor: '#4b9288', // A default blue color for button background
       padding: 10,
       borderRadius: 10, // Rounded corners
       alignItems: 'center',
@@ -328,91 +333,66 @@ const ForgotPassword = () => {
 
   // @ts-ignore
   return (
-    <ImageBackground
-      source={loginImage}
-      style={[
-        styles.container,
-        {backgroundColor: theme.colors.background.default},
-      ]}>
-      <View
-        style={{
-          position: 'absolute',
-          top: 20, // Adjust the top position as needed
-          left: 35, // Adjust the left position as needed
-          flexDirection: 'row',
-        }}>
-        <SvgXml
-          xml={finalGigoLogo}
-          width={imageWidth}
-          height={imageWidth}
-          color="white"
+    <View>
+      <Image source={require('../img/forgotPasswordJungle.png')} />
+      <View style={styles.container}>
+        <Text style={styles.header}>Forgot Password</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          onChangeText={handleEmailChange}
+          value={email}
+          placeholderTextColor={'white'}
+          mode={'flat'}
+          underlineColor="transparent"
+          theme={{
+            colors: {
+              primary: 'transparent', // Outline color when focused
+            },
+          }}
         />
-        <Text
-          style={{
-            paddingTop: 15,
-            paddingLeft: 15,
-            fontWeight: 'bold', // Customize the text style
-            fontSize:
-              Dimensions.get('window').width > 1000
-                ? 32
-                : Dimensions.get('window').width * 0.05, // Adjust the font size
-            color: 'white',
-          }}>
-          works on our machine.
+        <Text style={styles.helperText}>
+          Please enter the email associated with your account
         </Text>
-      </View>
-      <View style={styles.box}>
-        <View style={styles.container}>
-          <Text style={styles.header}>Forgot Password</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            onChangeText={handleEmailChange}
-            value={email}
-          />
-          <Text style={styles.helperText}>
-            Please enter the email associated with your account
-          </Text>
-          <TouchableOpacity
-            onPress={sendResetValidation}
-            style={styles.buttonExtra}
-            disabled={!isEmailValid}
-            activeOpacity={0.7}>
-            <Text style={styles.buttonText}>Submit</Text>
+        <TouchableOpacity
+          onPress={sendResetValidation}
+          style={styles.buttonExtra}
+          disabled={!isEmailValid}
+          activeOpacity={0.7}>
+          <Text style={styles.buttonText}>Submit</Text>
+        </TouchableOpacity>
+        <View
+          style={{
+            flexDirection: 'row',
+            marginTop: 10,
+            justifyContent: 'space-evenly',
+            width: screenWidth * 0.65,
+          }}>
+          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <Text
+              style={{
+                color: '#4b9288',
+                fontSize: 16,
+                marginLeft: 10,
+                lineHeight: 18,
+              }}>
+              Login
+            </Text>
           </TouchableOpacity>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginTop: 10,
-              justifyContent: 'space-evenly',
-              width: screenWidth * 0.65,
-            }}>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text
-                style={{
-                  color: '#007BFF',
-                  fontSize: 16,
-                  marginLeft: 10,
-                  lineHeight: 18,
-                }}>
-                Login
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-              <Text
-                style={{
-                  color: '#007BFF',
-                  fontSize: 16,
-                  marginLeft: 10,
-                  lineHeight: 18,
-                }}>
-                Signup
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+            <Text
+              style={{
+                color: '#4b9288',
+                fontSize: 16,
+                marginLeft: 10,
+                lineHeight: 18,
+              }}>
+              Signup
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
-    </ImageBackground>
+    </View>
   );
 };
 

@@ -52,13 +52,13 @@ const App = () => {
           <View style={styles.container}>
             <Stack.Navigator>
               <Stack.Screen
-                name="SignUp"
-                component={CreateNewAccount}
+                name="Login"
+                component={Login}
                 options={{headerShown: false}}
               />
               <Stack.Screen
-                name="Login"
-                component={Login}
+                name="SignUp"
+                component={CreateNewAccount}
                 options={{headerShown: false}}
               />
               <Stack.Screen
@@ -102,7 +102,7 @@ const App = () => {
 
 const ConditionalSpeedDial = ({ currentRouteName }) => {
   console.log("current route: ", currentRouteName)
-  if (currentRouteName === 'Login' || currentRouteName === 'SignUp') {
+  if (currentRouteName === 'Login' || currentRouteName === 'SignUp' || currentRouteName === 'ForgotPassword') {
     return null;
   }
 

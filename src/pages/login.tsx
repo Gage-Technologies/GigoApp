@@ -187,13 +187,15 @@ const Login = () => {
       alignItems: 'center',
     },
     externalBox: {
-      backgroundColor: 'black',
-      borderRadius: 10,
-      width: width * 0.99, // 99% of screen width
-      height: height * 0.7, // 70% of screen height
+      backgroundColor: '#1c3f30',
+      borderRadius: 20,
+      width: width, // 90% of screen width
+      height: height * 0.35, // 25% of screen height
       alignItems: 'center',
       justifyContent: 'center',
       padding: 20,
+      position: 'absolute',
+      bottom: 24,
     },
     externalHeader: {
       fontSize: 24,
@@ -220,7 +222,7 @@ const Login = () => {
       minHeight: 35,
       width: '50%',
       marginTop: 10,
-      backgroundColor: '#007BFF', // A default blue color for button background
+      backgroundColor: '#4b9288', // A default blue color for button background
     },
     externalButtonText: {
       color: 'white', // Text color for buttons
@@ -449,47 +451,51 @@ const Login = () => {
   const renderExternal = () => {
     // @ts-ignore
     return (
-      <View style={styles.externalContainer}>
-        <View style={styles.externalBox}>
-          <Text style={styles.externalHeader}>Enter Password</Text>
-          <TextInput
-            style={styles.externalInput}
-            onChangeText={setPassword}
-            value={password}
-            placeholder="Password"
-            secureTextEntry={!showPass}
-            onSubmitEditing={() => {
+      <View style={styles.externalBox}>
+        <Text style={styles.externalHeader}>Enter Password</Text>
+        <TextInput
+          style={styles.externalInput}
+          onChangeText={setPassword}
+          value={password}
+          placeholder="Password"
+          secureTextEntry={!showPass}
+          onSubmitEditing={() => {
+            externalLogin === 'Google' ? googleSignIn() : githubConfirm();
+          }}
+          placeholderTextColor={'white'}
+          mode={'flat'}
+          underlineColor="transparent"
+          theme={{
+            colors: {
+              primary: 'transparent', // Outline color when focused
+            },
+          }}
+        />
+        {loading ? (
+          <View style={styles.externalButton}>
+            <Text style={styles.externalButtonText}>Login</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.externalButton}
+            onPress={() => {
               externalLogin === 'Google' ? googleSignIn() : githubConfirm();
-            }}
-          />
-          {loading ? (
-            <View style={styles.externalButton}>
-              <Text style={styles.externalButtonText}>Login</Text>
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.externalButton}
-              onPress={() => {
-                externalLogin === 'Google' ? googleSignIn() : githubConfirm();
-              }}>
-              <Text style={styles.externalButtonText}>Login</Text>
-            </TouchableOpacity>
-          )}
-          <Text style={styles.externalSubText}>
-            Haven't linked your account yet?
-          </Text>
-          <Button
-            onPress={() =>
-              navigation.navigate('SignUp', {
-                forward: encodeURIComponent(''),
-              })
-            }
-            title="Sign Up"
-            color="blue"
-            style={{color: 'blue'}}>
-            <Text>Sign Up</Text>
-          </Button>
-        </View>
+            }}>
+            <Text style={styles.externalButtonText}>Login</Text>
+          </TouchableOpacity>
+        )}
+        <Text style={styles.externalSubText}>
+          Haven't linked your account yet?
+        </Text>
+        <Button
+          onPress={() =>
+            navigation.navigate('SignUp', {
+              forward: encodeURIComponent(''),
+            })
+          }
+          title="Sign Up">
+          <Text style={{color: '#4b9288'}}>Sign Up</Text>
+        </Button>
       </View>
     );
   };

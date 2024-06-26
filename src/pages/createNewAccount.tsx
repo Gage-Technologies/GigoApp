@@ -111,7 +111,7 @@ const CreateNewAccount = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [external, setExternal] = React.useState(false);
+  const [external, setExternal] = React.useState(true);
   const [externalLogin, setExternalLogin] = React.useState('');
   const [externalToken, setExternalToken] = React.useState('');
   const [confirmPass, setConfirmPass] = useState('');
@@ -158,10 +158,10 @@ const CreateNewAccount = () => {
       padding: 10,
     },
     box: {
-      backgroundColor: 'black',
+      backgroundColor: '#1c3f30',
       borderRadius: 10,
-      width: width * 0.99, // 99% of screen width
-      height: height * 0.7, // 70% of screen height
+      width: width, // 99% of screen width
+      height: height * 0.55, // 70% of screen height
       alignItems: 'center',
       justifyContent: 'center',
       padding: 20,
@@ -241,11 +241,12 @@ const CreateNewAccount = () => {
       resizeMode: 'contain',
     },
     buttonExtra: {
-      backgroundColor: '#007BFF', // A default blue color for button background
+      backgroundColor: '#4b9288', // A default blue color for button background
       padding: 10,
       borderRadius: 10, // Rounded corners
       alignItems: 'center',
       marginBottom: 10, // Space between buttons
+      marginTop: 10,
       width: '70%',
     },
     buttonExtraCreation: {
@@ -1170,59 +1171,78 @@ const CreateNewAccount = () => {
     // @ts-ignore
     // @ts-ignore
     return step === 0 ? (
-      <View style={styles.container}>
-        <View style={styles.box}>
-          <Text>Create a Password</Text>
-          <TextInput
-            style={[
-              styles.input,
-              {
-                borderColor:
-                  password.length > 5 && password !== '' ? 'green' : 'red',
-              },
-            ]}
-            placeholder="Password"
-            secureTextEntry={!showPass}
-            value={password}
-            onChangeText={setPassword}
-          />
-          <TextInput
-            style={[
-              styles.input,
-              {
-                borderColor:
-                  password === confirmPass && password !== '' ? 'green' : 'red',
-              },
-            ]}
-            placeholder="Confirm Password"
-            secureTextEntry={!showPass}
-            value={confirmPass}
-            onChangeText={setConfirmPass}
-            onSubmitEditing={() => {
-              externalLogin === 'Google' ? googleCreate() : githubCreate();
-            }}
-          />
-          <Text>We use this password to encrypt sensitive information.</Text>
-          <Button
-            onPress={() => {
-              externalLogin === 'Google' ? googleCreate() : githubCreate();
-            }}
-            title="Create Account"
-            disabled={loading}
-            style={styles.buttonExtra}>
-            <Text style={styles.buttonText}>Create Account</Text>
-          </Button>
-          <Text style={styles.signInWith}>Already linked your account?</Text>
-          <Button
-            onPress={() => {
-              // @ts-ignore
-              navigation.navigate('Login');
-            }}
-            title="Sign In"
-            color="blue"
-            style={{color: 'blue'}}>
-            <Text>Sign In</Text>
-          </Button>
+      <View>
+        <Image source={require('../img/monkeyJungle.png')} />
+        <View style={styles.container}>
+          <View style={styles.box}>
+            <Text style={styles.header}>Create a Password</Text>
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  borderColor:
+                    password.length > 5 && password !== '' ? 'green' : 'red',
+                },
+              ]}
+              placeholder="Password"
+              secureTextEntry={!showPass}
+              value={password}
+              onChangeText={setPassword}
+              placeholderTextColor={'white'}
+              mode={'flat'}
+              underlineColor="transparent"
+              theme={{
+                colors: {
+                  primary: 'transparent', // Outline color when focused
+                },
+              }}
+            />
+            <TextInput
+              style={[
+                styles.input,
+                {
+                  borderColor:
+                    password === confirmPass && password !== '' ? 'green' : 'red',
+                },
+              ]}
+              placeholder="Confirm Password"
+              secureTextEntry={!showPass}
+              value={confirmPass}
+              onChangeText={setConfirmPass}
+              onSubmitEditing={() => {
+                externalLogin === 'Google' ? googleCreate() : githubCreate();
+              }}
+              placeholderTextColor={'white'}
+              mode={'flat'}
+              underlineColor="transparent"
+              theme={{
+                colors: {
+                  primary: 'transparent', // Outline color when focused
+                },
+              }}
+            />
+            <Text style={{color: "white"}}>We use this password to encrypt sensitive information.</Text>
+            <Button
+              onPress={() => {
+                externalLogin === 'Google' ? googleCreate() : githubCreate();
+              }}
+              title="Create Account"
+              disabled={loading}
+              style={styles.buttonExtra}>
+              <Text style={styles.buttonText}>Create Account</Text>
+            </Button>
+            <Text style={styles.signInWith}>Already linked your account?</Text>
+            <Button
+              onPress={() => {
+                // @ts-ignore
+                navigation.navigate('Login');
+              }}
+              title="Sign In"
+              color="blue"
+              style={{marginBottom: 20, marginTop: -10}}>
+              <Text style={{color: '#4b9288'}}>Sign In</Text>
+            </Button>
+          </View>
         </View>
       </View>
     ) : (

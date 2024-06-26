@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   ScrollView,
   View,
@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
   Modal as RNModal,
 } from 'react-native';
-import {Text, Button, useTheme} from 'react-native-paper';
+import { Text, Button, useTheme } from 'react-native-paper';
 import Config from 'react-native-config';
 import JourneyMap from '../components/JourneyMap';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -78,7 +78,7 @@ const JourneyMain = () => {
       }
 
       const fetchedUnits = await Promise.all(
-        res.user_map.units.map(async (unit: {_id: any}) => {
+        res.user_map.units.map(async (unit: { _id: any }) => {
           const response = await fetch(`${API_URL}/api/journey/getTasksInUnit`, {
             method: 'POST',
             headers: {
@@ -139,23 +139,26 @@ const JourneyMain = () => {
     const isLastIndex = index === units.length - 1;
     const allCompleted = unit.tasks.every(task => task.completed);
 
+    // calculate task offset by summing the length of all previous units
+    const taskOffset = units.slice(0, index).reduce((acc, unit) => acc + unit.tasks.length, 0);
+
     return (
       <View style={styles.unitContainer} key={unit._id}>
-        <View style={[styles.unitBox, { backgroundColor: unit.color }]}>
-          <View style={styles.unitHeader}>
-            <TouchableOpacity onPress={() => setShowHandout(showHandout === index ? null : index)} style={styles.clipboardIcon}>
-              <Ionicons name="clipboard-outline" size={24} color={theme.colors.primary} />
-            </TouchableOpacity>
-          </View>
+        <View style={[styles.unitHeader, { backgroundColor: unit.color }]}>
           <TouchableOpacity onPress={() => setShowHandout(showHandout === index ? null : index)}>
             <Text style={[styles.unitTitle, { color: getTextColor(unit.color) }]}>
               {unit.name}
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity onPress={() => setShowHandout(showHandout === index ? null : index)} style={styles.clipboardIcon}>
+            <Ionicons name="clipboard-outline" size={24} color={theme.colors.primary} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.unitContent}>
           {showHandout === index ? (
-            <MarkdownRenderer style={styles.handoutText} markdown={unit.handout} textColor={getTextColor(unit.color)}/>
+            <MarkdownRenderer style={styles.handoutText} markdown={unit.handout} textColor={getTextColor(unit.color)} />
           ) : (
-            <JourneyMap unitId={unit._id} unitIndex={index} />
+            <JourneyMap unitId={unit._id} unitIndex={index} taskOffset={taskOffset} />
           )}
         </View>
         {isLastIndex && (
@@ -163,7 +166,7 @@ const JourneyMain = () => {
             <Text>Add Unit</Text>
           </TouchableOpacity>
         )}
-        <RNModal
+        {/* <RNModal
           animationType="slide"
           transparent={true}
           visible={openDetourPop}
@@ -173,8 +176,8 @@ const JourneyMain = () => {
             <Text>Detour Selection Component</Text>
             <Button onPress={() => setOpenDetourPop(false)}>Close</Button>
           </View>
-        </RNModal>
-      </View>
+        </RNModal> */}
+        </View>
     );
   };
 
@@ -185,16 +188,16 @@ const JourneyMain = () => {
       </View>
     );
   }
+  
+  console.log('Units:', units.length);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      <Text style={[styles.header, { color: theme.colors.onBackground }]}>Your Journey</Text>
+    <ScrollView 
+      style={[styles.scrollView, { backgroundColor: theme.colors.background }]}
+      contentContainerStyle={styles.scrollViewContent}
+    >
       {activeJourney ? (
-        units.map((unit, index) => (
-          <View key={unit._id} style={{ marginBottom: 20 }}>
-            {handleMap(unit, index)}
-          </View>
-        ))
+        units.map((unit, index) => handleMap(unit, index))
       ) : (
         <GetStarted getTasks={getTasks} />
       )}
@@ -214,21 +217,16 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   unitContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  unitBox: {
-    width: 380,
-    padding: 30,
-    borderRadius: 30,
-    position: 'relative',
+    width: '100%',
+    overflow: 'hidden',
+    backgroundColor: 'transparent',
   },
   unitTitle: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: 'bold',
-    textAlign: 'center',
-    marginTop: 40,
-    marginBottom: 10,
+    textAlign: 'left',
+    flexWrap: 'wrap',
+    maxWidth: 400,
   },
   completedIndicator: {
     position: 'absolute',
@@ -265,20 +263,33 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   handoutText: {
-    marginTop: 20,
     fontSize: 14,
-    maxWidth: '100%',
   },
   unitHeader: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-    zIndex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 15,
+    borderRadius: 20,
+  },
+  unitContent: {
+    padding: 15,
   },
   clipboardIcon: {
     padding: 10,
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
     borderRadius: 50,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollViewContent: {
+    flexGrow: 1,
+    paddingVertical: 20,
+    paddingHorizontal: 10,
+  },
+  unitWrapper: {
+    width: '100%',
   },
 });
 

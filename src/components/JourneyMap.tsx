@@ -7,7 +7,7 @@ import Config from 'react-native-config';
 import { useNavigation } from '@react-navigation/native';
 import { Task } from '../models/Journey';
 
-const JourneyMap = ({ unitId, unitIndex }: { unitId: string, unitIndex: number }) => {
+const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitIndex: number, taskOffset: number }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -41,11 +41,6 @@ const JourneyMap = ({ unitId, unitIndex }: { unitId: string, unitIndex: number }
             const bNodeAbove = b.node_above ? parseInt(b.node_above, 10) : 0;
             return aNodeAbove - bNodeAbove;
           });
-          fetchedTasks.push(...fetchedTasks);
-          fetchedTasks.push(...fetchedTasks);
-          fetchedTasks.push(...fetchedTasks);
-          fetchedTasks.push(...fetchedTasks);
-          fetchedTasks.push(...fetchedTasks);
           setTasks(fetchedTasks);
           setHandoutContent(result.data.handout);
           setUnitTitle(result.data.unitTitle); // set the unit title
@@ -113,41 +108,45 @@ const JourneyMap = ({ unitId, unitIndex }: { unitId: string, unitIndex: number }
   );
 
   const JourneyStops = () => {
-    const buttonSpacing = 50; // space between buttons
+    const buttonSpacing = 40; // space between buttons
     const screenWidth = Dimensions.get('window').width;
 
     // calculate the offset for each task button
-    const calculateOffset = (index: number, totalTasks: number) => {
-      const maxOffset = (screenWidth / 2) - 10; // maximum offset from center
-      const offsetBase = totalTasks >= 6 ? 6 : 3;
-      let offset = 0;
+    const calculateOffset = (index: number) => {
+      // update the index relative to the taskOffset
+      index += taskOffset;
 
-      if (index === 0) {
-        return offset;
-      }
+      const maxOffset = (screenWidth/1.8); // maximum offset from center
+      const offsetBase = 4;
+      let offset = 0;
 
       // find the first number at or below index that is divisible evenly by offsetBase and determine the direction
       let lastCenter = index;
       while (lastCenter > 0 && lastCenter % offsetBase !== 0) {
         lastCenter--;
       }
-      console.log(lastCenter);
-      const inverse = unitIndex % 2 === 0 ? (lastCenter / offsetBase) % 2 === 0 : lastCenter % offsetBase !== 0;
+      const inverse = (lastCenter / offsetBase) % 2 === 0;
 
       // determine the scaling factor to determine how much of the maxOffset to use
-      let scalingFactor = (index - lastCenter) / 3;
+      let scalingFactor = (index - lastCenter) / (offsetBase / 2);
       if (index % offsetBase > Math.floor(offsetBase / 2)) {
         // calculate steps from midpoint
-        let stepsFromMidpoint = index % offsetBase - Math.floor(offsetBase / 2);
-        // invert scaling factor to move closer to center
-        scalingFactor = 1 - (stepsFromMidpoint / (offsetBase / 2));
+        let stepsFromMidpoint = index % offsetBase - Math.floor(offsetBase / 2);        
+  
+        // calculate the scaling factor for this position inverse from the midpoint
+        console.log(index, stepsFromMidpoint, lastCenter, index - stepsFromMidpoint - lastCenter);
+        scalingFactor = Math.abs(index - (stepsFromMidpoint * 2) - lastCenter) / (offsetBase / 2);
       }
 
       // calculate offset to create a zigzag pattern
       offset = inverse ? maxOffset : -maxOffset;
 
+      console.log(index, offset, scalingFactor, offset * scalingFactor);
+
       return offset * scalingFactor;
     };
+
+    console.log("========================================");
 
     return (
       <View style={styles.pathContainer}>
@@ -158,14 +157,14 @@ const JourneyMap = ({ unitId, unitIndex }: { unitId: string, unitIndex: number }
                 styles.taskButton,
                 {
                   backgroundColor: task.completed ? '#29C18C' : (task.inProgress || index === 0 ? theme.colors.secondary : '#808080'),
-                  marginLeft: calculateOffset(index, tasks.length),
+                  marginLeft: calculateOffset(index),
                 }
               ]}
               onPress={() => (task.inProgress || index === 0) && handlePressTask(task)}
             >
               {renderTaskIcon(task, index)}
             </TouchableOpacity>
-            <Text style={styles.taskName}>{task.name}</Text>
+            {/* <Text style={styles.taskName}>{task.name}</Text> */}
           </View>
         ))}
       </View>
@@ -179,10 +178,10 @@ const JourneyMap = ({ unitId, unitIndex }: { unitId: string, unitIndex: number }
       ) : (
         <View style={styles.contentContainer}>
           <View style={styles.unitHeader}>
+            <Text style={styles.unitTitle}>
+              {unitTitle}
+            </Text>
           </View>
-          <Text style={styles.unitTitle}>
-            {unitTitle}
-          </Text>
           {handoutVisible ? (
             <View style={styles.handoutContainer}>
               <ScrollView>
@@ -288,7 +287,7 @@ const styles = StyleSheet.create({
     flex: 1, // takes up all available space
     alignItems: 'center',
     justifyContent: 'flex-start', // aligns content to the top
-    paddingVertical: 20,
+    paddingVertical: 5,
   },
   unitTitle: {
     fontSize: 28,

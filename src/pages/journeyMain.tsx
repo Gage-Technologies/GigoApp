@@ -15,6 +15,8 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import GetStarted from '../components/GetStarted';
 import MarkdownRenderer from '../components/Markdown/MarkdownRenderer';
 import { Unit } from '../models/Journey';
+import HandoutOverlay from '../components/Journey/HandoutOverlay';
+import { getTextColor } from '../services/utils';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
@@ -125,16 +127,6 @@ const JourneyMain = () => {
     getTasks();
   }, []);
 
-  const getTextColor = (backgroundColor: string) => {
-    const color = backgroundColor.substring(1);
-    const rgb = parseInt(color, 16);
-    const r = (rgb >> 16) & 0xff;
-    const g = (rgb >> 8) & 0xff;
-    const b = (rgb >> 0) & 0xff;
-    const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
-    return brightness > 186 ? '#000000' : '#FFFFFF';
-  };
-
   const handleMap = (unit: Unit, index: number) => {
     const isLastIndex = index === units.length - 1;
     const allCompleted = unit.tasks.every(task => task.completed);
@@ -155,18 +147,19 @@ const JourneyMain = () => {
           </TouchableOpacity>
         </View>
         <View style={styles.unitContent}>
-          {showHandout === index ? (
+          {/* {showHandout === index ? (
             <MarkdownRenderer style={styles.handoutText} markdown={unit.handout} textColor={getTextColor(unit.color)} />
           ) : (
             <JourneyMap unitId={unit._id} unitIndex={index} taskOffset={taskOffset} />
-          )}
+          )} */}
+          <JourneyMap unitId={unit._id} unitIndex={index} taskOffset={taskOffset} />
         </View>
         {isLastIndex && (
           <TouchableOpacity onPress={() => setOpenDetourPop(true)} style={styles.fab}>
             <Text>Add Unit</Text>
           </TouchableOpacity>
         )}
-        {/* <RNModal
+        <RNModal
           animationType="slide"
           transparent={true}
           visible={openDetourPop}
@@ -176,8 +169,8 @@ const JourneyMain = () => {
             <Text>Detour Selection Component</Text>
             <Button onPress={() => setOpenDetourPop(false)}>Close</Button>
           </View>
-        </RNModal> */}
-        </View>
+        </RNModal>
+      </View>
     );
   };
 
@@ -188,11 +181,11 @@ const JourneyMain = () => {
       </View>
     );
   }
-  
+
   console.log('Units:', units.length);
 
   return (
-    <ScrollView 
+    <ScrollView
       style={[styles.scrollView, { backgroundColor: theme.colors.background }]}
       contentContainerStyle={styles.scrollViewContent}
     >
@@ -201,6 +194,7 @@ const JourneyMain = () => {
       ) : (
         <GetStarted getTasks={getTasks} />
       )}
+      <HandoutOverlay isVisible={showHandout !== null} onClose={() => setShowHandout(null)} unit={units[showHandout ?? 0]} />
     </ScrollView>
   );
 };
@@ -294,3 +288,5 @@ const styles = StyleSheet.create({
 });
 
 export default JourneyMain;
+
+

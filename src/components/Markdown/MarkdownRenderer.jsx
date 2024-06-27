@@ -167,14 +167,19 @@ const MarkdownRenderer = ({
   function rehypeTextToReactNative() {
     return (tree) => {
       visit(tree, (node, index, parent) => {
+        // // handle any node that has a value property
+        // if (node.value !== undefined && node.value.trim() === "") {
+        //   // remove nodes with empty value
+        //   node.type = undefined
+        //   node.value = undefined
+        //   return
+        // }
+
         if (node.type === 'text' && parent.tagName !== 'RCTText') {
-          // wrap all text nodes in Text components, even if they're just whitespace
+          // wrap non-empty text nodes in Text components
           node.type = 'element';
           node.tagName = 'RCTText';
           node.properties = { style: styles.text };
-          if (node.children === undefined) {
-            node.children = []
-          }
           node.children = [{ type: 'text', value: node.value }];
         }
       });
@@ -206,7 +211,7 @@ const MarkdownRenderer = ({
         code({node, inline, className, children, ...props}) {
           const match = /language-(\w+)/.exec(className || '');
           let t = "";
-          if (children === undefined || children.length === 0) {
+          if (children === undefined || children.length === 0 || children[0] === undefined) {
             return null;
           }
           if (children[0].type === "RCTText") {
@@ -293,6 +298,11 @@ const MarkdownRenderer = ({
   if (markdown === undefined || markdown === null || markdown === '') {
     return null;
   }
+
+  // render(md, {
+  //   unstable_validateStringsRenderedWithinText: true
+  // });
+  // console.log(screen.debug());
 
   return (
     <>

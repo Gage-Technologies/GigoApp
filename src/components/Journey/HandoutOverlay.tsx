@@ -25,9 +25,9 @@ interface HandoutOverlayProps {
 }
 
 const INITIAL_OFFSET = 0.50;
-const LOWER_BOUND_SNAP_THRESHOLD = 0.55;
+const LOWER_BOUND_SNAP_THRESHOLD = 0.7;
 const UPPER_BOUND_SNAP_THRESHOLD = 0.15;
-const SCROLL_SMOOTHING = 0.4;
+const SCROLL_SMOOTHING = 0.5;
 
 const HandoutOverlay: React.FC<HandoutOverlayProps> = ({ isVisible, onClose, unit }) => {
     const { height } = Dimensions.get('window');

@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Text, Button, useTheme } from 'react-native-paper';
 import Config from 'react-native-config';
-import JourneyMap from '../components/JourneyMap';
+import JourneyMap from '../components/Journey/JourneyMap';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import GetStarted from '../components/GetStarted';
 import MarkdownRenderer from '../components/Markdown/MarkdownRenderer';
@@ -136,16 +136,14 @@ const JourneyMain = () => {
 
     return (
       <View style={styles.unitContainer} key={unit._id}>
-        <View style={[styles.unitHeader, { backgroundColor: unit.color }]}>
-          <TouchableOpacity onPress={() => setShowHandout(showHandout === index ? null : index)}>
+        <TouchableOpacity style={[styles.unitHeader, { backgroundColor: unit.color }]} onPress={() => setShowHandout(showHandout === index ? null : index)}>
             <Text style={[styles.unitTitle, { color: getTextColor(unit.color) }]}>
               {unit.name}
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => setShowHandout(showHandout === index ? null : index)} style={styles.clipboardIcon}>
-            <Ionicons name="clipboard-outline" size={24} color={theme.colors.primary} />
-          </TouchableOpacity>
-        </View>
+          <View style={styles.clipboardIcon}>
+            <Ionicons name="document-text-outline" size={24} color={getTextColor(unit.color)} />
+          </View>
+        </TouchableOpacity>
         <View style={styles.unitContent}>
           {/* {showHandout === index ? (
             <MarkdownRenderer style={styles.handoutText} markdown={unit.handout} textColor={getTextColor(unit.color)} />
@@ -271,7 +269,7 @@ const styles = StyleSheet.create({
   },
   clipboardIcon: {
     padding: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: 'transparent',
     borderRadius: 50,
   },
   scrollView: {

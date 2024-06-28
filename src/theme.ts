@@ -2,10 +2,12 @@ import { DefaultTheme } from 'react-native-paper';
 
 // Define base colors used throughout the theme, matching the dark mode of your web app
 const baseColors = {
-    primary: '#3D8EF7',          // Blue
-    primaryVariant: '#2a63ac',   // Darker Blue
-    secondary: '#29C18C',        // Green
-    secondaryVariant: '#1c8762', // Darker Green
+    primary: '#29C18C',        // Green
+    primaryVariant: '#1c8762', // Darker Green
+    secondary: '#3D8EF7',          // Blue
+    secondaryVariant: '#2a63ac',   // Darker Blue
+    tertiary: '#dfce53',
+    tertiaryVariant: '#b3a337',
     background: '#1c1c1a',       // Very dark grey (almost black)
     surface: '#282826',          // Dark grey
     error: '#B00020',            // Red

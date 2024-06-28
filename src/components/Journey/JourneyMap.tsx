@@ -5,7 +5,7 @@ import { Button, useTheme } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // For modern icons
 import Config from 'react-native-config';
 import { useNavigation } from '@react-navigation/native';
-import { Task } from '../models/Journey';
+import { Task } from '../../models/Journey';
 import AwesomeButton from "react-native-really-awesome-button";
 
 const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitIndex: number, taskOffset: number }) => {
@@ -42,7 +42,6 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
             const bNodeAbove = b.node_above ? parseInt(b.node_above, 10) : 0;
             return aNodeAbove - bNodeAbove;
           });
-          console.log("fetchedTasks", fetchedTasks);
           setTasks(fetchedTasks);
           setHandoutContent(result.data.handout);
           setUnitTitle(result.data.unitTitle); // set the unit title
@@ -149,18 +148,18 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
 
     // function to determine button colors and offset based on task and index
     const getButtonStyles = (task: any, index: number) => {
-      // determine the button color based on task completion and previous task status
-      const buttonColor = task.completed
-        ? '#29C18C'
-        : index === 0 || (index > 0 && tasks[index - 1].completed)
-          ? theme.colors.secondary
-          : '#808080';
+      if (task.completed) {
+        // @ts-ignore
+        return [theme.colors.tertiary, theme.colors.tertiaryVariant];
+      }
 
-      // determine the awesome button offset colors
-      const offsetColor = index === 0 || (index > 0 && tasks[index - 1].completed) ? '#1E8F69' : '#5D5D5D';
+      if (index === 0 || (index > 0 && tasks[index - 1].completed)) {
+        // @ts-ignore
+        return [theme.colors.primary, theme.colors.primaryVariant];
+      }
 
 
-      return [buttonColor, offsetColor];
+      return ['#808080', '#5D5D5D'];
     };
 
     return (

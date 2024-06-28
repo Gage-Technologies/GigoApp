@@ -1,22 +1,19 @@
-import React, {Suspense, useCallback, useEffect, useState} from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
-import remarkBreaks from 'remark-breaks';
-import {defaultSchema} from 'rehype-sanitize';
+import { defaultSchema } from 'rehype-sanitize';
 import remarkCodeBlock from 'remark-code-blocks';
 import ReactMarkdown from 'react-markdown';
-import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
-import {darkSyntaxTheme, lightSyntaxTheme} from './SyntaxHighlights';
+import SyntaxHighlighter from 'react-native-syntax-highlighter';
+import { darkSyntaxTheme } from './SyntaxHighlights';
 import merge from 'deepmerge';
-import {visit} from 'unist-util-visit';
-import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
-import {useTheme} from 'react-native-paper';
+import { visit } from 'unist-util-visit';
+import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Clipboard from '@react-native-clipboard/clipboard';
 import getStyles from './styles';
-import { render, screen } from '@testing-library/react-native';
-// import "./css/MarkdownRenderer.css";
-// import './css/github-markdown-dark.css'
+// import { render, screen } from '@testing-library/react-native';
 
 const syntaxHighlightingSchema = merge(defaultSchema, {
   attributes: {
@@ -25,15 +22,15 @@ const syntaxHighlightingSchema = merge(defaultSchema, {
 });
 
 const MarkdownRenderer = ({
-                            markdown,
-                            style,
-                            onAllMediaLoaded,
-                            imgProxy,
-                            remarkPlugins,
-                            rehypePlugins,
-                            goToCallback,
-                            textColor
-                          }) => {
+  markdown,
+  style,
+  onAllMediaLoaded,
+  imgProxy,
+  remarkPlugins,
+  rehypePlugins,
+  goToCallback,
+  textColor
+}) => {
   const theme = useTheme();
   const styles = getStyles(theme, textColor);
 
@@ -42,6 +39,31 @@ const MarkdownRenderer = ({
   const [loadedMediaCount, setLoadedMediaCount] = useState(0);
 
   const [portals, setPortals] = useState([])
+
+  // state to store the page width
+  const [pageWidth, setPageWidth] = useState(0);
+
+  // function to update the page width
+  const updatePageWidth = useCallback(() => {
+    // get the window width using dimensions api
+    const { width } = Dimensions.get('window');
+    setPageWidth(width);
+  }, []);
+
+  // effect to set initial page width and add event listener
+  useEffect(() => {
+    updatePageWidth();
+    // add event listener for dimension changes
+    Dimensions.addEventListener('change', updatePageWidth);
+    // cleanup function to remove event listener
+    return () => {
+      try {
+        Dimensions.removeEventListener('change', updatePageWidth);
+      } catch (e) {
+        console.log(e);
+      }
+    };
+  }, [updatePageWidth]);
 
   useEffect(() => {
     if (mediaCount === loadedMediaCount && mediaCount > 0) {
@@ -88,7 +110,7 @@ const MarkdownRenderer = ({
         if (node.tagName === 'img') {
           node.properties.id = "img:" + node.properties.src;
           node.properties.onLoad = () => {
-            handleMediaLoad({target: node})
+            handleMediaLoad({ target: node })
           };
           node.properties.loading = "lazy";
           if (config.imgCdnProxy && imgProxy) {
@@ -107,7 +129,7 @@ const MarkdownRenderer = ({
           node.properties.id = "video:" + src;
 
           node.properties.onLoadedData = () => {
-            handleMediaLoad({target: node})
+            handleMediaLoad({ target: node })
           };
           node.properties.loading = "lazy";
           node.properties.controls = false;
@@ -182,6 +204,18 @@ const MarkdownRenderer = ({
           node.properties = { style: styles.text };
           node.children = [{ type: 'text', value: node.value }];
         }
+
+        // if (node.type === 'element' && node.tagName === 'code') {
+        //   // add maxWidth to the style of code elements
+        //   node.properties = {
+        //     ...(node.properties || {}),
+        //     style: {
+        //       ...(node.properties?.style || {}),
+        //       maxWidth: '100%',
+        //       backgroundColor: 'transparent'
+        //     },
+        //   };
+        // }
       });
     };
   }
@@ -189,7 +223,7 @@ const MarkdownRenderer = ({
   const md = (
     <ReactMarkdown
       remarkPlugins={[remarkGfm, remarkCodeBlock, ...remarkPlugins.map(x => x[0])]}
-      rehypePlugins={[rehypeRaw, rehypeTextToReactNative, rehypeOnLoadPlugin, {settings: syntaxHighlightingSchema}, ...rehypePlugins.map(x => x[0])]}
+      rehypePlugins={[rehypeRaw, rehypeTextToReactNative, rehypeOnLoadPlugin, { settings: syntaxHighlightingSchema }, ...rehypePlugins.map(x => x[0])]}
       components={{
         text: renderText,
         span: renderText,
@@ -208,7 +242,7 @@ const MarkdownRenderer = ({
         ol: renderList,
         li: renderListItem,
         a: renderLink,
-        code({node, inline, className, children, ...props}) {
+        code({ node, inline, className, children, ...props }) {
           const match = /language-(\w+)/.exec(className || '');
           let t = "";
           if (children === undefined || children.length === 0 || children[0] === undefined) {
@@ -248,8 +282,12 @@ const MarkdownRenderer = ({
               }
             }
 
+            // Note we do some hacky stuff here to get the markdown renderer to fit the screen
+            // this is because we have to figure out why the code node does not respoect styling here
+            // and changes in the rehype plugin cause a crash with the syntax highlighter so for now
+            // the markdown renderer can only be used on full page presentation (common so not a big issue)
             return (
-              <View style={styles.codeBlock}>
+              <View style={[styles.codeBlock, { maxWidth: pageWidth - 49 }]}>
                 <Text style={styles.languageLabel}>
                   {match[1] !== "" && match[1] !== "_" ? match[1] : "plaintext"}
                 </Text>
@@ -258,24 +296,23 @@ const MarkdownRenderer = ({
                     onPress={() => copyToClipboard(t)}
                     style={styles.iconButton}
                   >
-                    <Icon 
-                      name={copied === t ? "check" : "content-copy"} 
-                      size={14} 
-                      color={copied === t ? theme.colors.success : theme.colors.primary} 
+                    <Icon
+                      name={copied === t ? "check" : "content-copy"}
+                      size={14}
+                      color={copied === t ? theme.colors.success : theme.colors.primary}
                     />
                   </TouchableOpacity>
                   {goToLink}
                 </View>
-                <Suspense fallback={<View />}>
-                  <SyntaxHighlighter
-                    style={theme.dark ? darkSyntaxTheme : lightSyntaxTheme}
-                    language={match[1]}
-                    PreTag={View}
-                    {...props}
-                  >
-                    {t}
-                  </SyntaxHighlighter>
-                </Suspense>
+                <SyntaxHighlighter
+                  style={darkSyntaxTheme}
+                  language={match[1]}
+                  highlighter="prism"
+                  PreTag={View}
+                  {...props}
+                >
+                  {t}
+                </SyntaxHighlighter>
               </View>
             );
           }
@@ -299,10 +336,8 @@ const MarkdownRenderer = ({
     return null;
   }
 
-  // render(md, {
-  //   unstable_validateStringsRenderedWithinText: true
-  // });
-  // console.log(screen.debug());
+  // render(md);
+  // console.log(JSON.stringify(screen.toJSON()));
 
   return (
     <>
@@ -316,7 +351,7 @@ const MarkdownRenderer = ({
 
 MarkdownRenderer.defaultProps = {
   style: {},
-  onAllMediaLoaded: () => {},
+  onAllMediaLoaded: () => { },
   imgProxy: null,
   remarkPlugins: [],
   rehypePlugins: [],

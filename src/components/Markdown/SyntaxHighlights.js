@@ -15,7 +15,8 @@ export const darkSyntaxTheme = {
     "WebkitHyphens": "none",
     "MozHyphens": "none",
     "msHyphens": "none",
-    "hyphens": "none"
+    "hyphens": "none",
+    "maxWidth": "100%"
   },
   "pre[class*=\"language-\"]": {
     "color": "#c5c8c6",

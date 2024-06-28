@@ -96,8 +96,9 @@ export default function getStyles(theme: MD3Theme, textColor: string | undefined
       marginRight: 6,
       paddingTop: 1,
       backgroundColor: theme.colors.background,
-      borderRadius: 4,
+      borderRadius: 10,
       padding: 2,
+      width: '100%'
     },
     languageLabel: {
       fontSize: 11,
@@ -110,7 +111,7 @@ export default function getStyles(theme: MD3Theme, textColor: string | undefined
     codeActions: {
       position: 'absolute',
       top: 0,
-      right: -14,
+      right: 4,
       zIndex: 1,
       flexDirection: 'row',
     },

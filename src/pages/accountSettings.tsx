@@ -82,6 +82,7 @@ const AccountSettings = () => {
   const [hasSubscriptionId, setHasSubscriptionId] = React.useState(false);
   const [userInfo, setUserInfo] = React.useState(null);
   const [selectedTab, setSelectedTab] = useState('Main');
+  const [issueText, setIssueText] = useState('')
   const [Attributes, setAttributes] = useState({
     topType: 'NoHair',
     accessoriesType: 'Blank',
@@ -1171,6 +1172,41 @@ const AccountSettings = () => {
     setStateFunction(value);
   };
 
+  const handleCancelIssue = () => {
+    setIssueText('');
+  };
+
+  const handleSubmitIssue = () => {
+    console.log('Submitted issue:', issueText);
+    // Handle the submit action
+    setIssueText('');
+  };
+
+  const reportIssueTab = () => {
+    return (
+      <View style={styles.reportContainer}>
+        <Text style={styles.reportTitle}>Report Issue</Text>
+        <TextInput
+          style={styles.reportTextInput}
+          multiline={true}
+          numberOfLines={10}
+          placeholder="Describe your issue here..."
+          placeholderTextColor={"grey"}
+          value={issueText}
+          onChangeText={text => setIssueText(text)}
+        />
+        <View style={styles.reportButtonContainer}>
+          <TouchableOpacity onPress={handleCancelIssue} style={[styles.reportButton, styles.reportCancelButton]}>
+            <Text style={styles.reportButtonText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSubmitIssue} style={[styles.reportButton, styles.reportSubmitButton]}>
+            <Text style={styles.reportButtonText}>Submit</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    )
+  }
+
   const workspaceTab = () => {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -1327,6 +1363,8 @@ const AccountSettings = () => {
         return membershipTab();
       case 'ExclusiveContentSetup':
         return exclusiveContentTab();
+      case 'ReportIssue':
+        return reportIssueTab();
       default:
         return userTab();
     }
@@ -1405,27 +1443,75 @@ const AccountSettings = () => {
       <View style={styles.mainContainer}>
         {selectedTab === 'Main' ? (
           <View style={styles.tabsContainer}>
-            <View style={styles.separatorMain} />
-            <View style={styles.titleContainer}>
-              <Text style={styles.titleText}>
-                Account Settings
-              </Text>
+            <LinearGradient
+              colors={['#29C18C', '#1c8762', '#145D46']}
+              style={styles.titleContainer}
+            >
+              <Text style={styles.titleText}>Account Settings</Text>
+            </LinearGradient>
+            <View style={{ paddingTop: 20, paddingBottom: 10 }}>
+              <Text style={{ color: "white" }}>General</Text>
             </View>
+
             <TouchableOpacity onPress={() => setSelectedTab('User')} style={styles.tabButton}>
-              <Text style={styles.tabText}>User</Text>
+              <View style={styles.buttonContent}>
+                <View style={[styles.leftContent, {marginRight: 5}]}>
+                  <Icon name="user" size={16} color="white" />
+                  <Text style={styles.tabText}>User</Text>
+                </View>
+                <Icon name="chevron-right" size={16} color="white" />
+              </View>
             </TouchableOpacity>
-            <View style={{height: 5, color: "red"}}/>
+
             <TouchableOpacity onPress={() => setSelectedTab('WorkspaceSettings')} style={styles.tabButton}>
-              <Text style={styles.tabText}>Workspace Settings</Text>
+              <View style={styles.buttonContent}>
+                <View style={styles.leftContent}>
+                  <Icon name="cogs" size={16} color="white" />
+                  <Text style={styles.tabText}>Workspace Settings</Text>
+                </View>
+                <Icon name="chevron-right" size={16} color="white" />
+              </View>
             </TouchableOpacity>
-            <View style={styles.separatorMain} />
+
             <TouchableOpacity onPress={() => setSelectedTab('Membership')} style={styles.tabButton}>
-              <Text style={styles.tabText}>Membership</Text>
+              <View style={styles.buttonContent}>
+                <View style={styles.leftContent}>
+                  <Icon name="users" size={16} color="white" />
+                  <Text style={styles.tabText}>Membership</Text>
+                </View>
+                <Icon name="chevron-right" size={16} color="white" />
+              </View>
             </TouchableOpacity>
-            <View style={styles.separatorMain} />
+
             <TouchableOpacity onPress={() => setSelectedTab('ExclusiveContentSetup')} style={styles.tabButton}>
-              <Text style={styles.tabText}>Exclusive Content Setup</Text>
+              <View style={styles.buttonContent}>
+                <View style={styles.leftContent}>
+                  <Icon name="star" size={16} color="white" />
+                  <Text style={styles.tabText}>Exclusive Content Setup</Text>
+                </View>
+                <Icon name="chevron-right" size={16} color="white" />
+              </View>
             </TouchableOpacity>
+
+            <View style={{ paddingTop: 20, paddingBottom: 20 }}>
+              <Text style={{ color: "white" }}>Support</Text>
+            </View>
+
+            <TouchableOpacity onPress={() => setSelectedTab('ReportIssue')} style={styles.tabButton}>
+              <View style={styles.buttonContent}>
+                <View style={styles.leftContent}>
+                  <Icon name="exclamation-circle" size={16} color="white" />
+                  <Text style={styles.tabText}>Report Issue</Text>
+                </View>
+                <Icon name="chevron-right" size={16} color="white" />
+              </View>
+            </TouchableOpacity>
+
+            <View style={styles.logoutContainer}>
+              <TouchableOpacity onPress={() => console.log('Logout pressed')} style={styles.logoutButton}>
+                <Text style={styles.logoutText}>Logout</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           <View style={styles.container}>
@@ -1595,9 +1681,9 @@ const styles = StyleSheet.create({
   },
   tabsContainer: {
     flex: 1,
-    alignItems: 'center',
     justifyContent: 'flex-start',
-    paddingTop: 20, // Adjust to avoid overlap with the title container
+    paddingHorizontal: 20,
+    paddingVertical: 10,
   },
   column: {
     alignItems: 'center',
@@ -1608,7 +1694,7 @@ const styles = StyleSheet.create({
     borderRightWidth: 1,
     borderRightColor: '#29c18c',
     marginBottom: 10,
-    width: '100%',
+    width: width,
   },
   row: {
     flexDirection: 'row',
@@ -1617,18 +1703,16 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   tabButton: {
-    alignItems: 'flex-start',
-    justifyContent: 'flex-start',
+    backgroundColor: '#323230',
     borderRadius: 10,
-    width: Dimensions.get('window').width - 40,
-    paddingLeft: 20,
-    height: 80,
+    marginVertical: 5,
+    paddingVertical: 15,
+    paddingHorizontal: 10,
   },
   tabText: {
-    marginTop: 5,
-    fontSize: 14,
+    fontSize: 16,
     color: 'white',
-    textAlign: 'left',
+    marginLeft: 5, // Adjust spacing between icon and text
   },
   tabTextClicked: {
     color: '#29c18c', // blue text
@@ -1781,8 +1865,13 @@ const styles = StyleSheet.create({
   separatorMain: {
     height: 1,
     backgroundColor: 'white',
-    width: '100%',
+    width: width - 80,
     marginVertical: 10,
+  },
+  separatorContainer: {
+    flex: 1,
+    justifyContent: 'center', // Center vertically
+    alignItems: 'center', // Center horizontally
   },
   workspaceTitle: {
     fontSize: 24,
@@ -1883,18 +1972,90 @@ const styles = StyleSheet.create({
   titleContainer: {
     width: Dimensions.get('window').width,
     height: 100,
-    backgroundColor: '#2f6d58',
     paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative', // Changed from absolute to relative
-    top: 0,
+    position: 'relative',
+    top: -40,
     left: 0,
     right: 0,
+    marginBottom: -10,
   },
   titleText: {
     fontSize: 20,
     color: 'white',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  leftContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoutContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 30,
+    alignItems: 'center',
+  },
+  logoutButton: {
+    backgroundColor: '#ff6b6b',
+    borderRadius: 25,
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    width: '60%', // Ensures the logout button stretches across the container
+    alignItems: 'center',
+  },
+  logoutText: {
+    fontSize: 18,
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  reportContainer: {
+    flex: 1,
+    padding: 20,
+  },
+  reportTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: "white"
+  },
+  reportTextInput: {
+    height: 150,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 10,
+    padding: 10,
+    textAlignVertical: 'top',
+    marginBottom: 20,
+    width: width - 80,
+    color: "white"
+  },
+  reportButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  reportButton: {
+    flex: 1,
+    alignItems: 'center',
+    padding: 15,
+    borderRadius: 10,
+    marginHorizontal: 5,
+  },
+  reportCancelButton: {
+    backgroundColor: 'red',
+  },
+  reportSubmitButton: {
+    backgroundColor: '#29C18C',
+  },
+  reportButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

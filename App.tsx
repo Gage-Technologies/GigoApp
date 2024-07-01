@@ -52,6 +52,11 @@ const App = () => {
           <View style={styles.container}>
             <Stack.Navigator>
               <Stack.Screen
+                name="AccountSettings"
+                component={AccountSettings}
+                options={{headerShown: false}}
+              />
+              <Stack.Screen
                 name="Login"
                 component={Login}
                 options={{headerShown: false}}
@@ -64,11 +69,6 @@ const App = () => {
               <Stack.Screen
                 name="Byte"
                 component={Byte}
-                options={{headerShown: false}}
-              />
-              <Stack.Screen
-                name="AccountSettings"
-                component={AccountSettings}
                 options={{headerShown: false}}
               />
               <Stack.Screen

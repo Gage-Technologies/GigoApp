@@ -1,10 +1,10 @@
 {
-  "name": "GigoApp",
+  "name": "GIGO",
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android",
-    "ios": "react-native run-ios",
+    "android": "react-native run-android --variant=release",
+    "ios": "react-native run-ios --configuration Release",
     "lint": "eslint .",
     "start": "react-native start --experimental-debugger",
     "test": "jest"
@@ -13,6 +13,7 @@
     "@expo/vector-icons": "^14.0.1",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-clipboard/clipboard": "^1.14.1",
+    "@react-native-community/blur": "^4.4.0",
     "@react-native-google-signin/google-signin": "^11.0.1",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/drawer": "^6.6.15",
@@ -73,6 +74,7 @@
     "@babel/plugin-syntax-dynamic-import": "^7.8.3",
     "@babel/preset-env": "^7.20.0",
     "@babel/runtime": "^7.20.0",
+    "@bam.tech/react-native-make": "^3.0.3",
     "@react-native/babel-preset": "0.74.81",
     "@react-native/eslint-config": "0.74.81",
     "@react-native/metro-config": "0.74.81",

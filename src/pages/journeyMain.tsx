@@ -17,6 +17,8 @@ import MarkdownRenderer from '../components/Markdown/MarkdownRenderer';
 import { Unit } from '../models/Journey';
 import HandoutOverlay from '../components/Journey/HandoutOverlay';
 import { getTextColor } from '../services/utils';
+import AwesomeButton from "react-native-really-awesome-button";
+import { BlurView } from "@react-native-community/blur";
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
@@ -130,29 +132,54 @@ const JourneyMain = () => {
   const handleMap = (unit: Unit, index: number) => {
     const isLastIndex = index === units.length - 1;
     const allCompleted = unit.tasks.every(task => task.completed);
+    const isPendingAcceptance = index === units.length - 1;
 
     // calculate task offset by summing the length of all previous units
     const taskOffset = units.slice(0, index).reduce((acc, unit) => acc + unit.tasks.length, 0);
 
     return (
-      <View style={styles.unitContainer} key={unit._id}>
+      <View style={isPendingAcceptance ? [styles.unitContainer, { paddingTop: 20 }] : styles.unitContainer} key={unit._id}>
         <TouchableOpacity style={[styles.unitHeader, { backgroundColor: unit.color }]} onPress={() => setShowHandout(showHandout === index ? null : index)}>
-            <Text style={[styles.unitTitle, { color: getTextColor(unit.color) }]}>
-              {unit.name}
-            </Text>
+          <Text style={[styles.unitTitle, { color: getTextColor(unit.color) }]}>
+            {unit.name}
+          </Text>
           <View style={styles.clipboardIcon}>
             <Ionicons name="document-text-outline" size={24} color={getTextColor(unit.color)} />
           </View>
         </TouchableOpacity>
         <View style={styles.unitContent}>
-          {/* {showHandout === index ? (
-            <MarkdownRenderer style={styles.handoutText} markdown={unit.handout} textColor={getTextColor(unit.color)} />
-          ) : (
-            <JourneyMap unitId={unit._id} unitIndex={index} taskOffset={taskOffset} />
-          )} */}
           <JourneyMap unitId={unit._id} unitIndex={index} taskOffset={taskOffset} />
         </View>
-        {isLastIndex && (
+        {isPendingAcceptance && (
+          <BlurView
+            style={styles.blurOverlay}
+            blurType="dark"
+            blurAmount={3}
+            reducedTransparencyFallbackColor={theme.colors.background}
+          >
+            <View style={styles.buttonWrapper}>
+              <AwesomeButton
+                width={300}
+                height={80}
+                borderRadius={20}
+                textSize={28}
+                backgroundColor={theme.colors.primary}
+                // @ts-ignore
+                backgroundDarker={theme.colors.primaryVariant}
+                // @ts-ignore
+                textColor={theme.colors.primaryVariant}
+                onPress={() => {
+                  // handle adding unit to journey
+                  console.log("Add Unit To Journey");
+                }}
+                style={styles.addUnitButton}
+              >
+                Add Unit To Journey
+              </AwesomeButton>
+            </View>
+          </BlurView>
+        )}
+        {isLastIndex && !isPendingAcceptance && (
           <TouchableOpacity onPress={() => setOpenDetourPop(true)} style={styles.fab}>
             <Text>Add Unit</Text>
           </TouchableOpacity>
@@ -212,6 +239,7 @@ const styles = StyleSheet.create({
     width: '100%',
     overflow: 'hidden',
     backgroundColor: 'transparent',
+    position: 'relative',
   },
   unitTitle: {
     fontSize: 20,
@@ -277,14 +305,32 @@ const styles = StyleSheet.create({
   },
   scrollViewContent: {
     flexGrow: 1,
-    paddingVertical: 20,
-    paddingHorizontal: 10,
+    paddingVertical: 0,
+    paddingHorizontal: 0,
   },
   unitWrapper: {
     width: '100%',
   },
+  blurOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonWrapper: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  addUnitButton: {
+    alignSelf: 'center',
+    width: 300,
+    height: 80,
+  },
 });
 
 export default JourneyMain;
-
-

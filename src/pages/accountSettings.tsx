@@ -1332,77 +1332,101 @@ const AccountSettings = () => {
     }
   };
 
-  //                   <View style={styles.tabsContainer}>
-  //                       <View style={{marginTop: "-50%", marginBottom: "50%"}}>
-  //                           <Text style={{fontSize: 20, color: "white"}}>
-  //                               Account Settings
-  //                           </Text>
-  //                       </View>
-  //                     <TouchableOpacity onPress={() => setSelectedTab('User')} style={styles.tabButton}>
-  //                       <Text style={styles.tabText}>User</Text>
-  //                     </TouchableOpacity>
-  //                     <TouchableOpacity onPress={() => setSelectedTab('WorkspaceSettings')} style={styles.tabButton}>
-  //                       <Text style={styles.tabText}>Workspace Settings</Text>
-  //                     </TouchableOpacity>
-  //                     <TouchableOpacity onPress={() => setSelectedTab('Membership')} style={styles.tabButton}>
-  //                       <Text style={styles.tabText}>Membership</Text>
-  //                     </TouchableOpacity>
-  //                     <TouchableOpacity onPress={() => setSelectedTab('ExclusiveContentSetup')} style={styles.tabButton}>
-  //                       <Text style={styles.tabText}>Exclusive Content Setup</Text>
-  //                     </TouchableOpacity>
-  //                   </View>
+                    // <View style={styles.tabsContainer}>
+                    //     <View style={{marginTop: "-50%", marginBottom: "50%"}}>
+                    //         <Text style={{fontSize: 20, color: "white"}}>
+                    //             Account Settings
+                    //         </Text>
+                    //     </View>
+                    //   <TouchableOpacity onPress={() => setSelectedTab('User')} style={styles.tabButton}>
+                    //     <Text style={styles.tabText}>User</Text>
+                    //   </TouchableOpacity>
+                    //   <TouchableOpacity onPress={() => setSelectedTab('WorkspaceSettings')} style={styles.tabButton}>
+                    //     <Text style={styles.tabText}>Workspace Settings</Text>
+                    //   </TouchableOpacity>
+                    //   <TouchableOpacity onPress={() => setSelectedTab('Membership')} style={styles.tabButton}>
+                    //     <Text style={styles.tabText}>Membership</Text>
+                    //   </TouchableOpacity>
+                    //   <TouchableOpacity onPress={() => setSelectedTab('ExclusiveContentSetup')} style={styles.tabButton}>
+                    //     <Text style={styles.tabText}>Exclusive Content Setup</Text>
+                    //   </TouchableOpacity>
+                    // </View>
+
+  // <LinearGradient
+  //   colors={['#4d4d4d', '#3E5D52', '#2f6d58']}
+  //   style={styles.gradient}>
+  //   <View style={styles.tabsContainer}>
+  //     <View style={{marginTop: '-50%', marginBottom: '50%'}}>
+  //       <Text style={{fontSize: 20, color: 'white'}}>
+  //         Account Settings
+  //       </Text>
+  //     </View>
+  //     <View style={styles.row}>
+  //       <View style={styles.column}>
+  //         <TouchableOpacity
+  //           onPress={() => setSelectedTab('User')}
+  //           style={styles.tabButton}>
+  //           <Icon name="user" size={30} color="white" />
+  //         </TouchableOpacity>
+  //         <Text style={styles.tabText}>User</Text>
+  //       </View>
+  //       <View style={styles.column}>
+  //         <TouchableOpacity
+  //           onPress={() => setSelectedTab('WorkspaceSettings')}
+  //           style={styles.tabButton}>
+  //           <Icon name="cogs" size={30} color="white" />
+  //         </TouchableOpacity>
+  //         <Text style={styles.tabText}>Workspace Settings</Text>
+  //       </View>
+  //     </View>
+  //     <View style={styles.row}>
+  //       <View style={styles.column}>
+  //         <TouchableOpacity
+  //           onPress={() => setSelectedTab('Membership')}
+  //           style={styles.tabButton}>
+  //           <Icon name="group" size={30} color="white" />
+  //         </TouchableOpacity>
+  //         <Text style={styles.tabText}>Membership</Text>
+  //       </View>
+  //       <View style={styles.column}>
+  //         <TouchableOpacity
+  //           onPress={() => setSelectedTab('ExclusiveContentSetup')}
+  //           style={styles.tabButton}>
+  //           <Icon name="star" size={30} color="white" />
+  //         </TouchableOpacity>
+  //         <Text style={styles.tabText}>Exclusive Content Setup</Text>
+  //       </View>
+  //     </View>
+  //   </View>
+  // </LinearGradient>
 
   return (
     <PaperProvider>
       <View style={styles.mainContainer}>
         {selectedTab === 'Main' ? (
-          <LinearGradient
-            colors={['#4d4d4d', '#3E5D52', '#2f6d58']}
-            style={styles.gradient}>
-            <View style={styles.tabsContainer}>
-              <View style={{marginTop: '-50%', marginBottom: '50%'}}>
-                <Text style={{fontSize: 20, color: 'white'}}>
-                  Account Settings
-                </Text>
-              </View>
-              <View style={styles.row}>
-                <View style={styles.column}>
-                  <TouchableOpacity
-                    onPress={() => setSelectedTab('User')}
-                    style={styles.tabButton}>
-                    <Icon name="user" size={30} color="white" />
-                  </TouchableOpacity>
-                  <Text style={styles.tabText}>User</Text>
-                </View>
-                <View style={styles.column}>
-                  <TouchableOpacity
-                    onPress={() => setSelectedTab('WorkspaceSettings')}
-                    style={styles.tabButton}>
-                    <Icon name="cogs" size={30} color="white" />
-                  </TouchableOpacity>
-                  <Text style={styles.tabText}>Workspace Settings</Text>
-                </View>
-              </View>
-              <View style={styles.row}>
-                <View style={styles.column}>
-                  <TouchableOpacity
-                    onPress={() => setSelectedTab('Membership')}
-                    style={styles.tabButton}>
-                    <Icon name="group" size={30} color="white" />
-                  </TouchableOpacity>
-                  <Text style={styles.tabText}>Membership</Text>
-                </View>
-                <View style={styles.column}>
-                  <TouchableOpacity
-                    onPress={() => setSelectedTab('ExclusiveContentSetup')}
-                    style={styles.tabButton}>
-                    <Icon name="star" size={30} color="white" />
-                  </TouchableOpacity>
-                  <Text style={styles.tabText}>Exclusive Content Setup</Text>
-                </View>
-              </View>
+          <View style={styles.tabsContainer}>
+            <View style={styles.separatorMain} />
+            <View style={styles.titleContainer}>
+              <Text style={styles.titleText}>
+                Account Settings
+              </Text>
             </View>
-          </LinearGradient>
+            <TouchableOpacity onPress={() => setSelectedTab('User')} style={styles.tabButton}>
+              <Text style={styles.tabText}>User</Text>
+            </TouchableOpacity>
+            <View style={{height: 5, color: "red"}}/>
+            <TouchableOpacity onPress={() => setSelectedTab('WorkspaceSettings')} style={styles.tabButton}>
+              <Text style={styles.tabText}>Workspace Settings</Text>
+            </TouchableOpacity>
+            <View style={styles.separatorMain} />
+            <TouchableOpacity onPress={() => setSelectedTab('Membership')} style={styles.tabButton}>
+              <Text style={styles.tabText}>Membership</Text>
+            </TouchableOpacity>
+            <View style={styles.separatorMain} />
+            <TouchableOpacity onPress={() => setSelectedTab('ExclusiveContentSetup')} style={styles.tabButton}>
+              <Text style={styles.tabText}>Exclusive Content Setup</Text>
+            </TouchableOpacity>
+          </View>
         ) : (
           <View style={styles.container}>
             <TouchableOpacity
@@ -1572,7 +1596,8 @@ const styles = StyleSheet.create({
   tabsContainer: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    paddingTop: 20, // Adjust to avoid overlap with the title container
   },
   column: {
     alignItems: 'center',
@@ -1592,18 +1617,18 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   tabButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#27ab7c',
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
     borderRadius: 10,
-    width: 80,
+    width: Dimensions.get('window').width - 40,
+    paddingLeft: 20,
     height: 80,
   },
   tabText: {
     marginTop: 5,
     fontSize: 14,
     color: 'white',
-    textAlign: 'center',
+    textAlign: 'left',
   },
   tabTextClicked: {
     color: '#29c18c', // blue text
@@ -1753,6 +1778,12 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     opacity: 0.4,
   },
+  separatorMain: {
+    height: 1,
+    backgroundColor: 'white',
+    width: '100%',
+    marginVertical: 10,
+  },
   workspaceTitle: {
     fontSize: 24,
     marginBottom: 16,
@@ -1848,6 +1879,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     height: 40,
+  },
+  titleContainer: {
+    width: Dimensions.get('window').width,
+    height: 100,
+    backgroundColor: '#2f6d58',
+    paddingVertical: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative', // Changed from absolute to relative
+    top: 0,
+    left: 0,
+    right: 0,
+  },
+  titleText: {
+    fontSize: 20,
+    color: 'white',
   },
 });
 

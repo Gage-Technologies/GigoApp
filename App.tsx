@@ -2,8 +2,8 @@ import React, {StrictMode, useEffect, useRef} from 'react';
 import {Provider as PaperProvider} from 'react-native-paper';
 import {
   NavigationContainer,
-  NavigationContainerRef,
-} from '@react-navigation/native';
+  NavigationContainerRef, useNavigationState, useRoute
+} from "@react-navigation/native";
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {Provider as ReduxProvider, useSelector} from 'react-redux';
 import {View, StyleSheet} from 'react-native';
@@ -30,65 +30,85 @@ const App = () => {
   useEffect(() => {
     console.log('app page about to call deep link');
     handleDeepLink(navigationRef);
+    getCurrentRouteName()
     return () => {
       //             Linking.removeEventListener('url');
     };
   }, []);
+
+  const getCurrentRouteName = () => {
+    const state = navigationRef.current?.getRootState();
+    console.log("state is: ", state)
+    console.log("info is: ", state?.routes[state.index]?.name)
+    setCurrentRouteName(state?.routes[state.index]?.name)
+  };
+
+  const [currentRouteName, setCurrentRouteName] = React.useState('');
   return (
-    <StrictMode>
-      <ReduxProvider store={store}>
-        <PaperProvider theme={theme}>
-          <NavigationContainer>
-            <View style={styles.container}>
-              <Stack.Navigator>
-                <Stack.Screen
-                  name="Login"
-                  component={Login}
-                  options={{headerShown: false}}
-                />
-                <Stack.Screen
-                  name="Byte"
-                  component={Byte}
-                  options={{headerShown: false}}
-                />
-                <Stack.Screen
-                  name="AccountSettings"
-                  component={AccountSettings}
-                  options={{headerShown: false}}
-                />
-                <Stack.Screen
-                  name="Profile"
-                  component={Profile}
-                  options={{headerShown: false}}
-                />
-                <Stack.Screen
-                  name="Home"
-                  component={Home}
-                  options={{headerShown: false}}
-                />
-                <Stack.Screen
-                  name="SignUp"
-                  component={CreateNewAccount}
-                  options={{headerShown: false}}
-                />
-                <Stack.Screen
-                  name="JourneyMain"
-                  component={JourneyMain}
-                  options={{headerShown: false}}
-                />
-                <Stack.Screen
-                  name="ForgotPassword"
-                  component={ForgotPassword}
-                  options={{headerShown: false}}
-                />
-              </Stack.Navigator>
-              <SpeedDial />
-            </View>
-          </NavigationContainer>
-        </PaperProvider>
-      </ReduxProvider>
-    </StrictMode>
+    <ReduxProvider store={store}>
+      <PaperProvider theme={theme}>
+        <NavigationContainer
+          ref={navigationRef}
+          onStateChange={() => getCurrentRouteName()}
+        >
+          <View style={styles.container}>
+            <Stack.Navigator>
+              <Stack.Screen
+                name="AccountSettings"
+                component={AccountSettings}
+                options={{headerShown: false}}
+              />
+              <Stack.Screen
+                name="Login"
+                component={Login}
+                options={{headerShown: false}}
+              />
+              <Stack.Screen
+                name="SignUp"
+                component={CreateNewAccount}
+                options={{headerShown: false}}
+              />
+              <Stack.Screen
+                name="Byte"
+                component={Byte}
+                options={{headerShown: false}}
+              />
+              <Stack.Screen
+                name="Profile"
+                component={Profile}
+                options={{headerShown: false}}
+              />
+              <Stack.Screen
+                name="Home"
+                component={Home}
+                options={{headerShown: false}}
+              />
+              <Stack.Screen
+                name="JourneyMain"
+                component={JourneyMain}
+                options={{headerShown: false}}
+              />
+              <Stack.Screen
+                name="ForgotPassword"
+                component={ForgotPassword}
+                options={{headerShown: false}}
+              />
+            </Stack.Navigator>
+            <ConditionalSpeedDial currentRouteName={currentRouteName}/>
+          </View>
+        </NavigationContainer>
+      </PaperProvider>
+    </ReduxProvider>
   );
+};
+
+const ConditionalSpeedDial = ({ currentRouteName }) => {
+  console.log("current route: ", currentRouteName)
+  if (currentRouteName === 'Login' || currentRouteName === 'SignUp' || currentRouteName === 'ForgotPassword') {
+    return null;
+  }
+
+  return <SpeedDial />;
 };
 
 const styles = StyleSheet.create({

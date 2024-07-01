@@ -95,13 +95,15 @@ const Login = () => {
       padding: 20,
     },
     box: {
-      backgroundColor: 'black',
-      borderRadius: 10,
-      width: width * 0.99, // 99% of screen width
-      height: height * 0.7, // 70% of screen height
+      backgroundColor: '#1c3f30',
+      borderRadius: 20,
+      width: width, // 90% of screen width
+      height: height * 0.5, // 25% of screen height
       alignItems: 'center',
       justifyContent: 'center',
       padding: 20,
+      position: 'absolute',
+      bottom: 24,
     },
     header: {
       fontSize: 24,
@@ -140,14 +142,12 @@ const Login = () => {
       width: screenWidth * 0.8,
     },
     button: {
-      padding: 10,
       alignItems: 'center', // Center content horizontally
       justifyContent: 'center', // Center content vertically
-      marginVertical: 5, // Provides vertical spacing between buttons
     },
     innerContainer: {
       flexDirection: 'row', // Align images horizontally
-      alignItems: 'center',
+      alignItems: 'center'
     },
     logo: {
       width: imageWidth,
@@ -155,7 +155,7 @@ const Login = () => {
       resizeMode: 'contain',
     },
     buttonExtra: {
-      backgroundColor: '#007BFF', // A default blue color for button background
+      backgroundColor: '#4b9288', // A default blue color for button background
       padding: 10,
       borderRadius: 10, // Rounded corners
       alignItems: 'center',
@@ -170,7 +170,7 @@ const Login = () => {
       fontSize: 16, // Font size for text
     },
     buttonTextExtra: {
-      color: '#007BFF',
+      color: '#4b9288',
       fontSize: 16,
     },
     disabledButton: {
@@ -187,13 +187,15 @@ const Login = () => {
       alignItems: 'center',
     },
     externalBox: {
-      backgroundColor: 'black',
-      borderRadius: 10,
-      width: width * 0.99, // 99% of screen width
-      height: height * 0.7, // 70% of screen height
+      backgroundColor: '#1c3f30',
+      borderRadius: 20,
+      width: width, // 90% of screen width
+      height: height * 0.35, // 25% of screen height
       alignItems: 'center',
       justifyContent: 'center',
       padding: 20,
+      position: 'absolute',
+      bottom: 24,
     },
     externalHeader: {
       fontSize: 24,
@@ -220,7 +222,7 @@ const Login = () => {
       minHeight: 35,
       width: '50%',
       marginTop: 10,
-      backgroundColor: '#007BFF', // A default blue color for button background
+      backgroundColor: '#4b9288', // A default blue color for button background
     },
     externalButtonText: {
       color: 'white', // Text color for buttons
@@ -458,47 +460,51 @@ const Login = () => {
   const renderExternal = () => {
     // @ts-ignore
     return (
-      <View style={styles.externalContainer}>
-        <View style={styles.externalBox}>
-          <Text style={styles.externalHeader}>Enter Password</Text>
-          <TextInput
-            style={styles.externalInput}
-            onChangeText={setPassword}
-            value={password}
-            placeholder="Password"
-            secureTextEntry={!showPass}
-            onSubmitEditing={() => {
+      <View style={styles.externalBox}>
+        <Text style={styles.externalHeader}>Enter Password</Text>
+        <TextInput
+          style={styles.externalInput}
+          onChangeText={setPassword}
+          value={password}
+          placeholder="Password"
+          secureTextEntry={!showPass}
+          onSubmitEditing={() => {
+            externalLogin === 'Google' ? googleSignIn() : githubConfirm();
+          }}
+          placeholderTextColor={'white'}
+          mode={'flat'}
+          underlineColor="transparent"
+          theme={{
+            colors: {
+              primary: 'transparent', // Outline color when focused
+            },
+          }}
+        />
+        {loading ? (
+          <View style={styles.externalButton}>
+            <Text style={styles.externalButtonText}>Login</Text>
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={styles.externalButton}
+            onPress={() => {
               externalLogin === 'Google' ? googleSignIn() : githubConfirm();
-            }}
-          />
-          {loading ? (
-            <View style={styles.externalButton}>
-              <Text style={styles.externalButtonText}>Login</Text>
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={styles.externalButton}
-              onPress={() => {
-                externalLogin === 'Google' ? googleSignIn() : githubConfirm();
-              }}>
-              <Text style={styles.externalButtonText}>Login</Text>
-            </TouchableOpacity>
-          )}
-          <Text style={styles.externalSubText}>
-            Haven't linked your account yet?
-          </Text>
-          <Button
-            onPress={() =>
-              navigation.navigate('SignUp', {
-                forward: encodeURIComponent(''),
-              })
-            }
-            title="Sign Up"
-            color="blue"
-            style={{color: 'blue'}}>
-            <Text>Sign Up</Text>
-          </Button>
-        </View>
+            }}>
+            <Text style={styles.externalButtonText}>Login</Text>
+          </TouchableOpacity>
+        )}
+        <Text style={styles.externalSubText}>
+          Haven't linked your account yet?
+        </Text>
+        <Button
+          onPress={() =>
+            navigation.navigate('SignUp', {
+              forward: encodeURIComponent(''),
+            })
+          }
+          title="Sign Up">
+          <Text style={{color: '#4b9288'}}>Sign Up</Text>
+        </Button>
       </View>
     );
   };
@@ -513,6 +519,14 @@ const Login = () => {
           onChangeText={setUsername}
           value={username}
           placeholder="Username/Email"
+          placeholderTextColor={'white'}
+          mode={'flat'}
+          underlineColor="transparent"
+          theme={{
+            colors: {
+              primary: 'transparent', // Outline color when focused
+            },
+          }}
         />
         <TextInput
           style={styles.input}
@@ -520,6 +534,14 @@ const Login = () => {
           value={password}
           placeholder="Password"
           secureTextEntry={true}
+          placeholderTextColor={'white'}
+          mode={'flat'}
+          underlineColor="transparent"
+          theme={{
+            colors: {
+              primary: 'transparent', // Outline color when focused
+            },
+          }}
         />
         <TouchableOpacity
           onPress={loginFunction}
@@ -569,41 +591,10 @@ const Login = () => {
   };
 
   return (
-    <ImageBackground
-      source={loginImage}
-      style={[
-        styles.container,
-        {backgroundColor: theme.colors.background.default},
-      ]}>
-      <View
-        style={{
-          position: 'absolute',
-          top: 20, // Adjust the top position as needed
-          left: 35, // Adjust the left position as needed
-          flexDirection: 'row',
-        }}>
-        <SvgXml
-          xml={finalGigoLogo}
-          width={imageWidth}
-          height={imageWidth}
-          color="white"
-        />
-        <Text
-          style={{
-            paddingTop: 15,
-            paddingLeft: 15,
-            fontWeight: 'bold', // Customize the text style
-            fontSize:
-              Dimensions.get('window').width > 1000
-                ? 32
-                : Dimensions.get('window').width * 0.05, // Adjust the font size
-            color: 'white',
-          }}>
-          works on our machine.
-        </Text>
-      </View>
+    <View>
+      <Image source={require('../img/loginJungle.png')} />
       {external ? renderExternal() : renderLogin()}
-    </ImageBackground>
+    </View>
   );
 };
 

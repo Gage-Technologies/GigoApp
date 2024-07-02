@@ -115,7 +115,8 @@ const JourneyMain = () => {
         })
       );
 
-      setUnits(prevUnits => [...prevUnits, ...fetchedUnits]);
+      // setUnits(prevUnits => [...prevUnits, ...fetchedUnits]);
+      setUnits([fetchedUnits[fetchedUnits.length - 1]]);
       setActiveJourney(true); // Journey has started
       setLoading(false);
     } catch (error: any) {
@@ -158,24 +159,26 @@ const JourneyMain = () => {
             reducedTransparencyFallbackColor={theme.colors.background}
           >
             <View style={styles.buttonWrapper}>
-              <AwesomeButton
-                width={300}
-                height={80}
-                borderRadius={20}
-                textSize={28}
-                backgroundColor={theme.colors.primary}
-                // @ts-ignore
-                backgroundDarker={theme.colors.primaryVariant}
-                // @ts-ignore
-                textColor={theme.colors.primaryVariant}
-                onPress={() => {
-                  // handle adding unit to journey
-                  console.log("Add Unit To Journey");
-                }}
-                style={styles.addUnitButton}
-              >
-                Add Unit To Journey
-              </AwesomeButton>
+              <View style={styles.buttonContainer}>
+                <AwesomeButton
+                  width={300}
+                  height={80}
+                  borderRadius={20}
+                  textSize={28}
+                  backgroundColor={theme.colors.primary}
+                  // @ts-ignore
+                  backgroundDarker={theme.colors.primaryVariant}
+                  // @ts-ignore
+                  textColor={theme.colors.primaryVariant}
+                  onPress={() => {
+                    // handle adding unit to journey
+                    console.log("Add Unit To Journey");
+                  }}
+                  style={styles.addUnitButton}
+                >
+                  Add Unit To Journey
+                </AwesomeButton>
+              </View>
             </View>
           </BlurView>
         )}
@@ -325,6 +328,11 @@ const styles = StyleSheet.create({
     height: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  buttonContainer: {
+    width: 300,
+    height: 80,
+    alignSelf: 'center',
   },
   addUnitButton: {
     alignSelf: 'center',

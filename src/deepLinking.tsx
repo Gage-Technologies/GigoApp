@@ -1,6 +1,7 @@
 import { Linking } from 'react-native';
 import { NavigationContainerRef } from '@react-navigation/native';
 
+// @ts-ignore
 export const handleDeepLink = (navigationRef: React.RefObject<NavigationContainerRef>) => {
     console.log("within deep link")
     Linking.addEventListener('url', async (event) => {
@@ -21,6 +22,12 @@ export const handleDeepLink = (navigationRef: React.RefObject<NavigationContaine
             const byteId = parsedUrl.searchParams.get('id');
             const isJourney = parsedUrl.searchParams.get('isJourney');
             navigationRef.current?.navigate('Byte', { byteId: byteId, isJourney: isJourney });
+            return
+        }
+
+        if (path === 'journey') {
+            navigationRef.current?.navigate('JourneyMain');
+            return
         }
     });
 };

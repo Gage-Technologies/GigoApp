@@ -620,7 +620,7 @@ const CreateNewAccount = () => {
 
                 // this makes sure the dispatch occurs
                 sleep(1000).then(() => {
-                  navigation.navigate('Home');
+                  navigation.navigate('JourneyMain');
                 });
               } else {
                 Alert.alert(
@@ -792,7 +792,7 @@ const CreateNewAccount = () => {
 
                 // this makes sure the dispatch occurs
                 sleep(1000).then(() => {
-                  navigation.navigate('Home');
+                  navigation.navigate('JourneyMain');
                 });
               } else {
                 Alert.alert(
@@ -1154,7 +1154,7 @@ const CreateNewAccount = () => {
             console.log('made it here');
 
             // @ts-ignore
-            navigation.navigate('Home');
+            navigation.navigate('JourneyMain');
           }
         },
       );

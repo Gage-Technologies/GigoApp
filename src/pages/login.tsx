@@ -364,7 +364,7 @@ const Login = () => {
 
         setTimeout(() => {
           // @ts-ignore
-          navigation.navigate('Home');
+          navigation.navigate('JourneyMain');
         }, 1000);
       } else {
         Alert.alert(
@@ -433,7 +433,7 @@ const Login = () => {
         //                 trackEvent(payload);
 
         // @ts-ignore
-        navigation.navigate('Home');
+        navigation.navigate('JourneyMain');
       } else if (auth.includes('Too many failed attempts')) {
         Alert.alert('Login failed.', auth);
         setLoading(false);

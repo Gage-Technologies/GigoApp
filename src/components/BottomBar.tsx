@@ -1,8 +1,8 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import Home from '../pages/Home';
-import Login from "../pages/Login";
 import { Ionicons } from '@expo/vector-icons';
+import Login from '../pages/login';
+import JourneyMain from '../pages/journeyMain';
 
 const Tab = createBottomTabNavigator();
 
@@ -23,7 +23,7 @@ const BottomBar: React.FC = () => {
         tabBarInactiveTintColor: 'gray',
       })}
     >
-      <Tab.Screen name="Home" component={Home} options={{ headerShown: false }} />
+      <Tab.Screen name="Home" component={JourneyMain} options={{ headerShown: false }} />
       <Tab.Screen name="Login" component={Login} options={{ headerShown: false }} />
     </Tab.Navigator>
   );

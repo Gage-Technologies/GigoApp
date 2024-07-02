@@ -112,8 +112,7 @@ const JourneyMain = () => {
         })
       );
 
-      // setUnits(prevUnits => [...prevUnits, ...fetchedUnits]);
-      setUnits([fetchedUnits[fetchedUnits.length - 1]]);
+      setUnits(prevUnits => [...prevUnits, ...fetchedUnits]);
       setActiveJourney(true); // Journey has started
       setLoading(false);
     } catch (error: any) {

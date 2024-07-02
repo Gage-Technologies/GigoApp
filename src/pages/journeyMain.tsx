@@ -24,7 +24,6 @@ const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
   const [activeJourney, setActiveJourney] = useState<boolean | null>(null);
-  const [userId, setUserId] = useState(1684239109222039552);
   const [showHandout, setShowHandout] = useState<number | null>(null);
   const [openDetourPop, setOpenDetourPop] = useState(false);
 
@@ -63,7 +62,6 @@ const JourneyMain = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_id: userId,
           skip: units.length,
           limit: 5,
         }),
@@ -89,7 +87,6 @@ const JourneyMain = () => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              user_id: userId,
               unit_id: unit._id,
             }),
           });
@@ -152,35 +149,33 @@ const JourneyMain = () => {
           <JourneyMap unitId={unit._id} unitIndex={index} taskOffset={taskOffset} />
         </View>
         {isPendingAcceptance && (
-          <BlurView
-            style={styles.blurOverlay}
-            blurType="dark"
-            blurAmount={3}
-            reducedTransparencyFallbackColor={theme.colors.background}
-          >
+          <View style={styles.blurOverlay}>
+            <BlurView
+              style={styles.blurView}
+              blurType="dark"
+              blurAmount={3}
+              reducedTransparencyFallbackColor={theme.colors.background}
+            />
             <View style={styles.buttonWrapper}>
-              <View style={styles.buttonContainer}>
-                <AwesomeButton
-                  width={300}
-                  height={80}
-                  borderRadius={20}
-                  textSize={28}
-                  backgroundColor={theme.colors.primary}
-                  // @ts-ignore
-                  backgroundDarker={theme.colors.primaryVariant}
-                  // @ts-ignore
-                  textColor={theme.colors.primaryVariant}
-                  onPress={() => {
-                    // handle adding unit to journey
-                    console.log("Add Unit To Journey");
-                  }}
-                  style={styles.addUnitButton}
-                >
-                  Add Unit To Journey
-                </AwesomeButton>
-              </View>
+              <AwesomeButton
+                width={300}
+                height={80}
+                borderRadius={20}
+                textSize={28}
+                backgroundColor={theme.colors.primary}
+                // @ts-ignore
+                backgroundDarker={theme.colors.primaryVariant}
+                // @ts-ignore
+                textColor={theme.colors.primaryVariant}
+                onPress={() => {
+                  // handle adding unit to journey
+                  console.log("Add Unit To Journey");
+                }}
+              >
+                Add Unit To Journey
+              </AwesomeButton>
             </View>
-          </BlurView>
+          </View>
         )}
         {isLastIndex && !isPendingAcceptance && (
           <TouchableOpacity onPress={() => setOpenDetourPop(true)} style={styles.fab}>
@@ -323,21 +318,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  blurView: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
   buttonWrapper: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  buttonContainer: {
-    width: 300,
-    height: 80,
-    alignSelf: 'center',
-  },
-  addUnitButton: {
-    alignSelf: 'center',
-    width: 300,
-    height: 80,
+    zIndex: 1,
   },
 });
 

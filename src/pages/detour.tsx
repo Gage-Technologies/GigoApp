@@ -9,7 +9,6 @@ import {
   ScrollView,
 } from 'react-native';
 import {useTheme, IconButton, Button} from 'react-native-paper';
-import LinearGradient from 'react-native-linear-gradient';
 import Config from 'react-native-config';
 import {debounce} from 'lodash';
 import DetourCard from '../components/DetourCard'; 
@@ -216,18 +215,19 @@ const Detour = () => {
       flex: 1,
       backgroundColor: theme.colors.background,
     },
-    titleContainer: {
-      width: '100%',
-      paddingVertical: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
-      backgroundColor: '#29C18C',
-    },
     titleText: {
       fontSize: 24,
       color: theme.colors.text,
       fontWeight: 'bold',
       ...theme.fonts.medium,
+      marginVertical: 20,
+      textAlign: 'center',
+    },
+    headerLine: {
+      height: 1,
+      backgroundColor: '#ccc',
+      width: '100%',
+      marginVertical: 10,
     },
     searchBarContainer: {
       width: '90%',
@@ -293,16 +293,13 @@ const Detour = () => {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={['#29C18C', '#1c8762', '#145D46']}
-        style={styles.titleContainer}>
-        <Text style={styles.titleText}>Take A Detour</Text>
-      </LinearGradient>
+      <Text style={styles.titleText}>Take A Detour</Text>
+      <View style={styles.headerLine} />
       <View style={styles.searchBarContainer}>
         <IconButton icon="magnify" size={25} color={theme.colors.surface} />
         <TextInput
           style={styles.searchBar}
-          placeholder="Search..."
+          placeholder="Search Detours..."
           placeholderTextColor="#888"
           value={searchText}
           onChangeText={handleSearchTextChange}
@@ -316,4 +313,3 @@ const Detour = () => {
 };
 
 export default Detour;
-

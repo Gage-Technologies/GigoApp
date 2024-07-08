@@ -8171,6 +8171,11 @@ react-native-dotenv@^3.4.11:
   dependencies:
     dotenv "^16.4.5"
 
+react-native-fast-image@^8.6.3:
+  version "8.6.3"
+  resolved "https://registry.npmjs.org/react-native-fast-image/-/react-native-fast-image-8.6.3.tgz#6edc3f9190092a909d636d93eecbcc54a8822255"
+  integrity sha512-Sdw4ESidXCXOmQ9EcYguNY2swyoWmx53kym2zRsvi+VeFCHEdkO+WG1DK+6W81juot40bbfLNhkc63QnWtesNg==
+
 react-native-fs@^2.20.0:
   version "2.20.0"
   resolved "https://registry.yarnpkg.com/react-native-fs/-/react-native-fs-2.20.0.tgz#05a9362b473bfc0910772c0acbb73a78dbc810f6"
@@ -8257,7 +8262,7 @@ react-native-screens@^3.31.1:
 
 react-native-svg-transformer@^1.4.0:
   version "1.4.0"
-  resolved "https://registry.yarnpkg.com/react-native-svg-transformer/-/react-native-svg-transformer-1.4.0.tgz#d17502d3659cfe58780ca28cb13b353cb68bbd76"
+  resolved "https://registry.npmjs.org/react-native-svg-transformer/-/react-native-svg-transformer-1.4.0.tgz#d17502d3659cfe58780ca28cb13b353cb68bbd76"
   integrity sha512-ZJ9dpSl8EONXbFQcVoGVr0cAl/7Vm/sKtOH1V6Mf9lcdyeT1/rfww43xgSfQWjmneTNTTXjslM5EoyZTHPfawQ==
   dependencies:
     "@svgr/core" "^8.1.0"
@@ -8267,7 +8272,7 @@ react-native-svg-transformer@^1.4.0:
 
 react-native-svg@^15.3.0:
   version "15.3.0"
-  resolved "https://registry.yarnpkg.com/react-native-svg/-/react-native-svg-15.3.0.tgz#e24b833fe330714c99f1dd894bb0da52ad859a4c"
+  resolved "https://registry.npmjs.org/react-native-svg/-/react-native-svg-15.3.0.tgz#e24b833fe330714c99f1dd894bb0da52ad859a4c"
   integrity sha512-mBHu/fdlzUbpGX8SZFxgbKvK/sgqLfDLP8uh8G7Us+zJgdjO8OSEeqHQs+kPRdQmdLJQiqPJX2WXgCl7ToTWqw==
   dependencies:
     css-select "^5.1.0"

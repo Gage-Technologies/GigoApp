@@ -1,46 +1,86 @@
+/* eslint-disable prettier/prettier */
 import React from 'react';
-import {View, Text, StyleSheet, Image} from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
 import {Card} from 'react-native-paper';
 import {useTheme} from 'react-native-paper';
+import FastImage from 'react-native-fast-image';
+import CppLogo from '../img/Cpp_Logo.svg';
+import GoLogo from '../img/Go-Logo-Blue.svg';
+import CSharpLogo from '../img/Logo_C_sharp.svg';
+import JavaScriptLogo from '../img/logo-javascript.svg';
+import RustLogo from '../img/logo-rust.svg';
+import PythonLogo from '../img/python-logo.svg';
+import Config from 'react-native-config';
 
 interface DetourCardProps {
   data: {
     id: string;
-    title: string;
+    name: string;
     image: string;
-    language: string;
+    langs: string[];
   };
 }
-
-const languageLogos = {
-  'C++': require('../img/Cpp_Logo.svg'),
-  Go: require('../img/Go-Logo-Blue.svg'),
-  'C#': require('../img/Logo_C_sharp.svg'),
-  JavaScript: require('../img/logo-javascript.svg'),
-  Rust: require('../img/logo-rust.svg'),
-  Python: require('../img/python-logo.svg'),
-};
 
 const DetourCard: React.FC<DetourCardProps> = ({data}) => {
   const theme = useTheme();
 
+  // log the data object to debug
+  console.log('DetourCard data:', data);
+
+  // function to render the appropriate logo based on the language
+  const renderLogo = (langs: string[]) => {
+    if (!langs || langs.length === 0) return null;
+
+    const lang = langs[0].toLowerCase();
+    switch (lang) {
+      case 'python':
+      case 'py':
+        return <PythonLogo width={30} height={30} style={styles.logo} />;
+      case 'golang':
+      case 'go':
+        return <GoLogo width={30} height={30} style={styles.logo} />;
+      case 'rust':
+      case 'rs':
+        return <RustLogo width={30} height={30} style={styles.logo} />;
+      case 'cpp':
+      case 'c++':
+      case 'cc':
+      case 'cxx':
+        return <CppLogo width={30} height={30} style={styles.logo} />;
+      case 'javascript':
+      case 'js':
+        return <JavaScriptLogo width={30} height={30} style={styles.logo} />;
+      case 'c#':
+      case 'csharp':
+      case 'cs':
+        return <CSharpLogo width={30} height={30} style={styles.logo} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <Card style={[styles.card, {backgroundColor: theme.colors.surface}]}>
       <View style={styles.content}>
-        <View style={styles.info}>
+        <View style={styles.header}>
           <Text
             style={[
               styles.title,
               {color: theme.colors.text, ...theme.fonts.medium},
-            ]}>
-            {data.title}
+            ]}
+            numberOfLines={2}
+            ellipsizeMode="tail"
+          >
+            {data.name}
           </Text>
-          <Image
-            source={languageLogos[data.language]}
-            style={styles.languageLogo}
-          />
         </View>
-        <Image source={{uri: data.image}} style={styles.image} />
+        <FastImage
+          source={{uri: `${Config.API_URL}/static/junit/t/${data._id}`}}
+          style={styles.image}
+          onError={e => console.log('Image Load Error:', e.nativeEvent.error)}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+        <View style={styles.logoContainer}>{renderLogo(data.langs)}</View>
       </View>
     </Card>
   );
@@ -48,35 +88,41 @@ const DetourCard: React.FC<DetourCardProps> = ({data}) => {
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
     borderRadius: 10,
     overflow: 'hidden',
     elevation: 3,
     margin: 5,
+    width: '100%',
   },
   content: {
-    flexDirection: 'row',
     width: '100%',
-    height: 100,
+    height: 200,
   },
-  info: {
-    width: '40%',
+  header: {
+    height: '33%',
     padding: 10,
     justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
-    fontSize: 16,
-    marginBottom: 10,
-  },
-  languageLogo: {
-    width: 30,
-    height: 30,
-    resizeMode: 'contain',
+    fontSize: 14,
   },
   image: {
-    width: '60%',
-    height: '100%',
+    height: '67%',
+    width: '100%',
     resizeMode: 'cover',
+  },
+  logoContainer: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 15,
+    padding: 5,
+  },
+  logo: {
+    width: 30,
+    height: 30,
   },
 });
 

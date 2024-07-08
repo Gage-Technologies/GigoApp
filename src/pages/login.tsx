@@ -1,5 +1,5 @@
 import React from 'react';
-import {useTheme, TextInput, Button} from 'react-native-paper';
+import { useTheme, TextInput, Button } from 'react-native-paper';
 import {
   View,
   Text,
@@ -9,20 +9,22 @@ import {
   ImageBackground,
   Dimensions,
   Alert,
+  KeyboardAvoidingView, // Add this import
+  Platform, // Add this import
 } from 'react-native';
 import loginImage from '../components/img/login_background_cropped.jpg';
 import googleLogo from '../components/Icons/login/google_g.png';
-import {SvgXml} from 'react-native-svg';
-import {useNavigation} from '@react-navigation/native';
-import {authorizeGithub, authorizeGoogle} from '../services/auth.js';
-import {authorize} from '../../auth.js';
-import {initialAuthStateUpdate, updateAuthState} from '../reducers/auth.ts';
-import {useDispatch} from 'react-redux';
+import { SvgXml } from 'react-native-svg';
+import { useNavigation } from '@react-navigation/native';
+import { authorizeGithub, authorizeGoogle } from '../services/auth.js';
+import { authorize } from '../../auth.js';
+import { initialAuthStateUpdate, updateAuthState } from '../reducers/auth.ts';
+import { useDispatch } from 'react-redux';
 import LoginGithub from '../components/Login/Github/LoginGithub';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const githubLogo = `
 <svg width="100%" height="100%" viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
@@ -92,18 +94,18 @@ const Login = () => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      padding: 20,
+      // padding: 20,
     },
     box: {
       backgroundColor: '#1c3f30',
       borderRadius: 20,
       width: width, // 90% of screen width
-      height: height * 0.5, // 25% of screen height
+      height: height * 0.6, // 25% of screen height
       alignItems: 'center',
       justifyContent: 'center',
       padding: 20,
       position: 'absolute',
-      bottom: 24,
+      bottom: -16,
     },
     header: {
       fontSize: 24,
@@ -112,14 +114,14 @@ const Login = () => {
     },
     input: {
       width: '80%',
-      height: 30,
       marginBottom: 20,
-      borderRadius: 10,
-      borderWidth: 1,
-      padding: 10,
-      color: 'white',
       backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      borderColor: 'gray',
+      borderRadius: 10,
+    },
+    inputLabel: {
+      color: 'white',
+      backgroundColor: 'transparent', // match this with your box background color
+      paddingHorizontal: 4,
     },
     signInWith: {
       marginVertical: 20,
@@ -301,7 +303,7 @@ const Login = () => {
     }
   };
 
-  const onSuccessGithub = async (gh: {code: React.SetStateAction<string>}) => {
+  const onSuccessGithub = async (gh: { code: React.SetStateAction<string> }) => {
     //         trackEvent({
     //             host: 'mobile_app', // Since there's no window.location in RN
     //             event: 'LoginStart',
@@ -503,11 +505,15 @@ const Login = () => {
             })
           }
           title="Sign Up">
-          <Text style={{color: '#4b9288'}}>Sign Up</Text>
+          <Text style={{ color: '#4b9288' }}>Sign Up</Text>
         </Button>
       </View>
     );
   };
+
+  const renderLabel = (label: string) => (
+    <Text style={styles.inputLabel}>{label}</Text>
+  );
 
   let renderLogin = () => {
     // @ts-ignore
@@ -515,33 +521,32 @@ const Login = () => {
       <View style={styles.box}>
         <Text style={styles.header}>Sign In</Text>
         <TextInput
-          style={styles.input}
-          onChangeText={setUsername}
+          label={renderLabel("Username")}
           value={username}
-          placeholder="Username/Email"
-          placeholderTextColor={'white'}
-          mode={'flat'}
+          onChangeText={setUsername}
+          style={styles.input}
+          mode="flat"
           underlineColor="transparent"
-          theme={{
-            colors: {
-              primary: 'transparent', // Outline color when focused
-            },
-          }}
+          activeUnderlineColor="transparent"
+          textColor="white"
+          cursorColor="white"
+          placeholderTextColor="rgba(255, 255, 255, 0.5)"
+          theme={{ colors: { text: 'white', placeholder: 'rgba(255, 255, 255, 0.5)' } }}
         />
         <TextInput
-          style={styles.input}
-          onChangeText={setPassword}
+          label={renderLabel("Password")}
           value={password}
-          placeholder="Password"
-          secureTextEntry={true}
-          placeholderTextColor={'white'}
-          mode={'flat'}
+          onChangeText={setPassword}
+          secureTextEntry={!showPass}
+          style={styles.input}
+          mode="flat"
           underlineColor="transparent"
-          theme={{
-            colors: {
-              primary: 'transparent', // Outline color when focused
-            },
-          }}
+          activeUnderlineColor="transparent"
+          textColor="white"
+          cursorColor="white"
+          placeholderTextColor="rgba(255, 255, 255, 0.5)"
+          theme={{ colors: { text: 'white', placeholder: 'rgba(255, 255, 255, 0.5)' } }}
+          right={<TextInput.Icon icon={showPass ? "eye-off" : "eye"} onPress={() => setShowPass(!showPass)} color="white" />}
         />
         <TouchableOpacity
           onPress={loginFunction}
@@ -581,7 +586,7 @@ const Login = () => {
             redirectUri={''}
             onSuccess={onSuccessGithub}
             onFailure={onFailureGithub}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <SvgXml xml={githubLogo} width={imageWidth} height={imageWidth} />
             </View>
           </LoginGithub>
@@ -591,10 +596,13 @@ const Login = () => {
   };
 
   return (
-    <View>
+    <KeyboardAvoidingView // Wrap your content with KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
       <Image source={require('../img/loginJungle.png')} />
       {external ? renderExternal() : renderLogin()}
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

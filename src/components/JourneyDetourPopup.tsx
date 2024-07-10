@@ -128,6 +128,7 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
 
   const renderStage2 = () => {
     const selectedIndex = journeyUnitMap.findIndex(unit => unit._id === selectedUnitId);
+    const unitHeight = 90; // This should match the height of your unitItem plus its marginBottom
 
     return (
       <ScrollView>
@@ -164,24 +165,26 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
             Unit Map
           </Text>
           <View style={styles.unitMapContent}>
-            <UnitSelector
-              unitCount={journeyUnitMap.length}
-              selectedIndex={selectedIndex}
-              onSelectUnit={(index) => handleUnitSelect(journeyUnitMap[index])}
-            />
+            <View style={styles.unitSelectorContainer}>
+              <UnitSelector
+                unitCount={journeyUnitMap.length}
+                selectedIndex={selectedIndex}
+                onSelectUnit={(index) => handleUnitSelect(journeyUnitMap[index])}
+                unitHeight={unitHeight} // Pass the unitHeight
+              />
+            </View>
             <View style={styles.cardsContainer}>
               {journeyUnitMap.map((journeyUnit, index) => {
                 const isSelected = selectedUnitId === journeyUnit._id;
                 return (
                   <View key={journeyUnit._id} style={styles.unitItem}>
-                    <View style={styles.journeyUnitCardContainer}>
-                      <JourneyUnitCard
-                        data={journeyUnit}
-                        onPress={() => handleUnitSelect(journeyUnit)}
-                        isSelected={isSelected}
-                        currentUnit={selectedUnitId}
-                      />
-                    </View>
+                    <JourneyUnitCard
+                      data={journeyUnit}
+                      onPress={() => handleUnitSelect(journeyUnit)}
+                      isSelected={isSelected}
+                      currentUnit={selectedUnitId}
+                      unitNumber={index + 1}
+                    />
                   </View>
                 );
               })}
@@ -283,14 +286,16 @@ const styles = StyleSheet.create({
   unitMapContent: {
     flexDirection: 'row',
   },
+  unitSelectorContainer: {
+    width: 30,
+    marginRight: 10,
+  },
   cardsContainer: {
     flex: 1,
   },
   unitItem: {
-    marginBottom: 8,
-  },
-  journeyUnitCardContainer: {
-    maxHeight: 80,
+    marginBottom: 10,
+    height: 80,
   },
   explanationContainer: {
     marginBottom: 15,

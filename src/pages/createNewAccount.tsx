@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import {useTheme, TextInput, Button} from 'react-native-paper';
+import React, { useState } from 'react';
+import { useTheme, TextInput, Button } from 'react-native-paper';
 import {
   View,
   Text,
@@ -10,27 +10,29 @@ import {
   Dimensions,
   Alert,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import loginImage from '../components/img/login_background_cropped.jpg';
 import googleLogo from '../components/Icons/login/google_g.png';
-import {SvgXml} from 'react-native-svg';
-import {useNavigation} from '@react-navigation/native';
+import { SvgXml } from 'react-native-svg';
+import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import debounce from 'lodash/debounce';
 import LoginGithub from '../components/Login/Github/LoginGithub';
 // import Avataaar from "../components/Avatar/avatar.js"
 import profilePic from '../components/Avatar/profile-pic.svg';
 import Config from 'react-native-config';
-import {useDispatch} from 'react-redux';
-import {authorizeGithub, authorizeGoogle} from '../services/auth.js';
-import {authorize} from '../../auth.js';
-import {GoogleSignin} from '@react-native-google-signin/google-signin';
-import {initialAuthStateUpdate, updateAuthState} from '../reducers/auth.ts';
+import { useDispatch } from 'react-redux';
+import { authorizeGithub, authorizeGoogle } from '../services/auth.js';
+import { authorize } from '../../auth.js';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { initialAuthStateUpdate, updateAuthState } from '../reducers/auth.ts';
 import fetchWithUpload from '../services/api-call.tsx';
 
 const screenWidth = Dimensions.get('window').width;
 const imageWidth = screenWidth * 0.1; // 15% of the screen width
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 import moment from 'moment-timezone';
 import Icon from "react-native-vector-icons/FontAwesome";
 
@@ -151,6 +153,11 @@ const CreateNewAccount = () => {
   const [creationStep, setCreationStep] = React.useState(0);
 
   const styles = StyleSheet.create({
+    keyboardContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     container: {
       flex: 1,
       justifyContent: 'center',
@@ -161,9 +168,11 @@ const CreateNewAccount = () => {
       backgroundColor: '#1c3f30',
       borderRadius: 10,
       width: width, // 99% of screen width
-      height: height * 0.55, // 70% of screen height
+      height: 460, // 70% of screen height
       alignItems: 'center',
       justifyContent: 'center',
+      position: 'absolute',
+      bottom: -16,
       padding: 20,
     },
     openingBox: {
@@ -352,143 +361,6 @@ const CreateNewAccount = () => {
     },
   });
 
-  // const RenderExternal = ({
-  //   navigation,
-  //   setPassword,
-  //   showPass,
-  //   password,
-  //   loading,
-  //   externalLogin,
-  //   googleSignIn,
-  //   githubConfirm,
-  //   forwardPath,
-  // }) => {
-  //   const width = Dimensions.get('window').width; // Get window width to adjust styles dynamically
-  //
-  //   return (
-  //     <ScrollView contentContainerStyle={styles.container}>
-  //       <View>
-  //         <Text style={styles.header}>Create a Password</Text>
-  //         <TextInput
-  //           style={styles.input}
-  //           placeholder="Password"
-  //           secureTextEntry={!showPass}
-  //           value={password}
-  //           onChangeText={setPassword}
-  //         />
-  //         <TextInput
-  //           style={styles.input}
-  //           placeholder="Confirm Password"
-  //           secureTextEntry={!showPass}
-  //           value={confirmPass}
-  //           onChangeText={setConfirmPass}
-  //         />
-  //         <Button
-  //           title="Create Account"
-  //           onPress={handleCreateAccount}
-  //           disabled={loading}
-  //         />
-  //         <Text style={styles.footerText}>Already linked your account?</Text>
-  //         <Button
-  //           title="Sign in"
-  //           onPress={() => navigation.navigate('Login')} // Make sure the route is correctly defined in your navigator
-  //         />
-  //       </View>
-  //     </ScrollView>
-  //   );
-  // };
-
-  //     useEffect(() => {
-  //         const configureGoogleSignIn = async () => {
-  //             const scopes = ['openid', 'email', 'profile'];
-  //             await GoogleSignin.configure({
-  //                 androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-  //                 scopes: scopes
-  //             });
-  //             console.log("Configured scopes:", scopes);
-  //         };
-  //
-  //         configureGoogleSignIn();
-  //     }, []);
-
-  // const setAvatar = (
-  //   e:
-  //     | {
-  //         topType: string;
-  //         accessoriesType: string;
-  //         avatarRef: {};
-  //         hairColor: string;
-  //         facialHairType: string;
-  //         clotheType: string;
-  //         clotheColor: string;
-  //         eyeType: string;
-  //         eyebrowType: string;
-  //         mouthType: string;
-  //         avatarStyle: string;
-  //         skinColor: string;
-  //       }
-  //     | ((prevState: {
-  //         topType: string;
-  //         accessoriesType: string;
-  //         avatarRef: {};
-  //         hairColor: string;
-  //         facialHairType: string;
-  //         clotheType: string;
-  //         clotheColor: string;
-  //         eyeType: string;
-  //         eyebrowType: string;
-  //         mouthType: string;
-  //         avatarStyle: string;
-  //         skinColor: string;
-  //       }) => {
-  //         topType: string;
-  //         accessoriesType: string;
-  //         avatarRef: {};
-  //         hairColor: string;
-  //         facialHairType: string;
-  //         clotheType: string;
-  //         clotheColor: string;
-  //         eyeType: string;
-  //         eyebrowType: string;
-  //         mouthType: string;
-  //         avatarStyle: string;
-  //         skinColor: string;
-  //       })
-  //     | ((prevState: {
-  //         topType: string;
-  //         accessoriesType: string;
-  //         avatarRef: object;
-  //         hairColor: string;
-  //         facialHairType: string;
-  //         clotheType: string;
-  //         clotheColor: string;
-  //         eyeType: string;
-  //         eyebrowType: string;
-  //         mouthType: string;
-  //         avatarStyle: string;
-  //         skinColor: string;
-  //       }) => {
-  //         topType: string;
-  //         accessoriesType: string;
-  //         avatarRef: object;
-  //         hairColor: string;
-  //         facialHairType: string;
-  //         clotheType: string;
-  //         clotheColor: string;
-  //         eyeType: string;
-  //         eyebrowType: string;
-  //         mouthType: string;
-  //         avatarStyle: string;
-  //         skinColor: string;
-  //       }),
-  // ) => {
-  //   setAttributes(e);
-  //
-  //   setAvatarRef(e.avatarRef.current);
-  //   setIsAvatarInitialized(isAvatarInitialized + 1);
-  //   // setLastStepDisabled(false)
-  // };
-
   const onSuccessGoogle = async (usr: React.SetStateAction<string> | null) => {
     setExternal(true);
     // @ts-ignore
@@ -496,7 +368,7 @@ const CreateNewAccount = () => {
     setExternalLogin('Google');
   };
 
-  const onSuccessGithub = async (gh: {code: React.SetStateAction<string>}) => {
+  const onSuccessGithub = async (gh: { code: React.SetStateAction<string> }) => {
     console.log('here in success');
 
     setExternalToken(gh.code);
@@ -817,7 +689,7 @@ const CreateNewAccount = () => {
   const verifyEmail = async (emailParam: string) => {
     if (emailParam === '') {
       Alert.alert('You must input a valid email', '', [
-        {text: 'OK', style: 'cancel'},
+        { text: 'OK', style: 'cancel' },
       ]);
       return false; // Directly return false when emailParam is empty
     }
@@ -829,7 +701,7 @@ const CreateNewAccount = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({email: emailParam}),
+        body: JSON.stringify({ email: emailParam }),
       });
       res = await res.json();
 
@@ -838,14 +710,14 @@ const CreateNewAccount = () => {
         Alert.alert(
           'An unexpected error has occurred',
           "We're sorry, we'll get right on that!",
-          [{text: 'OK', style: 'cancel'}],
+          [{ text: 'OK', style: 'cancel' }],
         );
         return false;
       } else if (res.valid === false) {
         Alert.alert(
           'Invalid Email Address',
           'Please enter a valid email address and retry',
-          [{text: 'OK', style: 'cancel'}],
+          [{ text: 'OK', style: 'cancel' }],
         );
         return false;
       } else if (res.valid === true) {
@@ -854,7 +726,7 @@ const CreateNewAccount = () => {
     } catch (error) {
       console.log('error: ', error); // Log the error
       Alert.alert('Network Error', 'Unable to connect to the server.', [
-        {text: 'OK', style: 'cancel'},
+        { text: 'OK', style: 'cancel' },
       ]);
       return false;
     }
@@ -1019,7 +891,7 @@ const CreateNewAccount = () => {
       //             }
       //             const byteArray = new Uint8Array(byteNumbers);
       // @ts-ignore
-      const blob = new Blob([svgString], {type: 'image/svg+xml'});
+      const blob = new Blob([svgString], { type: 'image/svg+xml' });
       return blob;
     } catch (error) {
       console.error('Error converting svg to Blob:', error);
@@ -1168,88 +1040,79 @@ const CreateNewAccount = () => {
   const debouncedAccountCreation = debounce(accountCreation, 3000);
 
   const renderExternal = () => {
-    // @ts-ignore
-    // @ts-ignore
     return step === 0 ? (
-      <View>
-        <Image source={require('../img/monkeyJungle.png')} />
-        <View style={styles.container}>
-          <View style={styles.box}>
-            <Text style={styles.header}>Create a Password</Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  borderColor:
-                    password.length > 5 && password !== '' ? 'green' : 'red',
-                },
-              ]}
-              placeholder="Password"
-              secureTextEntry={!showPass}
-              value={password}
-              onChangeText={setPassword}
-              placeholderTextColor={'white'}
-              mode={'flat'}
-              underlineColor="transparent"
-              theme={{
-                colors: {
-                  primary: 'transparent', // Outline color when focused
-                },
-              }}
-            />
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  borderColor:
-                    password === confirmPass && password !== '' ? 'green' : 'red',
-                },
-              ]}
-              placeholder="Confirm Password"
-              secureTextEntry={!showPass}
-              value={confirmPass}
-              onChangeText={setConfirmPass}
-              onSubmitEditing={() => {
-                externalLogin === 'Google' ? googleCreate() : githubCreate();
-              }}
-              placeholderTextColor={'white'}
-              mode={'flat'}
-              underlineColor="transparent"
-              theme={{
-                colors: {
-                  primary: 'transparent', // Outline color when focused
-                },
-              }}
-            />
-            <Text style={{color: "white"}}>We use this password to encrypt sensitive information.</Text>
-            <Button
-              onPress={() => {
-                externalLogin === 'Google' ? googleCreate() : githubCreate();
-              }}
-              title="Create Account"
-              disabled={loading}
-              style={styles.buttonExtra}>
-              <Text style={styles.buttonText}>Create Account</Text>
-            </Button>
-            <Text style={styles.signInWith}>Already linked your account?</Text>
-            <Button
-              onPress={() => {
-                // @ts-ignore
-                navigation.navigate('Login');
-              }}
-              title="Sign In"
-              color="blue"
-              style={{marginBottom: 20, marginTop: -10}}>
-              <Text style={{color: '#4b9288'}}>Sign In</Text>
-            </Button>
-          </View>
-        </View>
+      <View style={styles.box}>
+        <Text style={styles.header}>Create a Password</Text>
+        <TextInput
+          style={[
+            styles.input,
+            {
+              borderColor:
+                password.length > 5 && password !== '' ? 'green' : 'red',
+            },
+          ]}
+          placeholder="Password"
+          secureTextEntry={!showPass}
+          value={password}
+          onChangeText={setPassword}
+          placeholderTextColor={'white'}
+          mode={'flat'}
+          underlineColor="transparent"
+          theme={{
+            colors: {
+              primary: 'transparent', // Outline color when focused
+            },
+          }}
+        />
+        <TextInput
+          style={[
+            styles.input,
+            {
+              borderColor:
+                password === confirmPass && password !== '' ? 'green' : 'red',
+            },
+          ]}
+          placeholder="Confirm Password"
+          secureTextEntry={!showPass}
+          value={confirmPass}
+          onChangeText={setConfirmPass}
+          onSubmitEditing={() => {
+            externalLogin === 'Google' ? googleCreate() : githubCreate();
+          }}
+          placeholderTextColor={'white'}
+          mode={'flat'}
+          underlineColor="transparent"
+          theme={{
+            colors: {
+              primary: 'transparent', // Outline color when focused
+            },
+          }}
+        />
+        <Text style={{ color: "white" }}>We use this password to encrypt sensitive information.</Text>
+        <Button
+          onPress={() => {
+            externalLogin === 'Google' ? googleCreate() : githubCreate();
+          }}
+          title="Create Account"
+          disabled={loading}
+          style={styles.buttonExtra}>
+          <Text style={styles.buttonText}>Create Account</Text>
+        </Button>
+        <Text style={styles.signInWith}>Already linked your account?</Text>
+        <Button
+          onPress={() => {
+            // @ts-ignore
+            navigation.navigate('Login');
+          }}
+          title="Sign In"
+          color="blue"
+          style={{ marginBottom: 20, marginTop: -10 }}>
+          <Text style={{ color: '#4b9288' }}>Sign In</Text>
+        </Button>
       </View>
     ) : (
-      <View>
-        <View style={styles.box}>
-          {/* Render questions or other content */}
-        </View>
+      <View style={styles.box}>
+        {/* Render questions or other content */}
       </View>
     );
   };
@@ -1257,314 +1120,196 @@ const CreateNewAccount = () => {
   let renderCreateForm = () => {
     // @ts-ignore
     // @ts-ignore
-    return (
-      <View style={{flex: 1}}>
-        {creationStep === 0 ? (
-          <View>
-            <Image source={require('../img/monkeyJungle.png')} />
-            <View style={styles.openingBox}>
-              <ScrollView contentContainerStyle={styles.container}>
-                <Text
-                  style={{
-                    color: 'white',
-                    fontSize: 26,
-                    fontWeight: 'bold',
-                    marginBottom: 10,
-                  }}>
-                  Learn To Code For Free
-                </Text>
-                <Text style={{color: 'white', fontSize: 20}}>
-                  With Thousands of Lessons
-                </Text>
-                <View style={{flex: 1, justifyContent: 'flex-end'}}>
-                  <Button
-                    mode="contained"
-                    contentStyle={styles.buttonContent}
-                    style={styles.button}
-                    onPress={() => setCreationStep(1)}>
-                    Let's Get Started
-                  </Button>
-                </View>
-              </ScrollView>
-            </View>
+    return creationStep === 0 ? (
+      <View style={styles.openingBox}>
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text
+            style={{
+              color: 'white',
+              fontSize: 26,
+              fontWeight: 'bold',
+              marginBottom: 10,
+            }}>
+            Learn To Code For Free
+          </Text>
+          <Text style={{ color: 'white', fontSize: 20 }}>
+            With Thousands of Lessons
+          </Text>
+          <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+            <Button
+              mode="contained"
+              contentStyle={styles.buttonContent}
+              style={styles.button}
+              onPress={() => setCreationStep(1)}>
+              Let's Get Started
+            </Button>
           </View>
-        ) : (
-          <View>
-            <Image source={require('../img/ghostJungle.png')} />
-            <View style={styles.creationBox}>
-              <TouchableOpacity
-                onPress={() => setCreationStep(0)}
-                style={styles.goBackContainer}>
-                <Icon
-                  name="arrow-left"
-                  size={20}
-                  color="white"
-                  style={styles.icon}
-                />
-                <Text style={styles.goBack}>Go Back</Text>
-              </TouchableOpacity>
-              <ScrollView contentContainerStyle={styles.container}>
-                <Text style={styles.header}>Create Account</Text>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Username"
-                  value={username}
-                  onChangeText={setUsername}
-                  placeholderTextColor={'white'}
-                  mode={'flat'}
-                  underlineColor="transparent"
-                  theme={{
-                    colors: {
-                      primary: 'transparent', // Outline color when focused
-                    },
-                  }}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Email"
-                  value={email}
-                  onChangeText={setEmail}
-                  placeholderTextColor={'white'}
-                  mode={'flat'}
-                  underlineColor="transparent"
-                  theme={{
-                    colors: {
-                      primary: 'transparent', // Outline color when focused
-                    },
-                  }}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  secureTextEntry={true}
-                  value={password}
-                  onChangeText={setPassword}
-                  placeholderTextColor={'white'}
-                  underlineColor="transparent"
-                  mode={'flat'}
-                  theme={{
-                    colors: {
-                      primary: 'transparent', // Outline color when focused
-                    },
-                  }}
-                />
-                <TextInput
-                  style={styles.input}
-                  placeholder="Confirm Password"
-                  secureTextEntry={true}
-                  value={confirmPass}
-                  onChangeText={setConfirmPass}
-                  placeholderTextColor={'white'}
-                  underlineColor="transparent"
-                  mode={'flat'}
-                  theme={{
-                    colors: {
-                      primary: 'transparent', // Outline color when focused
-                    },
-                  }}
-                />
-                <TouchableOpacity
-                  onPress={async () => {
-                    let ok = await validateUser();
-                    if (ok) {
-                      console.log('content');
-                      debouncedAccountCreation();
-                    }
-                  }}
-                  style={styles.buttonExtraCreation}
-                  activeOpacity={0.7}
-                  disabled={
-                    missingEmail ||
-                    missingPassword ||
-                    missingConfirm ||
-                    invalidUsername ||
-                    username === '' ||
-                    email === '' ||
-                    password === '' ||
-                    confirmPass === '' ||
-                    password !== confirmPass
-                  }>
-                  <Text style={styles.buttonText}>Create Account</Text>
-                </TouchableOpacity>
-                <View style={styles.socialLogin}>
-                  <View style={{flexDirection: 'column'}}>
-                    <Text style={styles.signInWith}>Or Register With:</Text>
-                    <View style={styles.loginContainer}>
-                      <TouchableOpacity onPress={() => googleSignUp()}>
-                        <View style={styles.innerContainer}>
-                          <Image style={styles.logo} source={googleLogo} />
-                        </View>
-                      </TouchableOpacity>
-                      <LoginGithub
-                        color={'primary'}
-                        sx={{
-                          // width: window.innerWidth > 1000 ? '7vw' : '25vw',
-                          justifyContent: 'center',
-                          padding: '15px',
-                        }}
-                        clientId="Ov23liWncdWCkys9HUil"
-                        // this redirect URI is for production, testing on dev will not work
-                        redirectUri={'gigoApp://auth/github/callback'}
-                        onSuccess={onSuccessGithub}
-                        onFailure={onFailureGithub}>
-                        <View
-                          style={{flexDirection: 'row', alignItems: 'center'}}>
-                          <SvgXml
-                            xml={githubLogo}
-                            width={imageWidth}
-                            height={imageWidth}
-                          />
-                        </View>
-                      </LoginGithub>
-                    </View>
-                  </View>
-                </View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginTop: 10,
-                  }}>
-                  <Text style={{color: 'white', fontSize: 16, lineHeight: 18}}>
-                    Already have an account?
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => navigation.navigate('Login')}>
-                    <Text
-                      style={{
-                        color: '#a4c598',
-                        fontSize: 16,
-                        marginLeft: 10,
-                        lineHeight: 18,
-                      }}>
-                      Login
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
-            </View>
-          </View>
-        )}
+        </ScrollView>
       </View>
-    );
+    ) : (
+      <View style={styles.creationBox}>
+        <TouchableOpacity
+          onPress={() => setCreationStep(0)}
+          style={styles.goBackContainer}>
+          <Icon
+            name="arrow-left"
+            size={20}
+            color="white"
+            style={styles.icon}
+          />
+          <Text style={styles.goBack}>Go Back</Text>
+        </TouchableOpacity>
+        <ScrollView contentContainerStyle={styles.container}>
+          <Text style={styles.header}>Create Account</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            value={username}
+            onChangeText={setUsername}
+            placeholderTextColor={'white'}
+            mode={'flat'}
+            underlineColor="transparent"
+            theme={{
+              colors: {
+                primary: 'transparent', // Outline color when focused
+              },
+            }}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            placeholderTextColor={'white'}
+            mode={'flat'}
+            underlineColor="transparent"
+            theme={{
+              colors: {
+                primary: 'transparent', // Outline color when focused
+              },
+            }}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Password"
+            secureTextEntry={true}
+            value={password}
+            onChangeText={setPassword}
+            placeholderTextColor={'white'}
+            underlineColor="transparent"
+            mode={'flat'}
+            theme={{
+              colors: {
+                primary: 'transparent', // Outline color when focused
+              },
+            }}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Confirm Password"
+            secureTextEntry={true}
+            value={confirmPass}
+            onChangeText={setConfirmPass}
+            placeholderTextColor={'white'}
+            underlineColor="transparent"
+            mode={'flat'}
+            theme={{
+              colors: {
+                primary: 'transparent', // Outline color when focused
+              },
+            }}
+          />
+          <TouchableOpacity
+            onPress={async () => {
+              let ok = await validateUser();
+              if (ok) {
+                console.log('content');
+                debouncedAccountCreation();
+              }
+            }}
+            style={styles.buttonExtraCreation}
+            activeOpacity={0.7}
+            disabled={
+              missingEmail ||
+              missingPassword ||
+              missingConfirm ||
+              invalidUsername ||
+              username === '' ||
+              email === '' ||
+              password === '' ||
+              confirmPass === '' ||
+              password !== confirmPass
+            }>
+            <Text style={styles.buttonText}>Create Account</Text>
+          </TouchableOpacity>
+          <View style={styles.socialLogin}>
+            <View style={{ flexDirection: 'column' }}>
+              <Text style={styles.signInWith}>Or Register With:</Text>
+              <View style={styles.loginContainer}>
+                <TouchableOpacity onPress={() => googleSignUp()}>
+                  <View style={styles.innerContainer}>
+                    <Image style={styles.logo} source={googleLogo} />
+                  </View>
+                </TouchableOpacity>
+                <LoginGithub
+                  color={'primary'}
+                  sx={{
+                    // width: window.innerWidth > 1000 ? '7vw' : '25vw',
+                    justifyContent: 'center',
+                    padding: '15px',
+                  }}
+                  clientId="Ov23liWncdWCkys9HUil"
+                  // this redirect URI is for production, testing on dev will not work
+                  redirectUri={'gigoApp://auth/github/callback'}
+                  onSuccess={onSuccessGithub}
+                  onFailure={onFailureGithub}>
+                  <View
+                    style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <SvgXml
+                      xml={githubLogo}
+                      width={imageWidth}
+                      height={imageWidth}
+                    />
+                  </View>
+                </LoginGithub>
+              </View>
+            </View>
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: 10,
+            }}>
+            <Text style={{ color: 'white', fontSize: 16, lineHeight: 18 }}>
+              Already have an account?
+            </Text>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('Login')}>
+              <Text
+                style={{
+                  color: '#a4c598',
+                  fontSize: 16,
+                  marginLeft: 10,
+                  lineHeight: 18,
+                }}>
+                Login
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </View>
+    )
   };
 
-  // let renderCreateForm = () => {
-  //   // @ts-ignore
-  //     // @ts-ignore
-  //     return (
-  //     <View style={styles.box}>
-  //       <ScrollView contentContainerStyle={styles.container}>
-  //         <Text style={styles.header}>Create Account</Text>
-  //         <TextInput
-  //           style={styles.input}
-  //           placeholder="Username"
-  //           value={username}
-  //           onChangeText={setUsername}
-  //         />
-  //         <TextInput
-  //           style={styles.input}
-  //           placeholder="Email"
-  //           value={email}
-  //           onChangeText={setEmail}
-  //         />
-  //         <TextInput
-  //           style={styles.input}
-  //           placeholder="Password"
-  //           secureTextEntry={true}
-  //           value={password}
-  //           onChangeText={setPassword}
-  //         />
-  //         <TextInput
-  //           style={styles.input}
-  //           placeholder="Confirm Password"
-  //           secureTextEntry={true}
-  //           value={confirmPass}
-  //           onChangeText={setConfirmPass}
-  //         />
-  //         <TouchableOpacity
-  //           onPress={async () => {
-  //             let ok = await validateUser();
-  //             if (ok) {
-  //               console.log('content');
-  //               debouncedAccountCreation();
-  //             }
-  //           }}
-  //           style={styles.buttonExtra}
-  //           activeOpacity={0.7}
-  //           disabled={
-  //             missingEmail ||
-  //             missingPassword ||
-  //             missingConfirm ||
-  //             invalidUsername ||
-  //             username === '' ||
-  //             email === '' ||
-  //             password === '' ||
-  //             confirmPass === '' ||
-  //             password !== confirmPass
-  //           }>
-  //           <Text style={styles.buttonText}>Create Account</Text>
-  //         </TouchableOpacity>
-  //         <View style={styles.socialLogin}>
-  //           <View style={{flexDirection: 'column'}}>
-  //             <Text style={styles.signInWith}>Or Register With:</Text>
-  //             <View style={styles.loginContainer}>
-  //               <TouchableOpacity
-  //                 onPress={() => googleSignUp()}
-  //                 style={styles.button}>
-  //                 <View style={styles.innerContainer}>
-  //                   <Image style={styles.logo} source={googleLogo} />
-  //                 </View>
-  //               </TouchableOpacity>
-  //               <LoginGithub
-  //                 color={'primary'}
-  //                 sx={{
-  //                   // width: window.innerWidth > 1000 ? '7vw' : '25vw',
-  //                   justifyContent: 'center',
-  //                   padding: '15px',
-  //                 }}
-  //                 clientId="Ov23liWncdWCkys9HUil"
-  //                 // this redirect URI is for production, testing on dev will not work
-  //                 redirectUri={'gigoApp://auth/github/callback'}
-  //                 onSuccess={onSuccessGithub}
-  //                 onFailure={onFailureGithub}>
-  //                 <View style={{flexDirection: 'row', alignItems: 'center'}}>
-  //                   <SvgXml
-  //                     xml={githubLogo}
-  //                     width={imageWidth}
-  //                     height={imageWidth}
-  //                   />
-  //                 </View>
-  //               </LoginGithub>
-  //             </View>
-  //           </View>
-  //         </View>
-  //         <View
-  //           style={{flexDirection: 'row', alignItems: 'center', marginTop: 10}}>
-  //           <Text style={{color: 'white', fontSize: 16, lineHeight: 18}}>
-  //             Already have an account?
-  //           </Text>
-  //           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-  //             <Text
-  //               style={{
-  //                 color: '#007BFF',
-  //                 fontSize: 16,
-  //                 marginLeft: 10,
-  //                 lineHeight: 18,
-  //               }}>
-  //               Login
-  //             </Text>
-  //           </TouchableOpacity>
-  //         </View>
-  //       </ScrollView>
-  //     </View>
-  //   );
-  // };
-
   return (
-    <View style={{flex: 1}}>
+    <KeyboardAvoidingView // Wrap your content with KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.keyboardContainer}
+    >
+      <Image source={require('../img/monkeyJungle.png')} />
       {!external ? renderCreateForm() : renderExternal()}
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 

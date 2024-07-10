@@ -94,13 +94,12 @@ const Login = () => {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      // padding: 20,
     },
     box: {
       backgroundColor: '#1c3f30',
       borderRadius: 20,
       width: width, // 90% of screen width
-      height: height * 0.6, // 25% of screen height
+      height: 460, // 25% of screen height
       alignItems: 'center',
       justifyContent: 'center',
       padding: 20,
@@ -192,12 +191,12 @@ const Login = () => {
       backgroundColor: '#1c3f30',
       borderRadius: 20,
       width: width, // 90% of screen width
-      height: height * 0.35, // 25% of screen height
+      height: 300, // 25% of screen height
       alignItems: 'center',
       justifyContent: 'center',
       padding: 20,
       position: 'absolute',
-      bottom: 24,
+      bottom: -16,
     },
     externalHeader: {
       fontSize: 24,
@@ -465,21 +464,21 @@ const Login = () => {
       <View style={styles.externalBox}>
         <Text style={styles.externalHeader}>Enter Password</Text>
         <TextInput
-          style={styles.externalInput}
+          label={renderLabel("Password")}
           onChangeText={setPassword}
           value={password}
-          placeholder="Password"
           secureTextEntry={!showPass}
+          style={styles.input}
+          mode="flat"
+          underlineColor="transparent"
+          activeUnderlineColor="transparent"
+          textColor="white"
+          cursorColor="white"
+          placeholderTextColor="rgba(255, 255, 255, 0.5)"
+          theme={{ colors: { text: 'white', placeholder: 'rgba(255, 255, 255, 0.5)' } }}
+          right={<TextInput.Icon icon={showPass ? "eye-off" : "eye"} onPress={() => setShowPass(!showPass)} color="white" />}
           onSubmitEditing={() => {
             externalLogin === 'Google' ? googleSignIn() : githubConfirm();
-          }}
-          placeholderTextColor={'white'}
-          mode={'flat'}
-          underlineColor="transparent"
-          theme={{
-            colors: {
-              primary: 'transparent', // Outline color when focused
-            },
           }}
         />
         {loading ? (

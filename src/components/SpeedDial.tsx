@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignItems: 'center',
     right: 0,
-    marginBottom: 30,
+    marginBottom: 20,
   },
   optionButton: {
     width: 50,
@@ -130,12 +130,11 @@ const styles = StyleSheet.create({
   },
   optionLabel: {
     marginTop: 4,
-    backgroundColor: 'rgba(0,0,0,0.7)',
     color: 'white',
     paddingHorizontal: 8,
-    paddingVertical: 4,
+    paddingVertical: 2,
     borderRadius: 4,
-    fontSize: 12,
+    fontSize: 11,
   },
 });
 

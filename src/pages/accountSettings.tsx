@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -12,22 +12,29 @@ import {
   Linking,
   Dimensions,
   SafeAreaView,
+  ActivityIndicator,
+  BackHandler,
 } from 'react-native';
-import {Dialog, Portal, Provider as PaperProvider} from 'react-native-paper';
-import {TabView, SceneMap, TabBar, Card, CardContent} from 'react-native-paper';
-import {useTheme} from 'react-native-paper';
+import { Dialog, Portal, Provider as PaperProvider } from 'react-native-paper';
+import { Card } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import Config from 'react-native-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Subscription, useSelector } from "react-redux";
+import { Subscription, useDispatch, useSelector } from "react-redux";
 import LinearGradient from 'react-native-linear-gradient';
-import { initialAuthStateUpdate, selectAuthState } from "../reducers/auth.ts";
+import { initialAuthStateUpdate, initialState, selectAuthState, updateAuthState } from "../reducers/auth.ts";
 import Icon from 'react-native-vector-icons/FontAwesome';
+import store, { persistedReducer } from '../reducers/store.ts';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 
 const AccountSettings = () => {
   const theme = useTheme();
-  const authStateSetup = useSelector((state: RootState) =>
-    selectAuthState(state),
-  );
+
+  const navigation = useNavigation();
+
+  const authStateSetup = useSelector(selectAuthState);
+  const dispatch = useDispatch();
+
   const username = authStateSetup.userName;
   const email = authStateSetup.email;
   const phone = authStateSetup.phone;
@@ -72,6 +79,7 @@ const AccountSettings = () => {
   const [membership, setMembership] = React.useState(0);
   const [membershipType, setMembershipType] = React.useState('info');
   const [loading, setLoading] = React.useState(false);
+  const [logoutLoading, setLogoutLoading] = React.useState(false);
   const [subscription, setSubscription] = React.useState<Subscription | null>(
     null,
   );
@@ -98,31 +106,23 @@ const AccountSettings = () => {
     skinColor: 'Light',
   });
 
-  // const updateHoliday = async () => {
-  //   let update = fetch(`${API_URL}/api/user/updateHolidayPreference`, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({}),
-  //   });
-  //   if (!update.ok) {
-  //     console.log('response here is: ', update);
-  //     throw new Error('Network response was not ok');
-  //   }
-  //   const res = await update.json();
-  //   if (
-  //     res === undefined ||
-  //     res.message === undefined ||
-  //     res.message !== 'user holiday preference updated'
-  //   ) {
-  //     swal(
-  //       'We are unable to process your request at this time. Please try again later.',
-  //     );
-  //   } else {
-  //     setHolidayPref(!holidayPref);
-  //   }
-  // };
+  // add this useEffect
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (selectedTab !== 'Main') {
+          setSelectedTab('Main');
+          return true; // Prevent default behavior (exit app)
+        }
+        return false; // Let default behavior take over (exit app)
+      };
+
+      BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+    }, [selectedTab])
+  );
 
   const editUser = async () => {
     if (newUsername.length > 50) {
@@ -137,7 +137,7 @@ const AccountSettings = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({new_username: newUsername}),
+          body: JSON.stringify({ new_username: newUsername }),
         });
         console.log('response is: ', response);
 
@@ -162,7 +162,7 @@ const AccountSettings = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({new_email: newEmail}),
+          body: JSON.stringify({ new_email: newEmail }),
         });
 
         const resEmail = await response.json();
@@ -190,7 +190,7 @@ const AccountSettings = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({new_phone: newPhone}),
+          body: JSON.stringify({ new_phone: newPhone }),
         });
 
         const resPhone = await response.json();
@@ -237,17 +237,8 @@ const AccountSettings = () => {
   };
 
   const clearReducers = () => {
-    const authState = {...initialAuthState};
+    const authState = { ...initialState };
     dispatch(updateAuthState(authState));
-    dispatch(resetAppWrapper());
-    dispatch(clearProjectState());
-    dispatch(clearSearchParamsState());
-    dispatch(clearJourneyFormState());
-    dispatch(clearCache());
-    dispatch(clearMessageCache());
-    dispatch(clearChatState());
-    dispatch(clearBytesState());
-    dispatch(clearHeartsState());
   };
 
   const deleteUserAccount = async () => {
@@ -292,10 +283,8 @@ const AccountSettings = () => {
         'User has been deleted.',
         'You will be redirected to the login page in a few.',
       );
+      clearReducers();
       navigation.navigate('Login'); // Use your appropriate navigation method to redirect
-
-      const persistOptions = {};
-      persistStore(store, persistOptions).purge();
 
       await AsyncStorage.setItem('homeIndex', 'undefined');
     } catch (error) {
@@ -659,12 +648,12 @@ const AccountSettings = () => {
                 <TouchableOpacity
                   onPress={() => setEdit(false)}
                   style={styles.cancelEditUser}>
-                  <Text style={{color: 'white'}}>Cancel</Text>
+                  <Text style={{ color: 'white' }}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={editUser}
                   style={styles.submitEditUser}>
-                  <Text style={{color: 'white'}}>Submit</Text>
+                  <Text style={{ color: 'white' }}>Submit</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -673,14 +662,14 @@ const AccountSettings = () => {
             <TouchableOpacity
               onPress={() => setEdit(true)}
               style={styles.editUserButton}>
-              <Text style={{color: 'white'}}>Edit User Details</Text>
+              <Text style={{ color: 'white' }}>Edit User Details</Text>
             </TouchableOpacity>
           )}
-          <View style={{marginTop: 15}}>
+          <View style={{ marginTop: 15 }}>
             <TouchableOpacity
               onPress={() => setDeleteAccount(true)}
               style={styles.deleteUserButton}>
-              <Text style={{color: 'white'}}>Delete Account</Text>
+              <Text style={{ color: 'white' }}>Delete Account</Text>
             </TouchableOpacity>
             <Portal>
               <Dialog
@@ -894,7 +883,7 @@ const AccountSettings = () => {
                     <View
                       style={[
                         styles.progressFillMembership,
-                        {width: `${percentageOfMembership * 100}%`},
+                        { width: `${percentageOfMembership * 100}%` },
                       ]}
                     />
                   </View>
@@ -913,12 +902,12 @@ const AccountSettings = () => {
                       {inTrial && !hasPaymentInfo
                         ? 'Trial End'
                         : alreadyCancelled
-                        ? 'End of Pro Access'
-                        : subscription?.scheduledDowngrade
-                        ? `Downgrade To ${proStatusToString(
-                            subscription?.scheduledDowngrade,
-                          )}`
-                        : 'Next Payment'}
+                          ? 'End of Pro Access'
+                          : subscription?.scheduledDowngrade
+                            ? `Downgrade To ${proStatusToString(
+                              subscription?.scheduledDowngrade,
+                            )}`
+                            : 'Next Payment'}
                     </Text>
                     <Text style={styles.detailTextMembership}>
                       {formatDate(membershipDates.upcoming)}
@@ -929,9 +918,8 @@ const AccountSettings = () => {
                 <View style={styles.paymentContainerMembership}>
                   {(!inTrial || hasPaymentInfo) && !alreadyCancelled && (
                     <View style={styles.paymentItemMembership}>
-                      <Text style={styles.paymentTextMembership}>{`Next ${
-                        membershipCost === '80.00' ? 'Yearly' : 'Monthly'
-                      } Payment`}</Text>
+                      <Text style={styles.paymentTextMembership}>{`Next ${membershipCost === '80.00' ? 'Yearly' : 'Monthly'
+                        } Payment`}</Text>
                       <Text
                         style={
                           styles.paymentTextMembership
@@ -1094,7 +1082,7 @@ const AccountSettings = () => {
                   padding: 5,
                   alignItems: 'center',
                 }}>
-                <Text style={{color: '#29c18c'}}>Connect Account</Text>
+                <Text style={{ color: '#29c18c' }}>Connect Account</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -1338,21 +1326,6 @@ const AccountSettings = () => {
     );
   };
 
-  const tabDetermination = () => {
-    console.log('here');
-    switch (tab) {
-      case 'user':
-        return userTab();
-      case 'workspace settings':
-        return workspaceTab();
-      case 'membership':
-        return membershipTab();
-      case 'exclusive content setup':
-        return exclusiveContentTab();
-      default:
-        return avatarTab();
-    }
-  };
   const renderContent = () => {
     switch (selectedTab) {
       case 'User':
@@ -1370,74 +1343,6 @@ const AccountSettings = () => {
     }
   };
 
-                    // <View style={styles.tabsContainer}>
-                    //     <View style={{marginTop: "-50%", marginBottom: "50%"}}>
-                    //         <Text style={{fontSize: 20, color: "white"}}>
-                    //             Account Settings
-                    //         </Text>
-                    //     </View>
-                    //   <TouchableOpacity onPress={() => setSelectedTab('User')} style={styles.tabButton}>
-                    //     <Text style={styles.tabText}>User</Text>
-                    //   </TouchableOpacity>
-                    //   <TouchableOpacity onPress={() => setSelectedTab('WorkspaceSettings')} style={styles.tabButton}>
-                    //     <Text style={styles.tabText}>Workspace Settings</Text>
-                    //   </TouchableOpacity>
-                    //   <TouchableOpacity onPress={() => setSelectedTab('Membership')} style={styles.tabButton}>
-                    //     <Text style={styles.tabText}>Membership</Text>
-                    //   </TouchableOpacity>
-                    //   <TouchableOpacity onPress={() => setSelectedTab('ExclusiveContentSetup')} style={styles.tabButton}>
-                    //     <Text style={styles.tabText}>Exclusive Content Setup</Text>
-                    //   </TouchableOpacity>
-                    // </View>
-
-  // <LinearGradient
-  //   colors={['#4d4d4d', '#3E5D52', '#2f6d58']}
-  //   style={styles.gradient}>
-  //   <View style={styles.tabsContainer}>
-  //     <View style={{marginTop: '-50%', marginBottom: '50%'}}>
-  //       <Text style={{fontSize: 20, color: 'white'}}>
-  //         Account Settings
-  //       </Text>
-  //     </View>
-  //     <View style={styles.row}>
-  //       <View style={styles.column}>
-  //         <TouchableOpacity
-  //           onPress={() => setSelectedTab('User')}
-  //           style={styles.tabButton}>
-  //           <Icon name="user" size={30} color="white" />
-  //         </TouchableOpacity>
-  //         <Text style={styles.tabText}>User</Text>
-  //       </View>
-  //       <View style={styles.column}>
-  //         <TouchableOpacity
-  //           onPress={() => setSelectedTab('WorkspaceSettings')}
-  //           style={styles.tabButton}>
-  //           <Icon name="cogs" size={30} color="white" />
-  //         </TouchableOpacity>
-  //         <Text style={styles.tabText}>Workspace Settings</Text>
-  //       </View>
-  //     </View>
-  //     <View style={styles.row}>
-  //       <View style={styles.column}>
-  //         <TouchableOpacity
-  //           onPress={() => setSelectedTab('Membership')}
-  //           style={styles.tabButton}>
-  //           <Icon name="group" size={30} color="white" />
-  //         </TouchableOpacity>
-  //         <Text style={styles.tabText}>Membership</Text>
-  //       </View>
-  //       <View style={styles.column}>
-  //         <TouchableOpacity
-  //           onPress={() => setSelectedTab('ExclusiveContentSetup')}
-  //           style={styles.tabButton}>
-  //           <Icon name="star" size={30} color="white" />
-  //         </TouchableOpacity>
-  //         <Text style={styles.tabText}>Exclusive Content Setup</Text>
-  //       </View>
-  //     </View>
-  //   </View>
-  // </LinearGradient>
-
   return (
     <PaperProvider>
       <View style={styles.mainContainer}>
@@ -1449,13 +1354,13 @@ const AccountSettings = () => {
             >
               <Text style={styles.titleText}>Account Settings</Text>
             </LinearGradient>
-            <View style={{ paddingTop: 20, paddingBottom: 10 }}>
+            <View style={{ paddingTop: 20, paddingBottom: 10, paddingLeft: 10 }}>
               <Text style={{ color: "white" }}>General</Text>
             </View>
 
             <TouchableOpacity onPress={() => setSelectedTab('User')} style={styles.tabButton}>
               <View style={styles.buttonContent}>
-                <View style={[styles.leftContent, {marginRight: 5}]}>
+                <View style={[styles.leftContent, { marginRight: 5 }]}>
                   <Icon name="user" size={16} color="white" />
                   <Text style={styles.tabText}>User</Text>
                 </View>
@@ -1483,7 +1388,8 @@ const AccountSettings = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setSelectedTab('ExclusiveContentSetup')} style={styles.tabButton}>
+            {/* Exclusive content isn't available on mobile so we're leaving this commented for now */}
+            {/* <TouchableOpacity onPress={() => setSelectedTab('ExclusiveContentSetup')} style={styles.tabButton}>
               <View style={styles.buttonContent}>
                 <View style={styles.leftContent}>
                   <Icon name="star" size={16} color="white" />
@@ -1491,9 +1397,9 @@ const AccountSettings = () => {
                 </View>
                 <Icon name="chevron-right" size={16} color="white" />
               </View>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
-            <View style={{ paddingTop: 20, paddingBottom: 20 }}>
+            <View style={{ paddingTop: 20, paddingBottom: 20, paddingLeft: 10 }}>
               <Text style={{ color: "white" }}>Support</Text>
             </View>
 
@@ -1508,8 +1414,30 @@ const AccountSettings = () => {
             </TouchableOpacity>
 
             <View style={styles.logoutContainer}>
-              <TouchableOpacity onPress={() => console.log('Logout pressed')} style={styles.logoutButton}>
-                <Text style={styles.logoutText}>Logout</Text>
+              <TouchableOpacity
+                onPress={async () => {
+                  setLogoutLoading(true);
+                  try {
+                    await clearReducers();
+                    await AsyncStorage.clear();
+                    // sleep 300ms
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                    navigation.navigate('Login');
+                  } catch (error) {
+                    console.error('Logout error:', error);
+                    Alert.alert('Error', 'Failed to logout. Please try again.');
+                  } finally {
+                    setLogoutLoading(false);
+                  }
+                }}
+                style={[styles.logoutButton, logoutLoading && styles.disabledButton]}
+                disabled={logoutLoading}
+              >
+                {logoutLoading ? (
+                  <ActivityIndicator size="small" color="#ffffff" />
+                ) : (
+                  <Text style={styles.logoutText}>Logout</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>
@@ -1536,7 +1464,7 @@ const AccountSettings = () => {
   );
 };
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   mainContainer: {
@@ -1617,7 +1545,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#00f', // blue text
     textShadowColor: '#00f', // blue outline
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
   titleExclusive: {
@@ -1626,7 +1554,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: 'white', // blue text
     textShadowColor: '#00f', // blue outline
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
   subtitle: {
@@ -1634,7 +1562,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: '#00f', // blue text
     textShadowColor: '#00f', // blue outline
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
   subtitleExclusive: {
@@ -1642,7 +1570,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: 'white', // blue text
     textShadowColor: 'white', // blue outline
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
   sectionTitle: {
@@ -1651,7 +1579,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: '#00f', // blue text
     textShadowColor: '#00f', // blue outline
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
   sectionTitleExclusive: {
@@ -1660,7 +1588,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: 'white', // blue text
     textShadowColor: 'white', // blue outline
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
   paragraph: {
@@ -1668,7 +1596,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#00f', // blue text
     textShadowColor: '#00f', // blue outline
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
   paragraphExclusive: {
@@ -1676,7 +1604,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: 'white', // blue text
     textShadowColor: '#white', // blue outline
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
   },
   tabsContainer: {
@@ -1706,6 +1634,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#323230',
     borderRadius: 10,
     marginVertical: 5,
+    marginHorizontal: 10,
     paddingVertical: 15,
     paddingHorizontal: 10,
   },
@@ -1716,7 +1645,7 @@ const styles = StyleSheet.create({
   },
   tabTextClicked: {
     color: '#29c18c', // blue text
-    textShadowOffset: {width: 1, height: 1},
+    textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 1,
     textAlign: 'center',
   },
@@ -2007,6 +1936,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     width: '60%', // Ensures the logout button stretches across the container
     alignItems: 'center',
+  },
+  disabledButton: {
+    backgroundColor: '#ffb3b3', // lighter shade of red for disabled state
+    opacity: 0.7,
   },
   logoutText: {
     fontSize: 18,

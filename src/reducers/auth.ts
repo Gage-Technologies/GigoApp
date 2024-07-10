@@ -47,7 +47,7 @@ type AuthStateUpdate = {
   [K in keyof AuthState]?: AuthState[K];
 }
 
-const initialState: AuthState = {
+export const initialState: AuthState = {
   authenticated: false,
   token: '',
   id: '',

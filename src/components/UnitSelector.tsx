@@ -50,6 +50,7 @@ const UnitSelector: React.FC<UnitSelectorProps> = ({
       <View
         style={[
           styles.bar,
+          // eslint-disable-next-line react-native/no-inline-styles
           {
             backgroundColor: 'white',
             top: unitHeight / 2,

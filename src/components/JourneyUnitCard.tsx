@@ -104,8 +104,7 @@ const JourneyUnitCard: React.FC<JourneyUnitCardProps> = ({
             backgroundColor: isSelected
               ? theme.colors.primary
               : theme.colors.surface,
-            borderColor:
-              currentUnit === data._id ? theme.colors.accent : 'transparent',
+            borderColor: currentUnit === data._id ? `white` : 'transparent',
           },
         ]}>
         <FastImage

@@ -24,8 +24,9 @@ import { Subscription, useDispatch, useSelector } from "react-redux";
 import LinearGradient from 'react-native-linear-gradient';
 import { initialAuthStateUpdate, initialState, selectAuthState, updateAuthState } from "../reducers/auth.ts";
 import Icon from 'react-native-vector-icons/FontAwesome';
-import store, { persistedReducer } from '../reducers/store.ts';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import store, { persistedReducer } from '../reducers/store.ts';
+import { RootState } from "../reducers/store.ts";
 
 const AccountSettings = () => {
   const theme = useTheme();
@@ -90,7 +91,7 @@ const AccountSettings = () => {
   const [hasSubscriptionId, setHasSubscriptionId] = React.useState(false);
   const [userInfo, setUserInfo] = React.useState(null);
   const [selectedTab, setSelectedTab] = useState('Main');
-  const [issueText, setIssueText] = useState('')
+  const [issueText, setIssueText] = useState('');
   const [Attributes, setAttributes] = useState({
     topType: 'NoHair',
     accessoriesType: 'Blank',
@@ -106,6 +107,7 @@ const AccountSettings = () => {
     skinColor: 'Light',
   });
 
+  const navigation = useNavigation();
   // add this useEffect
   useFocusEffect(
     useCallback(() => {
@@ -1051,7 +1053,16 @@ const AccountSettings = () => {
     setWsSettingsLoading(false);
   };
 
-  const handleInputChange = (text, setter) => {
+  const handleInputChange = (
+    text: string,
+    setter: {
+      (value: React.SetStateAction<string>): void;
+      (value: React.SetStateAction<string>): void;
+      (value: React.SetStateAction<string>): void;
+      (value: React.SetStateAction<string>): void;
+      (arg0: any): void;
+    },
+  ) => {
     setter(text);
   };
 
@@ -1155,7 +1166,16 @@ const AccountSettings = () => {
     );
   };
 
-  const handleSwitchChange = (value, setStateFunction) => {
+  const handleSwitchChange = (
+    value: boolean,
+    setStateFunction: {
+      (value: React.SetStateAction<boolean>): void;
+      (value: React.SetStateAction<boolean>): void;
+      (value: React.SetStateAction<boolean>): void;
+      (value: React.SetStateAction<boolean>): void;
+      (arg0: any): void;
+    },
+  ) => {
     console.log('value is: ', value);
     setStateFunction(value);
   };
@@ -1164,10 +1184,28 @@ const AccountSettings = () => {
     setIssueText('');
   };
 
-  const handleSubmitIssue = () => {
-    console.log('Submitted issue:', issueText);
-    // Handle the submit action
-    setIssueText('');
+  const handleSubmitIssue = async () => {
+    const response = await fetch(`${API_URL}/api/reportIssue`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({page: 'settings', issue: issueText}),
+    });
+
+    const submitResponse = await response.json();
+
+    if (
+      submitResponse.message !== undefined &&
+      submitResponse.message === 'Thank you for your feedback!'
+    ) {
+      // Handle the submit action
+      setIssueText('');
+      Alert.alert('Thank you for your feedback!');
+      setSelectedTab('Main');
+    } else {
+      Alert.alert('Something went wrong, please try again.');
+    }
   };
 
   const reportIssueTab = () => {
@@ -1179,21 +1217,25 @@ const AccountSettings = () => {
           multiline={true}
           numberOfLines={10}
           placeholder="Describe your issue here..."
-          placeholderTextColor={"grey"}
+          placeholderTextColor={'grey'}
           value={issueText}
           onChangeText={text => setIssueText(text)}
         />
         <View style={styles.reportButtonContainer}>
-          <TouchableOpacity onPress={handleCancelIssue} style={[styles.reportButton, styles.reportCancelButton]}>
+          <TouchableOpacity
+            onPress={handleCancelIssue}
+            style={[styles.reportButton, styles.reportCancelButton]}>
             <Text style={styles.reportButtonText}>Cancel</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleSubmitIssue} style={[styles.reportButton, styles.reportSubmitButton]}>
+          <TouchableOpacity
+            onPress={handleSubmitIssue}
+            style={[styles.reportButton, styles.reportSubmitButton]}>
             <Text style={styles.reportButtonText}>Submit</Text>
           </TouchableOpacity>
         </View>
       </View>
-    )
-  }
+    );
+  };
 
   const workspaceTab = () => {
     return (
@@ -1326,6 +1368,33 @@ const AccountSettings = () => {
     );
   };
 
+  const logoutUser = async () => {
+    clearReducers();
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const resJson = await response.json();
+
+      if (resJson && resJson.message === 'success') {
+        navigation.navigate('Login');
+
+        // Clear AsyncStorage
+        await AsyncStorage.clear();
+        await AsyncStorage.setItem('homeIndex', 'undefined');
+      } else {
+        Alert.alert('Logout Error', 'There was an issue logging out');
+      }
+    } catch (error) {
+      Alert.alert('Logout Error', 'There was an issue logging out');
+    }
+  };
+
   const renderContent = () => {
     switch (selectedTab) {
       case 'User':
@@ -1350,15 +1419,16 @@ const AccountSettings = () => {
           <View style={styles.tabsContainer}>
             <LinearGradient
               colors={['#29C18C', '#1c8762', '#145D46']}
-              style={styles.titleContainer}
-            >
+              style={styles.titleContainer}>
               <Text style={styles.titleText}>Account Settings</Text>
             </LinearGradient>
             <View style={{ paddingTop: 20, paddingBottom: 10, paddingLeft: 10 }}>
               <Text style={{ color: "white" }}>General</Text>
             </View>
 
-            <TouchableOpacity onPress={() => setSelectedTab('User')} style={styles.tabButton}>
+            <TouchableOpacity
+              onPress={() => setSelectedTab('User')}
+              style={styles.tabButton}>
               <View style={styles.buttonContent}>
                 <View style={[styles.leftContent, { marginRight: 5 }]}>
                   <Icon name="user" size={16} color="white" />
@@ -1368,7 +1438,9 @@ const AccountSettings = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setSelectedTab('WorkspaceSettings')} style={styles.tabButton}>
+            <TouchableOpacity
+              onPress={() => setSelectedTab('WorkspaceSettings')}
+              style={styles.tabButton}>
               <View style={styles.buttonContent}>
                 <View style={styles.leftContent}>
                   <Icon name="cogs" size={16} color="white" />
@@ -1378,7 +1450,9 @@ const AccountSettings = () => {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setSelectedTab('Membership')} style={styles.tabButton}>
+            <TouchableOpacity
+              onPress={() => setSelectedTab('Membership')}
+              style={styles.tabButton}>
               <View style={styles.buttonContent}>
                 <View style={styles.leftContent}>
                   <Icon name="users" size={16} color="white" />
@@ -1403,7 +1477,9 @@ const AccountSettings = () => {
               <Text style={{ color: "white" }}>Support</Text>
             </View>
 
-            <TouchableOpacity onPress={() => setSelectedTab('ReportIssue')} style={styles.tabButton}>
+            <TouchableOpacity
+              onPress={() => setSelectedTab('ReportIssue')}
+              style={styles.tabButton}>
               <View style={styles.buttonContent}>
                 <View style={styles.leftContent}>
                   <Icon name="exclamation-circle" size={16} color="white" />
@@ -1641,7 +1717,7 @@ const styles = StyleSheet.create({
   tabText: {
     fontSize: 16,
     color: 'white',
-    marginLeft: 5, // Adjust spacing between icon and text
+    marginLeft: 15, // Adjust spacing between icon and text
   },
   tabTextClicked: {
     color: '#29c18c', // blue text
@@ -1955,7 +2031,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: "white"
+    color: 'white',
   },
   reportTextInput: {
     height: 150,
@@ -1966,7 +2042,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     marginBottom: 20,
     width: width - 80,
-    color: "white"
+    color: 'white',
   },
   reportButtonContainer: {
     flexDirection: 'row',
@@ -1980,7 +2056,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   reportCancelButton: {
-    backgroundColor: 'red',
+    backgroundColor: '#ff6b6b',
   },
   reportSubmitButton: {
     backgroundColor: '#29C18C',

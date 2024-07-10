@@ -107,7 +107,6 @@ const AccountSettings = () => {
     skinColor: 'Light',
   });
 
-  const navigation = useNavigation();
   // add this useEffect
   useFocusEffect(
     useCallback(() => {

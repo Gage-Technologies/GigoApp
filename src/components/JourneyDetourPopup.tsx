@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   Modal,
   View,
@@ -14,6 +14,7 @@ import FastImage from 'react-native-fast-image';
 import Config from 'react-native-config';
 import DetourCard from './DetourCard';
 import JourneyUnitCard from './JourneyUnitCard';
+import UnitSelector from './UnitSelector';
 
 interface JourneyDetourPopupProps {
   open: boolean;
@@ -32,6 +33,7 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
   const [stage, setStage] = useState(1);
   const [journeyUnitMap, setJourneyUnitMap] = useState([]);
   const [selectedUnitId, setSelectedUnitId] = useState(unit._id);
+  const [showFullExplanation, setShowFullExplanation] = useState(false);
   const theme = useTheme();
 
   const toggleDescription = () => setShowFullDescription(!showFullDescription);
@@ -44,10 +46,6 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
       getUnitMap(unit._id);
     }
   }, [open]);
-
-  useEffect(() => {
-    console.log('journeyUnitMap:', journeyUnitMap);
-  }, [journeyUnitMap]);
 
   const getUnitMap = async (unitId: string) => {
     try {
@@ -81,9 +79,14 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
     console.log('Taking detour');
   };
 
-  const handleUnitSelect = (selectedUnit) => {
+  const handleUnitSelect = useCallback(selectedUnit => {
+    console.log('Selecting unit:', selectedUnit._id);
     setSelectedUnitId(selectedUnit._id);
-  };
+  }, []);
+
+  useEffect(() => {
+    console.log('Selected unit ID updated:', selectedUnitId);
+  }, [selectedUnitId]);
 
   const renderStage1 = () => (
     <ScrollView>
@@ -123,51 +126,78 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
     </ScrollView>
   );
 
-  const renderStage2 = () => (
-    <ScrollView>
-      <View style={styles.header}>
-        <Text style={[styles.title, {color: theme.colors.text}]}>
-          {unit.name}
-        </Text>
-        <IconButton
-          icon={CloseIcon}
-          onPress={onClose}
-          style={styles.closeButton}
-        />
-      </View>
-      <View style={styles.unitMapContainer}>
-        <Text style={[styles.subtitle, {color: theme.colors.text}]}>
-          Unit Map
-        </Text>
-        {journeyUnitMap.map((journeyUnit, index) => (
-          <View key={journeyUnit._id} style={styles.unitItem}>
-            <Text style={[styles.unitNumber, {color: theme.colors.text}]}>
-              {index + 1}.
+  const renderStage2 = () => {
+    const selectedIndex = journeyUnitMap.findIndex(unit => unit._id === selectedUnitId);
+
+    return (
+      <ScrollView>
+        <View style={styles.header}>
+          <Text style={[styles.title, {color: theme.colors.text}]}>
+            Select Starting Point
+          </Text>
+          <IconButton
+            icon={CloseIcon}
+            onPress={onClose}
+            style={styles.closeButton}
+          />
+        </View>
+        <View style={styles.explanationContainer}>
+          <View style={styles.explanationTextWrapper}>
+            <Text 
+              style={[styles.explanationText, {color: theme.colors.text}]}
+              numberOfLines={showFullExplanation ? undefined : 1}
+            >
+              This Detour is part of a larger Journey. Select the point that you
+              would like to start your Detour at. If you are unfamiliar with the
+              concept, we would recommend starting this detour at the beginning of
+              the Journey.
             </Text>
-            <View style={styles.journeyUnitCardContainer}>
-              <JourneyUnitCard
-                data={{
-                  id: journeyUnit._id,
-                  name: journeyUnit.name,
-                  image: `${Config.API_URL}/static/junit/t/${journeyUnit._id}`,
-                  langs: journeyUnit.langs || [],
-                }}
-                onPress={() => handleUnitSelect(journeyUnit)}
-                isSelected={selectedUnitId === journeyUnit._id}
-              />
+          </View>
+          <TouchableOpacity onPress={() => setShowFullExplanation(!showFullExplanation)}>
+            <Text style={[styles.readMore, {color: theme.colors.primary}]}>
+              {showFullExplanation ? 'Read Less' : 'Read More'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.unitMapContainer}>
+          <Text style={[styles.subtitle, {color: theme.colors.text}]}>
+            Unit Map
+          </Text>
+          <View style={styles.unitMapContent}>
+            <UnitSelector
+              unitCount={journeyUnitMap.length}
+              selectedIndex={selectedIndex}
+              onSelectUnit={(index) => handleUnitSelect(journeyUnitMap[index])}
+            />
+            <View style={styles.cardsContainer}>
+              {journeyUnitMap.map((journeyUnit, index) => {
+                const isSelected = selectedUnitId === journeyUnit._id;
+                return (
+                  <View key={journeyUnit._id} style={styles.unitItem}>
+                    <View style={styles.journeyUnitCardContainer}>
+                      <JourneyUnitCard
+                        data={journeyUnit}
+                        onPress={() => handleUnitSelect(journeyUnit)}
+                        isSelected={isSelected}
+                        currentUnit={selectedUnitId}
+                      />
+                    </View>
+                  </View>
+                );
+              })}
             </View>
           </View>
-        ))}
-      </View>
-      <Button
-        mode="contained"
-        onPress={takeDetour}
-        style={styles.continueButton}
-        labelStyle={styles.continueButtonLabel}>
-        Take Detour
-      </Button>
-    </ScrollView>
-  );
+        </View>
+        <Button
+          mode="contained"
+          onPress={takeDetour}
+          style={styles.continueButton}
+          labelStyle={styles.continueButtonLabel}>
+          Take Detour
+        </Button>
+      </ScrollView>
+    );
+  };
 
   return (
     <Modal
@@ -205,11 +235,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
+    paddingBottom: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
   },
   title: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
+    flex: 1,
+    marginRight: 10,
   },
   image: {
     height: 200,
@@ -243,21 +278,35 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 15,
+  },
+  unitMapContent: {
+    flexDirection: 'row',
+  },
+  cardsContainer: {
+    flex: 1,
   },
   unitItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    width: '100%',
-  },
-  unitNumber: {
-    fontSize: 16,
-    marginRight: 10,
-    width: 20,
+    marginBottom: 8,
   },
   journeyUnitCardContainer: {
-    flex: 1,
+    maxHeight: 80,
+  },
+  explanationContainer: {
+    marginBottom: 15,
+    paddingHorizontal: 10,
+  },
+  explanationTextWrapper: {
+    overflow: 'hidden',
+  },
+  explanationText: {
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  readMore: {
+    marginTop: 5,
+    fontSize: 14,
+    fontWeight: 'bold',
   },
 });
 

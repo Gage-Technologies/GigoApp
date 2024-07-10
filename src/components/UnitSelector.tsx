@@ -1,0 +1,91 @@
+import React, {useState, useRef} from 'react';
+import {
+  View,
+  TouchableOpacity,
+  PanResponder,
+  Animated,
+  StyleSheet,
+} from 'react-native';
+import {useTheme} from 'react-native-paper';
+
+interface UnitSelectorProps {
+  unitCount: number;
+  selectedIndex: number;
+  onSelectUnit: (index: number) => void;
+}
+
+const UnitSelector: React.FC<UnitSelectorProps> = ({
+  unitCount,
+  selectedIndex,
+  onSelectUnit,
+}) => {
+  const theme = useTheme();
+  const [barHeight, setBarHeight] = useState(0);
+  const pan = useRef(new Animated.ValueXY()).current;
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderMove: (_, gestureState) => {
+      const newIndex = Math.max(
+        0,
+        Math.min(
+          Math.round(gestureState.moveY / (barHeight / unitCount)),
+          unitCount - 1,
+        ),
+      );
+      onSelectUnit(newIndex);
+    },
+    onPanResponderRelease: () => {
+      pan.flattenOffset();
+    },
+  });
+
+  return (
+    <View
+      style={styles.container}
+      onLayout={event => setBarHeight(event.nativeEvent.layout.height)}
+      {...panResponder.panHandlers}>
+      <View style={[styles.bar, {backgroundColor: 'white'}]} />
+      {Array.from({length: unitCount}).map((_, index) => (
+        <TouchableOpacity
+          key={index}
+          style={[
+            styles.circle,
+            // eslint-disable-next-line react-native/no-inline-styles
+            {
+              backgroundColor:
+                index === selectedIndex ? theme.colors.primary : 'white',
+              borderColor: theme.colors.primary,
+              top: `${(index / (unitCount - 1)) * 100}%`,
+            },
+          ]}
+          onPress={() => onSelectUnit(index)}
+        />
+      ))}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    width: 30,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bar: {
+    width: 2,
+    height: '100%',
+    position: 'absolute',
+  },
+  circle: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 2,
+    position: 'absolute',
+    left: 7,
+  },
+});
+
+export default UnitSelector;

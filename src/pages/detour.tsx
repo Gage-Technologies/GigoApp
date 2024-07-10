@@ -11,7 +11,8 @@ import {
 import {useTheme, IconButton, Button} from 'react-native-paper';
 import Config from 'react-native-config';
 import {debounce} from 'lodash';
-import DetourCard from '../components/DetourCard'; 
+import DetourCard from '../components/DetourCard';
+import JourneyDetourPopup from '../components/JourneyDetourPopup';
 
 interface JourneyGroups {
   [key: string]: Unit[];
@@ -25,6 +26,10 @@ const Detour = () => {
   const [journeyGroups, setJourneyGroups] = useState<JourneyGroups>({});
   const [loading, setLoading] = useState(false);
   const [groupStates, setGroupStates] = useState<{[key: string]: any}>({});
+
+  // state to manage popup visibility and selected unit
+  const [isPopupVisible, setPopupVisible] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState(null);
 
   useEffect(() => {
     getGroups();
@@ -154,6 +159,16 @@ const Detour = () => {
     }
   };
 
+  const handleCardPress = (unit) => {
+    setSelectedUnit(unit);
+    setPopupVisible(true);
+  };
+
+  const handleClosePopup = () => {
+    setPopupVisible(false);
+    setSelectedUnit(null);
+  };
+
   const renderJourneyGroups = () => {
     return (
       <View style={styles.journeyGroupsContainer}>
@@ -163,7 +178,9 @@ const Detour = () => {
               <Text style={styles.categoryTitle}>{category}</Text>
               {Units.length === 4 && (
                 <Button onPress={() => handleShowAllToggle(GroupID)}>
-                  {groupStates[GroupID]?.showAll ? 'Show Less' : 'Show More'}
+                  <Text>
+                    {groupStates[GroupID]?.showAll ? 'Show Less' : 'Show More'}
+                  </Text>
                 </Button>
               )}
             </View>
@@ -173,7 +190,10 @@ const Detour = () => {
                 : Units.slice(0, 4)
               ).map(unit => (
                 <View key={unit.id} style={styles.unitItem}>
-                  <DetourCard data={unit} />
+                  <DetourCard
+                    data={unit}
+                    onPress={() => handleCardPress(unit)}
+                  />
                 </View>
               ))}
             </View>
@@ -192,7 +212,7 @@ const Detour = () => {
           <View style={styles.unitsContainer}>
             {searchUnits.map(unit => (
               <View key={unit.id} style={styles.unitItem}>
-                <DetourCard data={unit} />
+                <DetourCard data={unit} onPress={() => handleCardPress(unit)} />
               </View>
             ))}
           </View>
@@ -308,6 +328,13 @@ const Detour = () => {
       <ScrollView contentContainerStyle={styles.content}>
         {renderContent()}
       </ScrollView>
+      {selectedUnit && (
+        <JourneyDetourPopup
+          open={isPopupVisible}
+          onClose={handleClosePopup}
+          unit={selectedUnit}
+        />
+      )}
     </View>
   );
 };

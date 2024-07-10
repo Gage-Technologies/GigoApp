@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   ScrollView,
   View,
@@ -8,17 +8,17 @@ import {
   TouchableOpacity,
   Modal as RNModal,
 } from 'react-native';
-import { Text, Button, useTheme } from 'react-native-paper';
+import {Text, Button, useTheme} from 'react-native-paper';
 import Config from 'react-native-config';
 import JourneyMap from '../components/Journey/JourneyMap';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import GetStarted from '../components/GetStarted';
 import MarkdownRenderer from '../components/Markdown/MarkdownRenderer';
-import { Unit } from '../models/Journey';
+import {Unit} from '../models/Journey';
 import HandoutOverlay from '../components/Journey/HandoutOverlay';
-import { getTextColor } from '../services/utils';
-import AwesomeButton from "react-native-really-awesome-button";
-import { BlurView } from "@react-native-community/blur";
+import {getTextColor} from '../services/utils';
+import AwesomeButton from 'react-native-really-awesome-button';
+import {BlurView} from '@react-native-community/blur';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
@@ -39,7 +39,7 @@ const JourneyMain = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({})
+        body: JSON.stringify({}),
       });
 
       if (!response.ok) {
@@ -80,16 +80,19 @@ const JourneyMain = () => {
       }
 
       const fetchedUnits = await Promise.all(
-        res.user_map.units.map(async (unit: { _id: any }) => {
-          const response = await fetch(`${API_URL}/api/journey/getTasksInUnit`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
+        res.user_map.units.map(async (unit: {_id: any}) => {
+          const response = await fetch(
+            `${API_URL}/api/journey/getTasksInUnit`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                unit_id: unit._id,
+              }),
             },
-            body: JSON.stringify({
-              unit_id: unit._id,
-            }),
-          });
+          );
 
           if (!response.ok) {
             throw new Error('Failed to fetch tasks in unit');
@@ -99,7 +102,7 @@ const JourneyMain = () => {
           const tasks = tasksResponse.data ? tasksResponse.data.tasks : [];
           if (!tasks.length) {
             console.error('No tasks array in the response for unit:', unit._id);
-            return { ...unit, tasks: [] };
+            return {...unit, tasks: []};
           }
 
           const sortedTasks = tasks.sort((a: any, b: any) => {
@@ -108,15 +111,19 @@ const JourneyMain = () => {
             return a.node_above - b.node_above;
           });
 
-          return { ...unit, tasks: sortedTasks };
-        })
+          return {...unit, tasks: sortedTasks};
+        }),
       );
 
       setUnits(prevUnits => [...prevUnits, ...fetchedUnits]);
       setActiveJourney(true); // Journey has started
       setLoading(false);
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to fetch tasks. Please check your network connection.');
+      Alert.alert(
+        'Error',
+        error.message ||
+          'Failed to fetch tasks. Please check your network connection.',
+      );
       setLoading(false);
     }
   };
@@ -132,20 +139,38 @@ const JourneyMain = () => {
     const isPendingAcceptance = index === units.length - 1;
 
     // calculate task offset by summing the length of all previous units
-    const taskOffset = units.slice(0, index).reduce((acc, unit) => acc + unit.tasks.length, 0);
+    const taskOffset = units
+      .slice(0, index)
+      .reduce((acc, unit) => acc + unit.tasks.length, 0);
 
     return (
-      <View style={isPendingAcceptance ? [styles.unitContainer, { paddingTop: 20 }] : styles.unitContainer} key={unit._id}>
-        <TouchableOpacity style={[styles.unitHeader, { backgroundColor: unit.color }]} onPress={() => setShowHandout(showHandout === index ? null : index)}>
-          <Text style={[styles.unitTitle, { color: getTextColor(unit.color) }]}>
+      <View
+        style={
+          isPendingAcceptance
+            ? [styles.unitContainer, {paddingTop: 20}]
+            : styles.unitContainer
+        }
+        key={unit._id}>
+        <TouchableOpacity
+          style={[styles.unitHeader, {backgroundColor: unit.color}]}
+          onPress={() => setShowHandout(showHandout === index ? null : index)}>
+          <Text style={[styles.unitTitle, {color: getTextColor(unit.color)}]}>
             {unit.name}
           </Text>
           <View style={styles.clipboardIcon}>
-            <Ionicons name="document-text-outline" size={24} color={getTextColor(unit.color)} />
+            <Ionicons
+              name="document-text-outline"
+              size={24}
+              color={getTextColor(unit.color)}
+            />
           </View>
         </TouchableOpacity>
         <View style={styles.unitContent}>
-          <JourneyMap unitId={unit._id} unitIndex={index} taskOffset={taskOffset} />
+          <JourneyMap
+            unitId={unit._id}
+            unitIndex={index}
+            taskOffset={taskOffset}
+          />
         </View>
         {isPendingAcceptance && (
           <View style={styles.blurOverlay}>
@@ -168,16 +193,17 @@ const JourneyMain = () => {
                 textColor={theme.colors.primaryVariant}
                 onPress={() => {
                   // handle adding unit to journey
-                  console.log("Add Unit To Journey");
-                }}
-              >
+                  console.log('Add Unit To Journey');
+                }}>
                 Add Unit To Journey
               </AwesomeButton>
             </View>
           </View>
         )}
         {isLastIndex && !isPendingAcceptance && (
-          <TouchableOpacity onPress={() => setOpenDetourPop(true)} style={styles.fab}>
+          <TouchableOpacity
+            onPress={() => setOpenDetourPop(true)}
+            style={styles.fab}>
             <Text>Add Unit</Text>
           </TouchableOpacity>
         )}
@@ -185,8 +211,7 @@ const JourneyMain = () => {
           animationType="slide"
           transparent={true}
           visible={openDetourPop}
-          onRequestClose={() => setOpenDetourPop(false)}
-        >
+          onRequestClose={() => setOpenDetourPop(false)}>
           <View style={styles.modalView}>
             <Text>Detour Selection Component</Text>
             <Button onPress={() => setOpenDetourPop(false)}>Close</Button>
@@ -198,7 +223,11 @@ const JourneyMain = () => {
 
   if (loading) {
     return (
-      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+      <View
+        style={[
+          styles.container,
+          {justifyContent: 'center', alignItems: 'center'},
+        ]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
@@ -208,15 +237,18 @@ const JourneyMain = () => {
 
   return (
     <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.colors.background }]}
-      contentContainerStyle={styles.scrollViewContent}
-    >
+      style={[styles.scrollView, {backgroundColor: theme.colors.background}]}
+      contentContainerStyle={styles.scrollViewContent}>
       {activeJourney ? (
         units.map((unit, index) => handleMap(unit, index))
       ) : (
         <GetStarted getTasks={getTasks} />
       )}
-      <HandoutOverlay isVisible={showHandout !== null} onClose={() => setShowHandout(null)} unit={units[showHandout ?? 0]} />
+      <HandoutOverlay
+        isVisible={showHandout !== null}
+        onClose={() => setShowHandout(null)}
+        unit={units[showHandout ?? 0]}
+      />
     </ScrollView>
   );
 };

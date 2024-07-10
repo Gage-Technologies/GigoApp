@@ -1,6 +1,5 @@
-/* eslint-disable prettier/prettier */
 import React from 'react';
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import {Card} from 'react-native-paper';
 import {useTheme} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
@@ -16,16 +15,27 @@ interface DetourCardProps {
   data: {
     id: string;
     name: string;
-    image: string;
+    image?: string;
+    _id?: string;
     langs: string[];
   };
+  onPress: () => void;
 }
 
-const DetourCard: React.FC<DetourCardProps> = ({data}) => {
+const DetourCard: React.FC<DetourCardProps> = ({data, onPress}) => {
   const theme = useTheme();
 
-  // log the data object to debug
-  console.log('DetourCard data:', data);
+  // Function to get the correct image URL
+  const getImageUrl = () => {
+    if (data.image) {
+      return data.image;
+    } else if (data._id) {
+      return `${Config.API_URL}/static/junit/t/${data._id}`;
+    } else if (data.id) {
+      return `${Config.API_URL}/static/junit/t/${data.id}`;
+    }
+    return 'https://via.placeholder.com/150';
+  };
 
   // function to render the appropriate logo based on the language
   const renderLogo = (langs: string[]) => {
@@ -55,34 +65,43 @@ const DetourCard: React.FC<DetourCardProps> = ({data}) => {
       case 'cs':
         return <CSharpLogo width={30} height={30} style={styles.logo} />;
       default:
-        return null;
+        return <Text style={styles.logo}>{lang}</Text>;
     }
   };
 
   return (
-    <Card style={[styles.card, {backgroundColor: theme.colors.surface}]}>
-      <View style={styles.content}>
-        <View style={styles.header}>
-          <Text
-            style={[
-              styles.title,
-              {color: theme.colors.text, ...theme.fonts.medium},
-            ]}
-            numberOfLines={2}
-            ellipsizeMode="tail"
-          >
-            {data.name}
-          </Text>
+    <TouchableOpacity onPress={onPress}>
+      <Card style={[styles.card, {backgroundColor: theme.colors.surface}]}>
+        <View style={styles.content}>
+          <View style={styles.header}>
+            <Text
+              style={[
+                styles.title,
+                {color: theme.colors.text, ...theme.fonts.medium},
+              ]}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {data.name}
+            </Text>
+          </View>
+          <FastImage
+            source={{uri: getImageUrl()}}
+            style={styles.image}
+            onError={e =>
+              console.log(
+                'Image Load Error:',
+                e.nativeEvent.error,
+                'for URL:',
+                getImageUrl(),
+              )
+            }
+            resizeMode={FastImage.resizeMode.cover}
+          />
+          <View style={styles.logoContainer}>{renderLogo(data.langs)}</View>
         </View>
-        <FastImage
-          source={{uri: `${Config.API_URL}/static/junit/t/${data._id}`}}
-          style={styles.image}
-          onError={e => console.log('Image Load Error:', e.nativeEvent.error)}
-          resizeMode={FastImage.resizeMode.cover}
-        />
-        <View style={styles.logoContainer}>{renderLogo(data.langs)}</View>
-      </View>
-    </Card>
+      </Card>
+    </TouchableOpacity>
   );
 };
 

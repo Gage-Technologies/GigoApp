@@ -10,7 +10,6 @@ import ForgotPassword from './pages/forgotPassword';
 import CreateNewAccount from './pages/createNewAccount';
 import AccountSettings from './pages/accountSettings';
 import JourneyMain from './pages/journeyMain';
-import Profile from './pages/profile';
 import Byte from './pages/byte';
 import SpeedDial from './components/SpeedDial';
 import {selectAuthState} from './reducers/auth.ts';
@@ -71,11 +70,6 @@ const AppRouter = () => {
             name="Byte"
             // @ts-ignore
             component={Byte}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Profile"
-            component={Profile}
             options={{headerShown: false}}
           />
           <Stack.Screen

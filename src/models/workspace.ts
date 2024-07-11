@@ -1,47 +1,46 @@
-import Tag from "./tag";
+import Tag from './tag';
 
 export interface WorkspaceInitFailure {
-    command: string;
-    status: number;
-    stdout: string;
-    stderr: string;
+  command: string;
+  status: number;
+  stdout: string;
+  stderr: string;
 }
 
-
 export interface Workspace {
-    _id: string;
-    code_source_id: string;
-    code_source_type: number;
-    code_source_type_string: string;
-    repo_id: string;
-    created_at: string;
-    owner_id: string;
-    expiration: string;
-    commit: string;
-    state: number;
-    state_string: string;
-    init_state: number;
-    init_state_string: string;
-    init_failure: WorkspaceInitFailure | null;
-    is_vnc: boolean;
-    ports?: { name: string; port: string; url: string, disabled: boolean }[];
+  _id: string;
+  code_source_id: string;
+  code_source_type: number;
+  code_source_type_string: string;
+  repo_id: string;
+  created_at: string;
+  owner_id: string;
+  expiration: string;
+  commit: string;
+  state: number;
+  state_string: string;
+  init_state: number;
+  init_state_string: string;
+  init_failure: WorkspaceInitFailure | null;
+  is_vnc: boolean;
+  ports?: {name: string; port: string; url: string; disabled: boolean}[];
 }
 
 export interface WorkspaceConfig {
-    _id: string;
-    title: string;
-    description: string;
-    content: string;
-    author: string;
-    author_id: string;
-    revision: number;
-    official: boolean;
-    tags: string[];
-    fullTags: Tag[];
-    languages: number[];
-    language_strings: string[];
-    uses: number;
-    completions: number;
+  _id: string;
+  title: string;
+  description: string;
+  content: string;
+  author: string;
+  author_id: string;
+  revision: number;
+  official: boolean;
+  tags: string[];
+  fullTags: Tag[];
+  languages: number[];
+  language_strings: string[];
+  uses: number;
+  completions: number;
 }
 
 export const DefaultWorkspaceConfig = `# version of configuration format
@@ -104,4 +103,4 @@ vscode:
 #   init: false # whether this should only be executed on initialization
 #   command: |
 #    #!/bin/bash
-#    echo "hello world"`
+#    echo "hello world"`;

@@ -1,2 +1,1 @@
-
-export const DailyHearts = 5
+export const DailyHearts = 5;

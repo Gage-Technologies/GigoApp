@@ -1,25 +1,24 @@
 import React, {useState, useRef} from 'react';
-import {useTheme, TextInput} from 'react-native-paper';
+import {TextInput} from 'react-native-paper';
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   Dimensions,
-  Alert, Image,
+  Alert,
+  Image,
   KeyboardAvoidingView,
-  Platform
-} from "react-native";
+  Platform,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 
 const screenWidth = Dimensions.get('window').width;
 const imageWidth = screenWidth * 0.1; // 15% of the screen width
-const {width, height} = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 import Config from 'react-native-config';
 
 const ForgotPassword = () => {
-  const theme = useTheme();
-
   const [email, setEmail] = useState('');
   const [isEmailValid, setIsEmailValid] = useState(false);
   const navigation = useNavigation();
@@ -84,7 +83,6 @@ const ForgotPassword = () => {
     },
     loginContainer: {
       flexDirection: 'row', // Align items in a column
-      alignItems: 'even', // Align items in the center horizontally
       justifyContent: 'space-evenly',
       width: screenWidth * 0.8,
     },
@@ -157,7 +155,6 @@ const ForgotPassword = () => {
     externalButton: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: theme.colors.accent,
       padding: 10,
       borderRadius: 5,
       justifyContent: 'center',
@@ -166,7 +163,6 @@ const ForgotPassword = () => {
       marginTop: 10,
     },
     externalButtonText: {
-      color: theme.fonts.regular,
       marginLeft: 10,
     },
     externalSubText: {
@@ -187,7 +183,7 @@ const ForgotPassword = () => {
 
   // Email validation function
   // eslint-disable-next-line @typescript-eslint/no-shadow
-  function isValidEmail(email) {
+  function isValidEmail(email: React.SetStateAction<string> | null) {
     const re =
       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     return re.test(String(email).toLowerCase());
@@ -206,7 +202,11 @@ const ForgotPassword = () => {
   const sendResetValidation = async () => {
     const currentEmail = emailRef.current;
 
-    if (!currentEmail || currentEmail.length < 5) {
+    if (
+      !currentEmail ||
+      //@ts-ignore
+      currentEmail.length < 5
+    ) {
       Alert.alert(
         'Invalid Credentials',
         'Please enter your email you used to sign up',
@@ -288,13 +288,12 @@ const ForgotPassword = () => {
   return (
     <KeyboardAvoidingView // Wrap your content with KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.keyboardContainer}
-    >
+      style={styles.keyboardContainer}>
       <Image source={require('../img/forgotPasswordJungle.png')} />
       <View style={styles.container}>
         <Text style={styles.header}>Forgot Password</Text>
         <TextInput
-          label={renderLabel("Email")}
+          label={renderLabel('Email')}
           value={email}
           onChangeText={handleEmailChange}
           style={styles.input}
@@ -304,7 +303,9 @@ const ForgotPassword = () => {
           textColor="white"
           cursorColor="white"
           placeholderTextColor="rgba(255, 255, 255, 0.5)"
-          theme={{ colors: { text: 'white', placeholder: 'rgba(255, 255, 255, 0.5)' } }}
+          theme={{
+            colors: {text: 'white', placeholder: 'rgba(255, 255, 255, 0.5)'},
+          }}
         />
         <Text style={styles.helperText}>
           Please enter the email associated with your account
@@ -323,7 +324,13 @@ const ForgotPassword = () => {
             justifyContent: 'space-evenly',
             width: screenWidth * 0.65,
           }}>
-          <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate(
+                //@ts-ignore
+                'Login',
+              )
+            }>
             <Text
               style={{
                 color: '#4b9288',
@@ -334,7 +341,13 @@ const ForgotPassword = () => {
               Login
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate(
+                //@ts-ignore
+                'SignUp',
+              )
+            }>
             <Text
               style={{
                 color: '#4b9288',

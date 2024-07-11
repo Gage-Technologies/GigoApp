@@ -16,6 +16,8 @@ const projects: Project[] = [
   {id: '4', title: 'Budget Tracker', image: 'path_to_image'},
 ];
 
+///this page is not used- therefore not finished
+
 const Profile: React.FC = () => {
   const apiLoad = async () => {
     let userData = await fetch(`${API_URL}/api/user/profilePage`, {

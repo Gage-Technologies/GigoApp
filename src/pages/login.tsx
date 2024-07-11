@@ -89,7 +89,6 @@ const Login = () => {
     },
     loginContainer: {
       flexDirection: 'row', // Align items in a column
-      alignItems: 'even', // Align items in the center horizontally
       justifyContent: 'space-evenly',
       width: screenWidth * 0.8,
     },

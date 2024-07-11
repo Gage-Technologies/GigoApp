@@ -19,6 +19,8 @@ import HandoutOverlay from '../components/Journey/HandoutOverlay';
 import {getTextColor} from '../services/utils';
 import AwesomeButton from 'react-native-really-awesome-button';
 import {BlurView} from '@react-native-community/blur';
+import {useNavigation} from '@react-navigation/native';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
@@ -226,6 +228,7 @@ const JourneyMain = () => {
       <View
         style={[
           styles.container,
+          // eslint-disable-next-line react-native/no-inline-styles
           {justifyContent: 'center', alignItems: 'center'},
         ]}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -235,21 +238,35 @@ const JourneyMain = () => {
 
   console.log('Units:', units.length);
 
+  const navigation = useNavigation();
+
+  const handleDetourNavigation = () => {
+    // @ts-ignore
+    navigation.navigate('Detour');
+  };
+
   return (
-    <ScrollView
-      style={[styles.scrollView, {backgroundColor: theme.colors.background}]}
-      contentContainerStyle={styles.scrollViewContent}>
-      {activeJourney ? (
-        units.map((unit, index) => handleMap(unit, index))
-      ) : (
-        <GetStarted getTasks={getTasks} />
-      )}
-      <HandoutOverlay
-        isVisible={showHandout !== null}
-        onClose={() => setShowHandout(null)}
-        unit={units[showHandout ?? 0]}
-      />
-    </ScrollView>
+    <>
+      <ScrollView
+        style={[styles.scrollView, {backgroundColor: theme.colors.background}]}
+        contentContainerStyle={styles.scrollViewContent}>
+        {activeJourney ? (
+          units.map((unit, index) => handleMap(unit, index))
+        ) : (
+          <GetStarted getTasks={getTasks} />
+        )}
+        <HandoutOverlay
+          isVisible={showHandout !== null}
+          onClose={() => setShowHandout(null)}
+          unit={units[showHandout ?? 0]}
+        />
+      </ScrollView>
+      <TouchableOpacity
+        style={styles.detourButton}
+        onPress={handleDetourNavigation}>
+        <MaterialCommunityIcons name="sign-direction" size={30} color="white" />
+      </TouchableOpacity>
+    </>
   );
 };
 
@@ -358,6 +375,18 @@ const styles = StyleSheet.create({
   },
   buttonWrapper: {
     zIndex: 1,
+  },
+  detourButton: {
+    position: 'absolute',
+    left: 20,
+    bottom: 30,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+    backgroundColor: '#ef9558',
   },
 });
 

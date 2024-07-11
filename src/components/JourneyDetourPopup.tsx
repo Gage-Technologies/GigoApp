@@ -6,15 +6,16 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  Dimensions,
+  Alert,
 } from 'react-native';
 import {IconButton, useTheme, Button} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FastImage from 'react-native-fast-image';
 import Config from 'react-native-config';
-import DetourCard from './DetourCard';
 import JourneyUnitCard from './JourneyUnitCard';
 import UnitSelector from './UnitSelector';
+import {useNavigation} from '@react-navigation/native';
+import {useSelector, useDispatch} from 'react-redux';
 
 interface JourneyDetourPopupProps {
   open: boolean;
@@ -34,7 +35,10 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
   const [journeyUnitMap, setJourneyUnitMap] = useState([]);
   const [selectedUnitId, setSelectedUnitId] = useState(unit._id);
   const [showFullExplanation, setShowFullExplanation] = useState(false);
+  const [selectedUnit, setSelectedUnit] = useState(unit);
   const theme = useTheme();
+  const navigation = useNavigation();
+  const userId = useSelector(state => state.auth.id);
 
   const toggleDescription = () => setShowFullDescription(!showFullDescription);
   const displayedDescription = showFullDescription
@@ -75,14 +79,57 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
   };
 
   const takeDetour = async () => {
-    // implement the logic for taking the detour
-    console.log('Taking detour');
+    if (!userId) {
+      Alert.alert(
+        'Error',
+        'User is not authenticated. Please log in and try again.',
+      );
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${Config.API_URL}/api/journey/createDetour`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            detour_unit_id: unit._id,
+            user_id: userId,
+            task_id: '0',
+          }),
+        },
+      );
+
+      const detour = await response.json();
+
+      if (detour.success) {
+        // Close the popup
+        onClose();
+        // Navigate to the Journey screen
+        // @ts-ignore
+        navigation.navigate('JourneyMain');
+      } else {
+        Alert.alert('Error', 'There was an issue adding this detour');
+      }
+    } catch (error) {
+      console.error('Error taking detour:', error);
+      Alert.alert('Error', 'An unexpected error occurred');
+    }
   };
 
   const handleUnitSelect = useCallback(selectedUnit => {
     console.log('Selecting unit:', selectedUnit._id);
-    setSelectedUnitId(selectedUnit._id);
+    setSelectedUnit(selectedUnit);
+    setStage(3); // move to the new stage
   }, []);
+
+  const handleSelectUnit = () => {
+    setSelectedUnitId(selectedUnit._id);
+    setStage(2); // go back to stage 2
+  };
 
   useEffect(() => {
     console.log('Selected unit ID updated:', selectedUnitId);
@@ -127,8 +174,10 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
   );
 
   const renderStage2 = () => {
-    const selectedIndex = journeyUnitMap.findIndex(unit => unit._id === selectedUnitId);
-    const unitHeight = 90; // This should match the height of your unitItem plus its marginBottom
+    const selectedIndex = journeyUnitMap.findIndex(
+      unit => unit._id === selectedUnitId,
+    );
+    const unitHeight = 90;
 
     return (
       <ScrollView>
@@ -144,17 +193,17 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
         </View>
         <View style={styles.explanationContainer}>
           <View style={styles.explanationTextWrapper}>
-            <Text 
+            <Text
               style={[styles.explanationText, {color: theme.colors.text}]}
-              numberOfLines={showFullExplanation ? undefined : 1}
-            >
+              numberOfLines={showFullExplanation ? undefined : 1}>
               This Detour is part of a larger Journey. Select the point that you
               would like to start your Detour at. If you are unfamiliar with the
-              concept, we would recommend starting this detour at the beginning of
-              the Journey.
+              concept, we would recommend starting this detour at the beginning
+              of the Journey.
             </Text>
           </View>
-          <TouchableOpacity onPress={() => setShowFullExplanation(!showFullExplanation)}>
+          <TouchableOpacity
+            onPress={() => setShowFullExplanation(!showFullExplanation)}>
             <Text style={[styles.readMore, {color: theme.colors.primary}]}>
               {showFullExplanation ? 'Read Less' : 'Read More'}
             </Text>
@@ -169,7 +218,7 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
               <UnitSelector
                 unitCount={journeyUnitMap.length}
                 selectedIndex={selectedIndex}
-                onSelectUnit={(index) => handleUnitSelect(journeyUnitMap[index])}
+                onSelectUnit={index => handleUnitSelect(journeyUnitMap[index])}
                 unitHeight={unitHeight} // Pass the unitHeight
               />
             </View>
@@ -184,6 +233,7 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
                       isSelected={isSelected}
                       currentUnit={selectedUnitId}
                       unitNumber={index + 1}
+                      unitNumberColor="#007AFF"
                     />
                   </View>
                 );
@@ -202,6 +252,59 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
     );
   };
 
+  const renderStage3 = () => {
+    // find the index of the selected unit in the journeyUnitMap
+    const unitIndex = journeyUnitMap.findIndex(u => u._id === selectedUnit._id);
+    const unitNumber = unitIndex !== -1 ? unitIndex + 1 : null;
+
+    return (
+      <ScrollView>
+        <View style={styles.header}>
+          <View style={styles.titleContainer}>
+            <Text style={[styles.title, {color: theme.colors.text}]}>
+              {selectedUnit.name}
+            </Text>
+            {unitNumber !== null && (
+              <View style={styles.unitNumberContainer}>
+                <Text style={styles.unitNumber}>{unitNumber}</Text>
+              </View>
+            )}
+          </View>
+          <IconButton
+            icon={CloseIcon}
+            onPress={() => setStage(2)}
+            style={styles.closeButton}
+          />
+        </View>
+        <FastImage
+          source={{uri: `${Config.API_URL}/static/junit/t/${selectedUnit._id}`}}
+          style={styles.image}
+          onError={e => console.log('Image Load Error:', e.nativeEvent.error)}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+        <Text style={[styles.description, {color: theme.colors.text}]}>
+          {showFullDescription
+            ? selectedUnit.description
+            : `${selectedUnit.description.substring(0, 150)}...`}
+        </Text>
+        {selectedUnit.description.length > 150 && (
+          <TouchableOpacity onPress={toggleDescription}>
+            <Text style={[styles.readMore, {color: theme.colors.primary}]}>
+              {showFullDescription ? 'Read Less' : 'Read More'}
+            </Text>
+          </TouchableOpacity>
+        )}
+        <Button
+          mode="contained"
+          onPress={handleSelectUnit}
+          style={styles.continueButton}
+          labelStyle={styles.continueButtonLabel}>
+          Select
+        </Button>
+      </ScrollView>
+    );
+  };
+
   return (
     <Modal
       visible={open}
@@ -214,7 +317,11 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
             styles.modalContainer,
             {backgroundColor: theme.colors.surface},
           ]}>
-          {stage === 1 ? renderStage1() : renderStage2()}
+          {stage === 1
+            ? renderStage1()
+            : stage === 2
+            ? renderStage2()
+            : renderStage3()}
         </View>
       </View>
     </Modal>
@@ -310,6 +417,26 @@ const styles = StyleSheet.create({
   },
   readMore: {
     marginTop: 5,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  titleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: 10,
+  },
+  unitNumberContainer: {
+    backgroundColor: '#007AFF',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 10,
+  },
+  unitNumber: {
+    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: 'bold',
   },

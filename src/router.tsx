@@ -11,6 +11,7 @@ import CreateNewAccount from './pages/createNewAccount';
 import AccountSettings from './pages/accountSettings';
 import JourneyMain from './pages/journeyMain';
 import Byte from './pages/byte';
+import Detour from './pages/detour.tsx';
 import SpeedDial from './components/SpeedDial';
 import {selectAuthState} from './reducers/auth.ts';
 import {handleDeepLink} from './deepLinking.tsx';
@@ -54,6 +55,11 @@ const AppRouter = () => {
           <Stack.Screen
             name="JourneyMain"
             component={JourneyMain}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Detour"
+            component={Detour}
             options={{headerShown: false}}
           />
           <Stack.Screen

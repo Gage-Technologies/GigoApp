@@ -125,9 +125,9 @@ const JourneyUnitCard: React.FC<JourneyUnitCardProps> = ({
           </View>
           <View style={styles.logoContainer}>{renderLogo(data.langs)}</View>
         </View>
-        <View style={styles.numberContainer}>
+        <View style={[styles.numberContainer, {backgroundColor: '#007AFF'}]}>
           <Text
-            style={[styles.numberText, {color: theme.colors.text.secondary}]}>
+            style={[styles.numberText, {color: '#FFFFFF'}]}>
             {unitNumber}
           </Text>
         </View>
@@ -190,7 +190,6 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.7)',
     justifyContent: 'center',
     alignItems: 'center',
   },

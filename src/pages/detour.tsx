@@ -13,6 +13,7 @@ import Config from 'react-native-config';
 import {debounce} from 'lodash';
 import DetourCard from '../components/DetourCard';
 import JourneyDetourPopup from '../components/JourneyDetourPopup';
+import {Unit} from '../models/Journey';
 
 interface JourneyGroups {
   [key: string]: Unit[];
@@ -67,6 +68,7 @@ const Detour = () => {
     }
   };
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const searchJourneyUnitsDebounced = useCallback(
     debounce(searchJourneyUnits, 800),
     [],
@@ -159,7 +161,7 @@ const Detour = () => {
     }
   };
 
-  const handleCardPress = (unit) => {
+  const handleCardPress = (unit: Unit | React.SetStateAction<null>) => {
     setSelectedUnit(unit);
     setPopupVisible(true);
   };

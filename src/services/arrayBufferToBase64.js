@@ -11,9 +11,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 export default function base64ArrayBuffer(arrayBuffer) {
-  var base64 = "";
+  var base64 = '';
   var encodings =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
   var bytes = new Uint8Array(arrayBuffer);
   var byteLength = bytes.byteLength;
@@ -47,7 +47,7 @@ export default function base64ArrayBuffer(arrayBuffer) {
     // Set the 4 least significant bits to zero
     b = (chunk & 3) << 4; // 3   = 2^2 - 1
 
-    base64 += encodings[a] + encodings[b] + "==";
+    base64 += encodings[a] + encodings[b] + '==';
   } else if (byteRemainder === 2) {
     chunk = (bytes[mainLength] << 8) | bytes[mainLength + 1];
 
@@ -57,7 +57,7 @@ export default function base64ArrayBuffer(arrayBuffer) {
     // Set the 2 least significant bits to zero
     c = (chunk & 15) << 2; // 15    = 2^4 - 1
 
-    base64 += encodings[a] + encodings[b] + encodings[c] + "=";
+    base64 += encodings[a] + encodings[b] + encodings[c] + '=';
   }
 
   return base64;

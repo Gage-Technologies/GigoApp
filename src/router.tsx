@@ -53,6 +53,11 @@ const AppRouter = () => {
       <View style={styles.container}>
         <Stack.Navigator>
           <Stack.Screen
+            name="SignUp"
+            component={CreateNewAccount}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
             name="JourneyMain"
             component={JourneyMain}
             options={{headerShown: false}}
@@ -65,11 +70,6 @@ const AppRouter = () => {
           <Stack.Screen
             name="Login"
             component={Login}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="SignUp"
-            component={CreateNewAccount}
             options={{headerShown: false}}
           />
           <Stack.Screen

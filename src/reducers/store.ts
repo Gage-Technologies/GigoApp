@@ -1,8 +1,7 @@
-
-import { configureStore } from '@reduxjs/toolkit';
+import {configureStore} from '@reduxjs/toolkit';
 import authReducer from './auth.ts';
-import {combineReducers} from "redux";
-import { persistReducer } from 'redux-persist';
+import {combineReducers} from 'redux';
+import {persistReducer} from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const persistConfig = {
@@ -16,10 +15,10 @@ const reducers = combineReducers({
   auth: authReducer,
 });
 
-export const persistedReducer = persistReducer(persistConfig, reducers)
+export const persistedReducer = persistReducer(persistConfig, reducers);
 
 const store = configureStore({
-  reducer: persistedReducer
+  reducer: persistedReducer,
 });
 
 export type RootState = ReturnType<typeof store.getState>;

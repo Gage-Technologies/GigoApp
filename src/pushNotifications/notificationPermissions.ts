@@ -1,5 +1,6 @@
+// @ts-ignore
 import messaging from '@react-native-firebase/messaging';
-import { PermissionsAndroid, Platform } from 'react-native';
+import {PermissionsAndroid, Platform} from 'react-native';
 
 export const requestUserPermission = async () => {
   if (Platform.OS === 'ios') {

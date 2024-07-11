@@ -1,6 +1,7 @@
 // src/features/auth/authSlice.ts
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { RootState } from '../../app/store';
+import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+// @ts-ignore
+import {RootState} from '../../app/store';
 
 interface TutorialState {
   all: boolean | null;
@@ -45,7 +46,7 @@ interface AuthState {
 // Define AuthStateUpdate to allow partial updates with nullable fields
 type AuthStateUpdate = {
   [K in keyof AuthState]?: AuthState[K];
-}
+};
 
 export const initialState: AuthState = {
   authenticated: false,
@@ -126,17 +127,17 @@ export const initialAuthStateUpdate: AuthStateUpdate = {
 export const authSlice = createSlice({
   name: 'auth',
   initialState,
-    reducers: {
-      logout: (state) => {
-        Object.assign(state, initialAuthStateUpdate);
-      },
-      updateAuthState: (state, action: PayloadAction<AuthStateUpdate>) => {
-        return { ...state, ...action.payload };
-      },
+  reducers: {
+    logout: state => {
+      Object.assign(state, initialAuthStateUpdate);
     },
+    updateAuthState: (state, action: PayloadAction<AuthStateUpdate>) => {
+      return {...state, ...action.payload};
+    },
+  },
 });
 
-export const { updateAuthState } = authSlice.actions;
+export const {updateAuthState} = authSlice.actions;
 
 export const selectAuthState = (state: RootState) => state.auth;
 

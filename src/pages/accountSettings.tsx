@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect, useCallback} from 'react';
 import {
   View,
   Text,
@@ -15,22 +15,21 @@ import {
   ActivityIndicator,
   BackHandler,
 } from 'react-native';
-import { Dialog, Portal, Provider as PaperProvider } from 'react-native-paper';
-import { Card } from 'react-native-paper';
-import { useTheme } from 'react-native-paper';
+import {Dialog, Portal, Provider as PaperProvider} from 'react-native-paper';
+import {Card} from 'react-native-paper';
 import Config from 'react-native-config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Subscription, useDispatch, useSelector } from "react-redux";
+import {Subscription, useDispatch, useSelector} from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
-import { initialAuthStateUpdate, initialState, selectAuthState, updateAuthState } from "../reducers/auth.ts";
+import {
+  initialState,
+  selectAuthState,
+  updateAuthState,
+} from '../reducers/auth.ts';
 import Icon from 'react-native-vector-icons/FontAwesome';
-import { useFocusEffect, useNavigation } from '@react-navigation/native';
-import store, { persistedReducer } from '../reducers/store.ts';
-import { RootState } from "../reducers/store.ts";
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 
 const AccountSettings = () => {
-  const theme = useTheme();
-
   const navigation = useNavigation();
 
   const authStateSetup = useSelector(selectAuthState);
@@ -51,17 +50,8 @@ const AccountSettings = () => {
   const [confirmDeletionContent, setConfirmDeletionContent] = useState('');
   const [connectedAccountLoading, setConnectedAccountLoading] = useState(false);
   const [wsSettingsLoading, setWsSettingsLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [tab, setTab] = useState('user');
-  const [proPopupOpen, setProPopupOpen] = useState(false);
   const [stripeAccount, setStripeAccount] = useState('');
-  const [authState, setAuthState] = useState({
-    id: '',
-    tier: '',
-    backgroundName: '',
-    backgroundColor: '',
-    backgroundRenderInFront: '',
-  });
   const [workspaceRunStart, setWorkspaceRunStart] = React.useState(false);
   const [workspaceLogging, setWorkspaceLogging] = React.useState(false);
   const [workspaceSilent, setWorkspaceSilent] = React.useState(false);
@@ -122,7 +112,7 @@ const AccountSettings = () => {
 
       return () =>
         BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-    }, [selectedTab])
+    }, [selectedTab]),
   );
 
   const editUser = async () => {
@@ -138,7 +128,7 @@ const AccountSettings = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ new_username: newUsername }),
+          body: JSON.stringify({new_username: newUsername}),
         });
         console.log('response is: ', response);
 
@@ -163,7 +153,7 @@ const AccountSettings = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ new_email: newEmail }),
+          body: JSON.stringify({new_email: newEmail}),
         });
 
         const resEmail = await response.json();
@@ -191,7 +181,7 @@ const AccountSettings = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ new_phone: newPhone }),
+          body: JSON.stringify({new_phone: newPhone}),
         });
 
         const resPhone = await response.json();
@@ -238,7 +228,7 @@ const AccountSettings = () => {
   };
 
   const clearReducers = () => {
-    const authState = { ...initialState };
+    const authState = {...initialState};
     dispatch(updateAuthState(authState));
   };
 
@@ -285,7 +275,10 @@ const AccountSettings = () => {
         'You will be redirected to the login page in a few.',
       );
       clearReducers();
-      navigation.navigate('Login'); // Use your appropriate navigation method to redirect
+      navigation.navigate(
+        //@ts-ignore
+        'Login',
+      ); // Use your appropriate navigation method to redirect
 
       await AsyncStorage.setItem('homeIndex', 'undefined');
     } catch (error) {
@@ -296,65 +289,67 @@ const AccountSettings = () => {
     }
   };
 
-  const getPortalLink = async () => {
-    setPortalLinkLoading(true);
+  //stripe cannot be fully integrated until later
+  // const getPortalLink = async () => {
+  //   setPortalLinkLoading(true);
+  //
+  //   let name = fetch(`${API_URL}/api/stripe/portalSession`, {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({}),
+  //   });
+  //
+  //   if (!name.ok) {
+  //     console.log('response here is: ', name);
+  //     throw new Error('Network response was not ok');
+  //   }
+  //   const res = await name.json();
+  //
+  //   setPortalLinkLoading(false);
+  //
+  //   if (res !== undefined && res.session !== undefined) {
+  //     window.location.replace(res.session);
+  //     // setPortalLink(res["session"])
+  //   }
+  // };
 
-    let name = fetch(`${API_URL}/api/stripe/portalSession`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({}),
-    });
-
-    if (!name.ok) {
-      console.log('response here is: ', name);
-      throw new Error('Network response was not ok');
-    }
-    const res = await name.json();
-
-    setPortalLinkLoading(false);
-
-    if (res !== undefined && res.session !== undefined) {
-      window.location.replace(res.session);
-      // setPortalLink(res["session"])
-    }
-  };
-
-  const stripeNavigate = async (yearly: boolean | null) => {
-    let stripe = fetch(`${API_URL}/api/stripe/premiumMembershipSession`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({}),
-    });
-
-    if (!stripe.ok) {
-      console.log('response here is: ', stripe);
-      throw new Error('Network response was not ok');
-    }
-    const res = await stripe.json();
-
-    if (res.message === 'You must be logged in to access the GIGO system.') {
-      let authState = Object.assign({}, initialAuthStateUpdate);
-      // @ts-ignore
-      dispatch(updateAuthState(authState));
-      navigation.navigate('Login');
-    }
-    if (
-      res !== undefined &&
-      res['return url'] !== undefined &&
-      res['return year'] !== undefined
-    ) {
-      //todo figure out how to change this for app
-      if (yearly != null && yearly) {
-        window.location.replace(res['return year']);
-      } else {
-        window.location.replace(res['return url']);
-      }
-    }
-  };
+  //stripe is not fully integrated until later
+  // const stripeNavigate = async (yearly: boolean | null) => {
+  //   let stripe = fetch(`${API_URL}/api/stripe/premiumMembershipSession`, {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify({}),
+  //   });
+  //
+  //   if (!stripe.ok) {
+  //     console.log('response here is: ', stripe);
+  //     throw new Error('Network response was not ok');
+  //   }
+  //   const res = await stripe.json();
+  //
+  //   if (res.message === 'You must be logged in to access the GIGO system.') {
+  //     let authState = Object.assign({}, initialAuthStateUpdate);
+  //     // @ts-ignore
+  //     dispatch(updateAuthState(authState));
+  //     navigation.navigate('Login');
+  //   }
+  //   if (
+  //     res !== undefined &&
+  //     res['return url'] !== undefined &&
+  //     res['return year'] !== undefined
+  //   ) {
+  //     //todo figure out how to change this for app
+  //     if (yearly != null && yearly) {
+  //       window.location.replace(res['return year']);
+  //     } else {
+  //       window.location.replace(res['return url']);
+  //     }
+  //   }
+  // };
 
   // const handleCloseAgree = (yearly: boolean | null) => {
   //   if (hasSubscriptionId) {
@@ -439,12 +434,14 @@ const AccountSettings = () => {
           Alert.alert(
             'Success',
             'Your workspace settings were edited successfully.',
+            //@ts-ignore
             'success',
           );
         } else {
           Alert.alert(
             'Server Error',
             'An error occurred editing your workspace settings.',
+            //@ts-ignore
             'error',
           );
         }
@@ -452,6 +449,7 @@ const AccountSettings = () => {
         Alert.alert(
           'Server Error',
           'An error occurred editing your workspace settings.',
+          //@ts-ignore
           'error',
         );
       }
@@ -459,6 +457,7 @@ const AccountSettings = () => {
       Alert.alert(
         'Network Error',
         'An error occurred editing your workspace settings. Please try again later.',
+        //@ts-ignore
         'error',
       );
     }
@@ -649,12 +648,12 @@ const AccountSettings = () => {
                 <TouchableOpacity
                   onPress={() => setEdit(false)}
                   style={styles.cancelEditUser}>
-                  <Text style={{ color: 'white' }}>Cancel</Text>
+                  <Text style={{color: 'white'}}>Cancel</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={editUser}
                   style={styles.submitEditUser}>
-                  <Text style={{ color: 'white' }}>Submit</Text>
+                  <Text style={{color: 'white'}}>Submit</Text>
                 </TouchableOpacity>
               </View>
             </>
@@ -663,14 +662,14 @@ const AccountSettings = () => {
             <TouchableOpacity
               onPress={() => setEdit(true)}
               style={styles.editUserButton}>
-              <Text style={{ color: 'white' }}>Edit User Details</Text>
+              <Text style={{color: 'white'}}>Edit User Details</Text>
             </TouchableOpacity>
           )}
-          <View style={{ marginTop: 15 }}>
+          <View style={{marginTop: 15}}>
             <TouchableOpacity
               onPress={() => setDeleteAccount(true)}
               style={styles.deleteUserButton}>
-              <Text style={{ color: 'white' }}>Delete Account</Text>
+              <Text style={{color: 'white'}}>Delete Account</Text>
             </TouchableOpacity>
             <Portal>
               <Dialog
@@ -678,10 +677,8 @@ const AccountSettings = () => {
                 onDismiss={() => setDeleteAccount(false)}>
                 <Dialog.Title>Delete Account</Dialog.Title>
                 <Dialog.Content>
-                  <Text style={styles.dialogText}>
-                    Are you sure you want to delete your account?
-                  </Text>
-                  <Text style={styles.dialogText}>
+                  <Text>Are you sure you want to delete your account?</Text>
+                  <Text>
                     Account deletion is permanent and cannot be undone. If you
                     delete your account, you will lose all of your work.
                   </Text>
@@ -778,7 +775,7 @@ const AccountSettings = () => {
     }
   };
 
-  const UnixDateConverter = unixTimestamp => {
+  const UnixDateConverter = (unixTimestamp: number) => {
     let date = new Date(unixTimestamp * 1000);
     let day = date.getDate();
     let month = date.getMonth() + 1;
@@ -786,11 +783,11 @@ const AccountSettings = () => {
     return day === 0 ? 'N/A' : `${month}/${day}/${year}`;
   };
 
-  const formatDate = (timestamp: number | null) => {
-    return timestamp === 0 || timestamp === null
-      ? 'N/A'
-      : UnixDateConverter(timestamp); // UnixDateConverter function is not defined, replace it with your date formatting logic
-  };
+  // const formatDate = (timestamp: number | null) => {
+  //   return timestamp === 0 || timestamp === null
+  //     ? 'N/A'
+  //     : UnixDateConverter(timestamp); // UnixDateConverter function is not defined, replace it with your date formatting logic
+  // };
 
   const membershipTab = () => {
     const formatDate = (timestamp: number | null) => {
@@ -828,10 +825,13 @@ const AccountSettings = () => {
                 marginLeft: 15,
                 textTransform: 'none',
               }}>
-              {subscription?.current_subscription_string || 'Free'}
+              {/*current stripe setup is not fully done*/}
+              {/*{subscription?.current_subscription_string || 'Free'}*/}
+              Free
             </Text>
             {membership === 0 && (
               <Text
+                //@ts-ignore
                 style={{
                   fontWeight: '150',
                   textTransform: 'none',
@@ -884,7 +884,7 @@ const AccountSettings = () => {
                     <View
                       style={[
                         styles.progressFillMembership,
-                        { width: `${percentageOfMembership * 100}%` },
+                        {width: `${percentageOfMembership * 100}%`},
                       ]}
                     />
                   </View>
@@ -900,15 +900,17 @@ const AccountSettings = () => {
                   </View>
                   <View style={styles.detailItemMembership}>
                     <Text style={styles.detailTitleMembership}>
-                      {inTrial && !hasPaymentInfo
-                        ? 'Trial End'
-                        : alreadyCancelled
-                          ? 'End of Pro Access'
-                          : subscription?.scheduledDowngrade
-                            ? `Downgrade To ${proStatusToString(
-                              subscription?.scheduledDowngrade,
-                            )}`
-                            : 'Next Payment'}
+                      {/*the stripe setup is not done until it is released*/}
+                      {/*{inTrial && !hasPaymentInfo*/}
+                      {/*  ? 'Trial End'*/}
+                      {/*  : alreadyCancelled*/}
+                      {/*  ? 'End of Pro Access'*/}
+                      {/*  : subscription?.scheduledDowngrade*/}
+                      {/*  ? `Downgrade To ${proStatusToString(*/}
+                      {/*      subscription?.scheduledDowngrade,*/}
+                      {/*    )}`*/}
+                      {/*  : 'Next Payment'}*/}
+                      Trial End
                     </Text>
                     <Text style={styles.detailTextMembership}>
                       {formatDate(membershipDates.upcoming)}
@@ -919,8 +921,9 @@ const AccountSettings = () => {
                 <View style={styles.paymentContainerMembership}>
                   {(!inTrial || hasPaymentInfo) && !alreadyCancelled && (
                     <View style={styles.paymentItemMembership}>
-                      <Text style={styles.paymentTextMembership}>{`Next ${membershipCost === '80.00' ? 'Yearly' : 'Monthly'
-                        } Payment`}</Text>
+                      <Text style={styles.paymentTextMembership}>{`Next ${
+                        membershipCost === '80.00' ? 'Yearly' : 'Monthly'
+                      } Payment`}</Text>
                       <Text
                         style={
                           styles.paymentTextMembership
@@ -1092,7 +1095,7 @@ const AccountSettings = () => {
                   padding: 5,
                   alignItems: 'center',
                 }}>
-                <Text style={{ color: '#29c18c' }}>Connect Account</Text>
+                <Text style={{color: '#29c18c'}}>Connect Account</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -1367,32 +1370,34 @@ const AccountSettings = () => {
     );
   };
 
-  const logoutUser = async () => {
-    clearReducers();
-
-    try {
-      const response = await fetch(`${API_URL}/api/auth/logout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const resJson = await response.json();
-
-      if (resJson && resJson.message === 'success') {
-        navigation.navigate('Login');
-
-        // Clear AsyncStorage
-        await AsyncStorage.clear();
-        await AsyncStorage.setItem('homeIndex', 'undefined');
-      } else {
-        Alert.alert('Logout Error', 'There was an issue logging out');
-      }
-    } catch (error) {
-      Alert.alert('Logout Error', 'There was an issue logging out');
-    }
-  };
+  // const logoutUser = async () => {
+  //   clearReducers();
+  //
+  //   try {
+  //     const response = await fetch(`${API_URL}/api/auth/logout`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+  //
+  //     const resJson = await response.json();
+  //
+  //     if (resJson && resJson.message === 'success') {
+  //       navigation.navigate(
+  //         //@ts-ignore
+  //         'Login');
+  //
+  //       // Clear AsyncStorage
+  //       await AsyncStorage.clear();
+  //       await AsyncStorage.setItem('homeIndex', 'undefined');
+  //     } else {
+  //       Alert.alert('Logout Error', 'There was an issue logging out');
+  //     }
+  //   } catch (error) {
+  //     Alert.alert('Logout Error', 'There was an issue logging out');
+  //   }
+  // };
 
   const renderContent = () => {
     switch (selectedTab) {
@@ -1421,15 +1426,15 @@ const AccountSettings = () => {
               style={styles.titleContainer}>
               <Text style={styles.titleText}>Account Settings</Text>
             </LinearGradient>
-            <View style={{ paddingTop: 20, paddingBottom: 10, paddingLeft: 10 }}>
-              <Text style={{ color: "white" }}>General</Text>
+            <View style={{paddingTop: 20, paddingBottom: 10, paddingLeft: 10}}>
+              <Text style={{color: 'white'}}>General</Text>
             </View>
 
             <TouchableOpacity
               onPress={() => setSelectedTab('User')}
               style={styles.tabButton}>
               <View style={styles.buttonContent}>
-                <View style={[styles.leftContent, { marginRight: 5 }]}>
+                <View style={[styles.leftContent, {marginRight: 5}]}>
                   <Icon name="user" size={16} color="white" />
                   <Text style={styles.tabText}>User</Text>
                 </View>
@@ -1472,8 +1477,8 @@ const AccountSettings = () => {
               </View>
             </TouchableOpacity> */}
 
-            <View style={{ paddingTop: 20, paddingBottom: 20, paddingLeft: 10 }}>
-              <Text style={{ color: "white" }}>Support</Text>
+            <View style={{paddingTop: 20, paddingBottom: 20, paddingLeft: 10}}>
+              <Text style={{color: 'white'}}>Support</Text>
             </View>
 
             <TouchableOpacity
@@ -1497,7 +1502,10 @@ const AccountSettings = () => {
                     await AsyncStorage.clear();
                     // sleep 300ms
                     await new Promise(resolve => setTimeout(resolve, 300));
-                    navigation.navigate('Login');
+                    navigation.navigate(
+                      //@ts-ignore
+                      'Login',
+                    );
                   } catch (error) {
                     console.error('Logout error:', error);
                     Alert.alert('Error', 'Failed to logout. Please try again.');
@@ -1505,9 +1513,11 @@ const AccountSettings = () => {
                     setLogoutLoading(false);
                   }
                 }}
-                style={[styles.logoutButton, logoutLoading && styles.disabledButton]}
-                disabled={logoutLoading}
-              >
+                style={[
+                  styles.logoutButton,
+                  logoutLoading && styles.disabledButton,
+                ]}
+                disabled={logoutLoading}>
                 {logoutLoading ? (
                   <ActivityIndicator size="small" color="#ffffff" />
                 ) : (
@@ -1517,7 +1527,7 @@ const AccountSettings = () => {
             </View>
           </View>
         ) : (
-          <View style={styles.container}>
+          <View style={styles.userContainer}>
             <TouchableOpacity
               onPress={() => setSelectedTab('Main')}
               style={styles.goBackContainer}>
@@ -1529,9 +1539,7 @@ const AccountSettings = () => {
               />
               <Text style={styles.goBack}>Go Back</Text>
             </TouchableOpacity>
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-              {renderContent()}
-            </ScrollView>
+            <ScrollView>{renderContent()}</ScrollView>
           </View>
         )}
       </View>
@@ -1539,7 +1547,7 @@ const AccountSettings = () => {
   );
 };
 
-const { width, height } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   mainContainer: {
@@ -1604,7 +1612,7 @@ const styles = StyleSheet.create({
     width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
   },
-  container: {
+  userContainer: {
     flex: 1,
   },
   card: {
@@ -1620,7 +1628,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#00f', // blue text
     textShadowColor: '#00f', // blue outline
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1,
   },
   titleExclusive: {
@@ -1629,7 +1637,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: 'white', // blue text
     textShadowColor: '#00f', // blue outline
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1,
   },
   subtitle: {
@@ -1637,7 +1645,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: '#00f', // blue text
     textShadowColor: '#00f', // blue outline
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1,
   },
   subtitleExclusive: {
@@ -1645,7 +1653,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: 'white', // blue text
     textShadowColor: 'white', // blue outline
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1,
   },
   sectionTitle: {
@@ -1654,7 +1662,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: '#00f', // blue text
     textShadowColor: '#00f', // blue outline
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1,
   },
   sectionTitleExclusive: {
@@ -1663,7 +1671,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: 'white', // blue text
     textShadowColor: 'white', // blue outline
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1,
   },
   paragraph: {
@@ -1671,7 +1679,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: '#00f', // blue text
     textShadowColor: '#00f', // blue outline
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1,
   },
   paragraphExclusive: {
@@ -1679,7 +1687,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     color: 'white', // blue text
     textShadowColor: '#white', // blue outline
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1,
   },
   tabsContainer: {
@@ -1720,7 +1728,7 @@ const styles = StyleSheet.create({
   },
   tabTextClicked: {
     color: '#29c18c', // blue text
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1,
     textAlign: 'center',
   },
@@ -1738,9 +1746,7 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 1,
     borderColor: '#27ab7c',
-    fontColor: 'white',
     width: '100%',
-    height: 'auto',
     alignItems: 'center',
     justifyContent: 'center',
     height: 50,
@@ -1749,7 +1755,6 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 1,
     borderColor: 'red',
-    fontColor: 'white',
     width: Dimensions.get('window').width / 1.12,
     alignItems: 'center',
     justifyContent: 'center',

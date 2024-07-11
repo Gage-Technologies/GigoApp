@@ -1,9 +1,9 @@
-
-import base64ArrayBuffer from "./arrayBufferToBase64";
-import JSZip from "jszip";
+import base64ArrayBuffer from './arrayBufferToBase64';
+import JSZip from 'jszip';
 
 const generateUniqueAlphaNumericString = (): string => {
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   const charactersLength = characters.length;
   let result = '';
 
@@ -17,13 +17,12 @@ const generateUniqueAlphaNumericString = (): string => {
 
 async function chunkFile(
   uri: string,
-  file: File| Blob,
+  file: File | Blob,
   params: RequestInit,
-  completionCallback: null | ((res: any) => void) = null
+  completionCallback: null | ((res: any) => void) = null,
 ) {
   // exit if no file was passed
   if (!file) {
-
     return;
   }
 
@@ -63,7 +62,7 @@ async function chunkFile(
   if (params.body !== null && params.body !== undefined) {
     body = JSON.parse(params.body.toString());
   }
-  Object.assign(body, { total_parts: totalChunks, upload_id: tempFileId });
+  Object.assign(body, {total_parts: totalChunks, upload_id: tempFileId});
 
   // specify reader callback to send upload chunks to the server
   reader.onload = async () => {
@@ -80,16 +79,16 @@ async function chunkFile(
     let payload = JSON.parse(JSON.stringify(body));
 
     // set the part argument to inform the server of which chunk this is
-    payload["part"] = partIndex;
+    payload.part = partIndex;
 
     // add chunk to body
-    payload["chunk"] = base64ArrayBuffer(reader.result);
+    payload.chunk = base64ArrayBuffer(reader.result);
 
     // update params with new body
     params.body = JSON.stringify(payload);
 
     // execute api call with the passed chunk
-    res = await fetch(uri,params).then(response => response.json());
+    res = await fetch(uri, params).then(response => response.json());
 
     // handle final chunk logic
     if (offset === fileSize) {
@@ -108,10 +107,7 @@ async function chunkFile(
   };
 
   // create callback for reader errors
-  reader.onerror = () => {
-  };
-
-
+  reader.onerror = () => {};
 
   // execute recursive file chunk reader
   await reader.readAsArrayBuffer(file.slice(offset, endOffset));
@@ -125,45 +121,40 @@ async function chunkFile(
   //   );
 
   // return start message
-  return { message: "File Upload Starting" };
+  return {message: 'File Upload Starting'};
 }
 
 export default async function fetchWithUpload(
   uri: string,
-  file: File| Blob | File[],
+  file: File | Blob | File[],
   params: RequestInit,
-  completionCallback: null | ((res: any) => void) = null
+  completionCallback: null | ((res: any) => void) = null,
 ) {
   // handle a single file
   if (Array.isArray(file) === true) {
     // create a new zipper object
     let zip = new JSZip();
     // iterate over files adding them to the zip
+    //@ts-ignore
     for (let i = 0; i < file.length; i++) {
       // add file to zip
+      // @ts-ignore
       zip.file(file[i].name, file[i]);
     }
 
     let result = null;
 
     // execute zip operation and pipe data to file upload
-    await zip.generateAsync({ type: "blob" }).then(async function (content: Blob) {
-      result = await chunkFile(
-        uri,
-        content,
-        params,
-        completionCallback
-      );
-    });
+    await zip
+      .generateAsync({type: 'blob'})
+      .then(async function (content: Blob) {
+        result = await chunkFile(uri, content, params, completionCallback);
+      });
 
     return result;
   } else {
     // execute call via file chunker
-    return await chunkFile(
-      uri,
-      file,
-      params,
-      completionCallback
-    );
+    //@ts-ignore
+    return await chunkFile(uri, file, params, completionCallback);
   }
 }

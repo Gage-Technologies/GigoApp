@@ -162,6 +162,7 @@ const Detour = () => {
   };
 
   const handleCardPress = (unit: Unit | React.SetStateAction<null>) => {
+    // @ts-ignore
     setSelectedUnit(unit);
     setPopupVisible(true);
   };
@@ -172,35 +173,54 @@ const Detour = () => {
   };
 
   const renderJourneyGroups = () => {
+    // @ts-ignore
     return (
       <View style={styles.journeyGroupsContainer}>
-        {Object.entries(journeyGroups).map(([category, {Units, GroupID}]) => (
-          <View key={category} style={styles.categoryContainer}>
-            <View style={styles.categoryHeader}>
-              <Text style={styles.categoryTitle}>{category}</Text>
-              {Units.length === 4 && (
-                <Button onPress={() => handleShowAllToggle(GroupID)}>
-                  <Text>
-                    {groupStates[GroupID]?.showAll ? 'Show Less' : 'Show More'}
-                  </Text>
-                </Button>
-              )}
+        {Object.entries(journeyGroups).map(
+          ([
+            category,
+            {
+              //@ts-ignore
+              Units,
+              //@ts-ignore
+              GroupID,
+            },
+          ]) => (
+            <View key={category} style={styles.categoryContainer}>
+              <View style={styles.categoryHeader}>
+                <Text style={styles.categoryTitle}>{category}</Text>
+                {Units.length === 4 && (
+                  <Button onPress={() => handleShowAllToggle(GroupID)}>
+                    <Text>
+                      {groupStates[GroupID]?.showAll
+                        ? 'Show Less'
+                        : 'Show More'}
+                    </Text>
+                  </Button>
+                )}
+              </View>
+              <View style={styles.unitsContainer}>
+                {(groupStates[GroupID]?.showAll
+                  ? groupStates[GroupID]?.units || Units
+                  : Units.slice(0, 4)
+                ).map((unit: Unit | React.SetStateAction<null>) => (
+                  <View
+                    key={
+                      //@ts-ignore
+                      unit.id
+                    }
+                    style={styles.unitItem}>
+                    <DetourCard
+                      //@ts-ignore
+                      data={unit}
+                      onPress={() => handleCardPress(unit)}
+                    />
+                  </View>
+                ))}
+              </View>
             </View>
-            <View style={styles.unitsContainer}>
-              {(groupStates[GroupID]?.showAll
-                ? groupStates[GroupID]?.units || Units
-                : Units.slice(0, 4)
-              ).map(unit => (
-                <View key={unit.id} style={styles.unitItem}>
-                  <DetourCard
-                    data={unit}
-                    onPress={() => handleCardPress(unit)}
-                  />
-                </View>
-              ))}
-            </View>
-          </View>
-        ))}
+          ),
+        )}
       </View>
     );
   };
@@ -213,8 +233,17 @@ const Detour = () => {
         ) : (
           <View style={styles.unitsContainer}>
             {searchUnits.map(unit => (
-              <View key={unit.id} style={styles.unitItem}>
-                <DetourCard data={unit} onPress={() => handleCardPress(unit)} />
+              <View
+                key={
+                  //@ts-ignore
+                  unit.id
+                }
+                style={styles.unitItem}>
+                <DetourCard
+                  //@ts-ignore
+                  data={unit}
+                  onPress={() => handleCardPress(unit)}
+                />
               </View>
             ))}
           </View>
@@ -318,7 +347,12 @@ const Detour = () => {
       <Text style={styles.titleText}>Take A Detour</Text>
       <View style={styles.headerLine} />
       <View style={styles.searchBarContainer}>
-        <IconButton icon="magnify" size={25} color={theme.colors.surface} />
+        <IconButton
+          icon="magnify"
+          size={25}
+          //@ts-ignore
+          color={theme.colors.surface}
+        />
         <TextInput
           style={styles.searchBar}
           placeholder="Search Detours..."

@@ -13,7 +13,6 @@ import Config from 'react-native-config';
 import JourneyMap from '../components/Journey/JourneyMap';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import GetStarted from '../components/GetStarted';
-import MarkdownRenderer from '../components/Markdown/MarkdownRenderer';
 import {Unit} from '../models/Journey';
 import HandoutOverlay from '../components/Journey/HandoutOverlay';
 import {getTextColor} from '../services/utils';
@@ -31,6 +30,8 @@ const JourneyMain = () => {
 
   const API_URL = Config.API_URL;
   const theme = useTheme();
+
+  const navigation = useNavigation();
 
   const getTasks = async () => {
     try {
@@ -108,8 +109,12 @@ const JourneyMain = () => {
           }
 
           const sortedTasks = tasks.sort((a: any, b: any) => {
-            if (a.node_above === null) return -1;
-            if (b.node_above === null) return 1;
+            if (a.node_above === null) {
+              return -1;
+            }
+            if (b.node_above === null) {
+              return 1;
+            }
             return a.node_above - b.node_above;
           });
 
@@ -237,8 +242,6 @@ const JourneyMain = () => {
   }
 
   console.log('Units:', units.length);
-
-  const navigation = useNavigation();
 
   const handleDetourNavigation = () => {
     // @ts-ignore

@@ -59,7 +59,6 @@ const githubLogo = `
 `;
 
 const CreateNewAccount = () => {
-
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

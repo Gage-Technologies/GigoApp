@@ -13,6 +13,7 @@ import JourneyMain from './pages/journeyMain';
 import Byte from './pages/byte';
 import Detour from './pages/detour.tsx';
 import SpeedDial from './components/SpeedDial';
+import BottomBar from './components/BottomBar';
 import {selectAuthState} from './reducers/auth.ts';
 import {handleDeepLink} from './deepLinking.tsx';
 import {useSelector} from 'react-redux';
@@ -53,13 +54,13 @@ const AppRouter = () => {
       <View style={styles.container}>
         <Stack.Navigator>
           <Stack.Screen
-            name="SignUp"
-            component={CreateNewAccount}
+            name="JourneyMain"
+            component={JourneyMain}
             options={{headerShown: false}}
           />
           <Stack.Screen
-            name="JourneyMain"
-            component={JourneyMain}
+            name="SignUp"
+            component={CreateNewAccount}
             options={{headerShown: false}}
           />
           <Stack.Screen
@@ -89,13 +90,13 @@ const AppRouter = () => {
             options={{headerShown: false}}
           />
         </Stack.Navigator>
-        <ConditionalSpeedDial currentRouteName={currentRouteName} />
+        <ConditionalBottomBar currentRouteName={currentRouteName} />
       </View>
     </NavigationContainer>
   );
 };
 
-const ConditionalSpeedDial = ({
+const ConditionalBottomBar = ({
   currentRouteName,
 }: {
   currentRouteName: string;
@@ -109,7 +110,13 @@ const ConditionalSpeedDial = ({
     return null;
   }
 
-  return <SpeedDial />;
+  // use speeddial for byte page
+  if (currentRouteName === 'Byte') {
+    return <SpeedDial />;
+  }
+
+  // use bottom bar for all other pages
+  return <BottomBar />;
 };
 
 const styles = StyleSheet.create({

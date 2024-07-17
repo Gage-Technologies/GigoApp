@@ -20,6 +20,7 @@ import AwesomeButton from 'react-native-really-awesome-button';
 import {BlurView} from '@react-native-community/blur';
 import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import XpPopup from '../components/XpPopup';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
@@ -27,6 +28,7 @@ const JourneyMain = () => {
   const [activeJourney, setActiveJourney] = useState<boolean | null>(null);
   const [showHandout, setShowHandout] = useState<number | null>(null);
   const [openDetourPop, setOpenDetourPop] = useState(false);
+  const [showXpPopup, setShowXpPopup] = useState(false);
 
   const API_URL = Config.API_URL;
   const theme = useTheme();
@@ -248,6 +250,10 @@ const JourneyMain = () => {
     navigation.navigate('Detour');
   };
 
+  const handleCloseXpPopup = () => {
+    setShowXpPopup(false);
+  };
+
   return (
     <>
       <ScrollView
@@ -269,6 +275,20 @@ const JourneyMain = () => {
         onPress={handleDetourNavigation}>
         <MaterialCommunityIcons name="sign-direction" size={30} color="white" />
       </TouchableOpacity>
+
+      {showXpPopup && (
+        <XpPopup
+          oldXP={50}
+          newXP={100}
+          nextLevel={2}
+          maxXP={150}
+          levelUp={true}
+          gainedXP={50}
+          renown={1}
+          popupClose={handleCloseXpPopup}
+          homePage={false}
+        />
+      )}
     </>
   );
 };

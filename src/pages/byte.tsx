@@ -1,10 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
-import React from 'react';
+import React, {useState} from 'react';
 import {View} from 'react-native';
 import {WebView} from 'react-native-webview';
 import {useSelector} from 'react-redux';
 import {selectAuthState} from '../reducers/auth';
 import {useNavigation} from '@react-navigation/native';
+import XpPopup from '../components/XpPopup';
 
 // component to display a byte or journey in a webview
 const Byte: React.FC<{
@@ -15,6 +16,16 @@ const Byte: React.FC<{
   const authState = useSelector(selectAuthState);
 
   const navigation = useNavigation();
+  const [showXpPopup, setShowXpPopup] = useState(false);
+  const [xpData, setXpData] = useState({
+    oldXP: 0,
+    newXP: 0,
+    nextLevel: 1,
+    maxXP: 100,
+    levelUp: false,
+    gainedXP: 0,
+    renown: 0,
+  });
 
   console.log('authState', authState);
 
@@ -24,6 +35,33 @@ const Byte: React.FC<{
       authState.token
     }${isJourney ? '&journey=true' : ''}`,
   );
+
+  const handleXpGain = (gainedXp: number) => {
+    // TODO: Figure out how to handle all of this xp data
+    const currentXP = 50;
+    const currentLevel = 1;
+    const xpForNextLevel = 100;
+
+    const newXP = currentXP + gainedXp;
+    const levelUp = newXP >= xpForNextLevel;
+    const nextLevel = levelUp ? currentLevel + 1 : currentLevel;
+
+    setXpData({
+      oldXP: currentXP,
+      newXP: newXP,
+      nextLevel: nextLevel,
+      maxXP: xpForNextLevel,
+      levelUp: levelUp,
+      gainedXP: gainedXp,
+      renown: 0,
+    });
+
+    setShowXpPopup(true);
+  };
+
+  const handleCloseXpPopup = () => {
+    setShowXpPopup(false);
+  };
 
   // function to handle url changes
   const handleNavigationStateChange = (newNavState: any): boolean => {
@@ -49,6 +87,14 @@ const Byte: React.FC<{
 
     // update isJourney based on url parameters
     isJourney = newNavState.url.includes('journey=true');
+
+    // Check for XP gain events here
+    // This is a placeholder condition. Replace with actual logic to detect XP gain.
+    if (newNavState.url.includes('xp_gained')) {
+      const xpGained = 50; // Replace with actual XP gained
+      handleXpGain(xpGained);
+    }
+
     return true;
   };
 
@@ -66,6 +112,9 @@ const Byte: React.FC<{
         }}
         onNavigationStateChange={handleNavigationStateChange}
       />
+      {showXpPopup && (
+        <XpPopup {...xpData} popupClose={handleCloseXpPopup} homePage={false} />
+      )}
     </View>
   );
 };

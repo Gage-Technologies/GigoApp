@@ -12,6 +12,8 @@ import AccountSettings from './pages/accountSettings';
 import JourneyMain from './pages/journeyMain';
 import Byte from './pages/byte';
 import Detour from './pages/detour.tsx';
+import Stats from './pages/stats.tsx';
+import AboutJourney from './pages/aboutJourney.tsx';
 import SpeedDial from './components/SpeedDial';
 import BottomBar from './components/BottomBar';
 import {selectAuthState} from './reducers/auth.ts';
@@ -56,6 +58,16 @@ const AppRouter = () => {
           <Stack.Screen
             name="JourneyMain"
             component={JourneyMain}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="AboutJourney"
+            component={AboutJourney}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Stats"
+            component={Stats}
             options={{headerShown: false}}
           />
           <Stack.Screen

@@ -24,6 +24,7 @@ const BottomBar = () => {
     {icon: 'poll', label: 'Stats', screen: 'Stats'},
     {icon: 'map', label: 'Journey', screen: 'JourneyMain'},
     {icon: 'cog', label: 'Settings', screen: 'AccountSettings'},
+    {icon: 'information-outline', label: 'About', screen: 'AboutJourney'}, // new tab added
   ];
 
   // create shared value for animation

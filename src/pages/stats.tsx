@@ -1,16 +1,15 @@
 /* eslint-disable react-native/no-inline-styles */
 import React from 'react';
-import {View, StyleSheet, Dimensions} from 'react-native';
+import {ScrollView, View, StyleSheet, Dimensions} from 'react-native';
 import {useTheme, Text} from 'react-native-paper';
-import Carousel from 'react-native-reanimated-carousel';
 import StatBox from '../components/Stats/StatBox';
 import ProgressionBox from '../components/Stats/ProgressionBox';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
-const STAT_CARD_WIDTH = SCREEN_WIDTH * 0.4;
-const STAT_CARD_HEIGHT = STAT_CARD_WIDTH * 1.5; // 1.5 times taller than wide
-const PROGRESSION_CARD_HEIGHT = SCREEN_WIDTH * 0.25;
-const PROGRESSION_CARD_WIDTH = SCREEN_WIDTH * 0.8;
+const STAT_CARD_WIDTH = SCREEN_WIDTH * 0.45;
+const STAT_CARD_HEIGHT = STAT_CARD_WIDTH * 0.6;
+const PROGRESSION_CARD_WIDTH = SCREEN_WIDTH * 0.9;
+const PROGRESSION_CARD_HEIGHT = PROGRESSION_CARD_WIDTH * 0.4;
 
 const Stats = () => {
   const theme = useTheme();
@@ -40,6 +39,18 @@ const Stats = () => {
       value: '7077ms',
       tooltip: 'Average time to complete a task',
     },
+    {
+      icon: 'chart-line',
+      title: 'Performance',
+      value: '85%',
+      tooltip: 'Overall performance',
+    },
+    {
+      icon: 'trophy',
+      title: 'Achievements',
+      value: '5',
+      tooltip: 'Number of achievements',
+    },
   ];
 
   const progressions = [
@@ -55,55 +66,60 @@ const Stats = () => {
   ];
 
   return (
-    <View
+    <ScrollView
       style={[styles.container, {backgroundColor: theme.colors.background}]}>
       <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-        Stats
+        Statistics
       </Text>
-      <View style={styles.carouselContainer}>
-        <Carousel
-          loop
-          width={SCREEN_WIDTH}
-          height={STAT_CARD_HEIGHT + 20} // add some extra space
-          data={stats}
-          renderItem={({item}) => <StatBox {...item} />}
-          style={styles.carousel}
-        />
+      <View style={styles.statsContainer}>
+        {stats.map((item, index) => (
+          <View key={index} style={styles.statBoxWrapper}>
+            <StatBox {...item} />
+          </View>
+        ))}
       </View>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {color: theme.colors.text, marginTop: 20},
-        ]}>
+      <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
         Progressions
       </Text>
-      <Carousel
-        loop
-        width={SCREEN_WIDTH}
-        height={PROGRESSION_CARD_HEIGHT}
-        data={progressions}
-        renderItem={({item}) => <ProgressionBox {...item} />}
-        style={styles.carousel}
-      />
-    </View>
+      <View style={styles.progressionsContainer}>
+        {progressions.map((item, index) => (
+          <View key={index} style={styles.progressionBoxWrapper}>
+            <ProgressionBox {...item} />
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 12,
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: 12,
   },
-  carouselContainer: {
-    height: STAT_CARD_HEIGHT + 20, // match the Carousel height
+  statsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
   },
-  carousel: {
-    marginBottom: 20,
+  statBoxWrapper: {
+    width: STAT_CARD_WIDTH,
+    height: STAT_CARD_HEIGHT,
+    marginBottom: 6,
+  },
+  progressionsContainer: {
+    flexDirection: 'column',
+  },
+  progressionBoxWrapper: {
+    width: PROGRESSION_CARD_WIDTH,
+    height: PROGRESSION_CARD_HEIGHT,
+    marginBottom: -8,
+    alignSelf: 'center',
   },
 });
 

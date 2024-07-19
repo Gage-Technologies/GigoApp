@@ -9,25 +9,37 @@ interface ProgressionBoxProps {
   tooltip: string;
 }
 
-const ProgressionBox: React.FC<ProgressionBoxProps> = ({title, value, max, tooltip}) => {
+const ProgressionBox: React.FC<ProgressionBoxProps> = ({
+  title,
+  value,
+  max,
+  tooltip,
+}) => {
   const theme = useTheme();
 
   // ensure progress is a valid number between 0 and 1
   const progress = Math.min(Math.max(value / max, 0), 1) || 0;
 
   return (
-    <Card style={[styles.container, {backgroundColor: theme.colors.surface}]}>
+    <Card
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.primary,
+        },
+      ]}>
       <Card.Content style={styles.content}>
         <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
         <View style={styles.progressBarContainer}>
-          <View 
+          <View
             style={[
-              styles.progressBar, 
+              styles.progressBar,
               {
                 backgroundColor: theme.colors.primary,
-                width: `${progress * 100}%`
-              }
-            ]} 
+                width: `${progress * 100}%`,
+              },
+            ]}
           />
         </View>
         <Text style={[styles.progressText, {color: theme.colors.text}]}>
@@ -46,18 +58,19 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({title, value, max, toolt
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 20,
-    elevation: 4,
-    width: 350,
-    margin: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    width: '100%',
+    height: '80%',
+    overflow: 'hidden',
   },
   content: {
     justifyContent: 'space-between',
     height: '100%',
-    padding: 12,
+    padding: 8,
   },
   title: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 8,
   },
@@ -72,7 +85,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   progressText: {
-    fontSize: 12,
+    fontSize: 13,
     textAlign: 'right',
     marginTop: 8,
   },

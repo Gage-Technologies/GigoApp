@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
-import {useTheme, Text, Card, IconButton} from 'react-native-paper';
+import {useTheme, Text, Card} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface StatBoxProps {
@@ -13,21 +13,36 @@ interface StatBoxProps {
 const StatBox: React.FC<StatBoxProps> = ({icon, title, value, tooltip}) => {
   const theme = useTheme();
 
+  // function to determine icon color based on icon name
+  const getIconColor = (iconName: string) => {
+    switch (iconName) {
+      case 'school':
+        return '#808A93';
+      case 'target':
+        return '#ec644b';
+      case 'laptop':
+        return theme.colors.secondary;
+      case 'timer':
+        return 'white';
+      case 'chart-line':
+        return theme.colors.primary;
+      case 'trophy':
+        return 'gold';
+      default:
+        return theme.colors.text;
+    }
+  };
+
   return (
-    <Card style={[styles.container, {backgroundColor: theme.colors.surface}]}>
+    <Card style={[styles.container, {backgroundColor: theme.colors.surface, borderColor: theme.colors.primary}]}>
       <Card.Content style={styles.content}>
-        <IconButton
-          icon="help-circle-outline"
-          size={16}
-          color={theme.colors.text}
-          onPress={() => console.log(tooltip)}
-          style={styles.tooltipIcon}
-        />
         <View style={styles.iconContainer}>
-          <Icon name={icon} size={60} color={theme.colors.primary} />
+          <Icon name={icon} size={24} color={getIconColor(icon)} style={styles.icon} />
         </View>
-        <Text style={[styles.value, {color: theme.colors.text}]}>{value}</Text>
-        <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
+        <View style={styles.textContainer}>
+          <Text style={[styles.value, {color: theme.colors.text}]}>{value}</Text>
+          <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
+        </View>
       </Card.Content>
     </Card>
   );
@@ -35,34 +50,40 @@ const StatBox: React.FC<StatBoxProps> = ({icon, title, value, tooltip}) => {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 20,
-    elevation: 4,
-    width: 350,
-    height: 245,
-    margin: 8,
+    borderRadius: 5,
+    borderWidth: 1,
+    width: '100%',
+    height: '80%',
+    overflow: 'hidden',
+    padding: 2,
   },
   content: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
     height: '100%',
-    padding: 12,
   },
   iconContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  value: {
-    fontSize: 40,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  title: {
-    fontSize: 18,
-    textAlign: 'center',
-  },
-  tooltipIcon: {
     position: 'absolute',
     top: 8,
-    right: 8,
+    left: 8,
+  },
+  textContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  icon: {
+    marginRight: 12,
+  },
+  value: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    bottom: 8,
+  },
+  title: {
+    fontSize: 13,
+    textAlign: 'center',
+    top: 8,
   },
 });
 

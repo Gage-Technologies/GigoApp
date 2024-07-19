@@ -1,24 +1,42 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
-import {useTheme, Text, Card, IconButton} from 'react-native-paper';
+import {useTheme, Text, Card} from 'react-native-paper';
 
 interface ProgressionBoxProps {
   title: string;
   value: number;
   max: number;
-  tooltip: string;
+  colorType: 'primary' | 'secondary' | 'golden' | 'custom';
+  level: number;
 }
 
 const ProgressionBox: React.FC<ProgressionBoxProps> = ({
   title,
   value,
   max,
-  tooltip,
+  colorType,
+  level,
 }) => {
   const theme = useTheme();
 
   // ensure progress is a valid number between 0 and 1
   const progress = Math.min(Math.max(value / max, 0), 1) || 0;
+
+  // determine the fill color based on the colorType prop
+  const getFillColor = () => {
+    switch (colorType) {
+      case 'primary':
+        return theme.colors.primary;
+      case 'secondary':
+        return theme.colors.secondary;
+      case 'golden':
+        return '#EFA900';
+      case 'custom':
+        return '#ec644b';
+      default:
+        return theme.colors.primary;
+    }
+  };
 
   return (
     <Card
@@ -31,26 +49,29 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({
       ]}>
       <Card.Content style={styles.content}>
         <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
+        <Text style={[styles.levelText, {color: theme.colors.text}]}>
+          Level {level}
+        </Text>
         <View style={styles.progressBarContainer}>
           <View
             style={[
-              styles.progressBar,
-              {
-                backgroundColor: theme.colors.primary,
-                width: `${progress * 100}%`,
-              },
-            ]}
-          />
+              styles.progressBarOutline,
+              {borderColor: theme.colors.primary},
+            ]}>
+            <View
+              style={[
+                styles.progressBar,
+                {
+                  backgroundColor: getFillColor(),
+                  width: `${progress * 100}%`,
+                },
+              ]}
+            />
+          </View>
         </View>
         <Text style={[styles.progressText, {color: theme.colors.text}]}>
           {`${value}/${max}`}
         </Text>
-        <IconButton
-          icon="help-circle-outline"
-          size={16}
-          onPress={() => console.log(tooltip)}
-          style={styles.tooltipIcon}
-        />
       </Card.Content>
     </Card>
   );
@@ -58,10 +79,10 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
     width: '100%',
-    height: '80%',
+    height: '75%',
     overflow: 'hidden',
   },
   content: {
@@ -75,24 +96,30 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   progressBarContainer: {
-    height: 8,
-    backgroundColor: '#e0e0e0',
+    height: 16,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressBarOutline: {
+    height: '100%',
+    borderWidth: 2,
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    borderRadius: 4,
   },
   progressText: {
     fontSize: 13,
     textAlign: 'right',
     marginTop: 8,
   },
-  tooltipIcon: {
+  levelText: {
     position: 'absolute',
     top: 8,
     right: 8,
+    fontSize: 12,
+    fontWeight: 'bold',
   },
 });
 

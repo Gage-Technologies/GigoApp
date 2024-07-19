@@ -27,7 +27,7 @@ const StatBox: React.FC<StatBoxProps> = ({icon, title, value, tooltip}) => {
       case 'chart-line':
         return theme.colors.primary;
       case 'trophy':
-        return 'gold';
+        return '#EFA900';
       default:
         return theme.colors.text;
     }

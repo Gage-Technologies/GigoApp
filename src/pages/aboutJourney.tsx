@@ -53,12 +53,12 @@ const AboutJourney = () => {
       color: theme.colors.text,
     },
     card: {
-      marginBottom: 16, // increased margin between cards
+      marginBottom: 16,
       elevation: 4,
       backgroundColor: theme.colors.surface,
     },
     firstCard: {
-      marginTop: 16, // margin above the first card
+      marginTop: 16,
     },
     cardTitle: {
       fontSize: 20,
@@ -78,11 +78,30 @@ const AboutJourney = () => {
     },
   });
 
-  const renderSection = (title, content, icon, isFirstCard = false) => (
+  const renderSection = (
+    title:
+      | string
+      | number
+      | boolean
+      | React.ReactElement<any, string | React.JSXElementConstructor<any>>
+      | Iterable<React.ReactNode>
+      | null
+      | undefined,
+    content:
+      | string
+      | number
+      | boolean
+      | React.ReactElement<any, string | React.JSXElementConstructor<any>>
+      | Iterable<React.ReactNode>
+      | null
+      | undefined,
+    icon: string,
+    isFirstCard = false,
+  ) => (
     <Card style={[styles.card, isFirstCard && styles.firstCard]}>
       <Card.Title
         title={title}
-        left={props => (
+        left={_props => (
           <View style={styles.iconContainer}>
             <Icon name={icon} size={24} color={theme.colors.primary} />
           </View>
@@ -117,7 +136,7 @@ const AboutJourney = () => {
           'Incremental Learning Path',
           'Our journey caters to both entry-level and experienced programmers. Beginners start with programming basics, while advanced users dive into complex algorithms and specialized areas.',
           'stairs-up',
-          true, // this is the first card
+          true,
         )}
 
         {renderSection(
@@ -129,7 +148,7 @@ const AboutJourney = () => {
         <Card style={styles.card}>
           <Card.Title
             title="Curriculum"
-            left={props => (
+            left={_props => (
               <View style={styles.iconContainer}>
                 <Icon
                   name="book-open-variant"

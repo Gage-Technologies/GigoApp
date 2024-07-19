@@ -1,53 +1,68 @@
 import React from 'react';
 import {View, StyleSheet} from 'react-native';
-import {useTheme, Text, IconButton} from 'react-native-paper';
+import {useTheme, Text, Card, IconButton} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface StatBoxProps {
   icon: string;
-  value: string | number;
   title: string;
+  value: string;
   tooltip: string;
 }
 
-const StatBox: React.FC<StatBoxProps> = ({icon, value, title, tooltip}) => {
+const StatBox: React.FC<StatBoxProps> = ({icon, title, value, tooltip}) => {
   const theme = useTheme();
 
   return (
-    <View style={[styles.container, {borderColor: theme.colors.primary}]}>
-      <View style={styles.iconContainer}>
-        <Icon name={icon} size={60} color={theme.colors.primary} />
-      </View>
-      <Text style={[styles.value, {color: theme.colors.primary}]}>{value}</Text>
-      <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
-    </View>
+    <Card style={[styles.container, {backgroundColor: theme.colors.surface}]}>
+      <Card.Content style={styles.content}>
+        <IconButton
+          icon="help-circle-outline"
+          size={16}
+          color={theme.colors.text}
+          onPress={() => console.log(tooltip)}
+          style={styles.tooltipIcon}
+        />
+        <View style={styles.iconContainer}>
+          <Icon name={icon} size={60} color={theme.colors.primary} />
+        </View>
+        <Text style={[styles.value, {color: theme.colors.text}]}>{value}</Text>
+        <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
+      </Card.Content>
+    </Card>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    width: '48%',
-    aspectRatio: 1,
-    borderWidth: 1,
     borderRadius: 20,
-    padding: 16,
-    marginBottom: 16,
-    alignItems: 'center',
+    elevation: 4,
+    width: 350,
+    height: 245,
+    margin: 8,
+  },
+  content: {
     justifyContent: 'space-between',
+    height: '100%',
+    padding: 12,
   },
   iconContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
+    marginBottom: 16,
   },
   value: {
-    fontSize: 32,
+    fontSize: 40,
     fontWeight: 'bold',
     textAlign: 'center',
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
     textAlign: 'center',
+  },
+  tooltipIcon: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
   },
 });
 

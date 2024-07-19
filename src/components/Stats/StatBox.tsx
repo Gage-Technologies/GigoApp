@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {useTheme, Text, Card} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -8,9 +8,10 @@ interface StatBoxProps {
   title: string;
   value: string;
   tooltip: string;
+  onPress: () => void;
 }
 
-const StatBox: React.FC<StatBoxProps> = ({icon, title, value, tooltip}) => {
+const StatBox: React.FC<StatBoxProps> = ({icon, title, value, tooltip, onPress}) => {
   const theme = useTheme();
 
   // function to determine icon color based on icon name
@@ -34,17 +35,19 @@ const StatBox: React.FC<StatBoxProps> = ({icon, title, value, tooltip}) => {
   };
 
   return (
-    <Card style={[styles.container, {backgroundColor: theme.colors.surface, borderColor: theme.colors.primary}]}>
-      <Card.Content style={styles.content}>
-        <View style={styles.iconContainer}>
-          <Icon name={icon} size={24} color={getIconColor(icon)} style={styles.icon} />
-        </View>
-        <View style={styles.textContainer}>
-          <Text style={[styles.value, {color: theme.colors.text}]}>{value}</Text>
-          <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
-        </View>
-      </Card.Content>
-    </Card>
+    <TouchableOpacity onPress={onPress}>
+      <Card style={[styles.container, {backgroundColor: theme.colors.surface, borderColor: theme.colors.primary}]}>
+        <Card.Content style={styles.content}>
+          <View style={styles.iconContainer}>
+            <Icon name={icon} size={24} color={getIconColor(icon)} style={styles.icon} />
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={[styles.value, {color: theme.colors.text}]}>{value}</Text>
+            <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
+          </View>
+        </Card.Content>
+      </Card>
+    </TouchableOpacity>
   );
 };
 
@@ -53,7 +56,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     borderWidth: 1,
     width: '100%',
-    height: '80%',
+    height: '90%',
     overflow: 'hidden',
     padding: 2,
   },

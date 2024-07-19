@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, StyleSheet} from 'react-native';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import {useTheme, Text, Card} from 'react-native-paper';
 
 interface ProgressionBoxProps {
@@ -8,6 +8,7 @@ interface ProgressionBoxProps {
   max: number;
   colorType: 'primary' | 'secondary' | 'golden' | 'custom';
   level: number;
+  onPress: () => void;
 }
 
 const ProgressionBox: React.FC<ProgressionBoxProps> = ({
@@ -16,6 +17,7 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({
   max,
   colorType,
   level,
+  onPress,
 }) => {
   const theme = useTheme();
 
@@ -30,7 +32,7 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({
       case 'secondary':
         return theme.colors.secondary;
       case 'golden':
-        return '#EFA900';
+        return '#FFD700';
       case 'custom':
         return '#ec644b';
       default:
@@ -39,41 +41,43 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({
   };
 
   return (
-    <Card
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.colors.surface,
-          borderColor: theme.colors.primary,
-        },
-      ]}>
-      <Card.Content style={styles.content}>
-        <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
-        <Text style={[styles.levelText, {color: theme.colors.text}]}>
-          Level {level}
-        </Text>
-        <View style={styles.progressBarContainer}>
-          <View
-            style={[
-              styles.progressBarOutline,
-              {borderColor: theme.colors.primary},
-            ]}>
+    <TouchableOpacity onPress={onPress}>
+      <Card
+        style={[
+          styles.container,
+          {
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.primary,
+          },
+        ]}>
+        <Card.Content style={styles.content}>
+          <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
+          <Text style={[styles.levelText, {color: theme.colors.text}]}>
+            Level {level}
+          </Text>
+          <View style={styles.progressBarContainer}>
             <View
               style={[
-                styles.progressBar,
-                {
-                  backgroundColor: getFillColor(),
-                  width: `${progress * 100}%`,
-                },
-              ]}
-            />
+                styles.progressBarOutline,
+                {borderColor: theme.colors.primary},
+              ]}>
+              <View
+                style={[
+                  styles.progressBar,
+                  {
+                    backgroundColor: getFillColor(),
+                    width: `${progress * 100}%`,
+                  },
+                ]}
+              />
+            </View>
           </View>
-        </View>
-        <Text style={[styles.progressText, {color: theme.colors.text}]}>
-          {`${value}/${max}`}
-        </Text>
-      </Card.Content>
-    </Card>
+          <Text style={[styles.progressText, {color: theme.colors.text}]}>
+            {`${value}/${max}`}
+          </Text>
+        </Card.Content>
+      </Card>
+    </TouchableOpacity>
   );
 };
 
@@ -82,7 +86,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     width: '100%',
-    height: '75%',
+    height: '85%',
     overflow: 'hidden',
   },
   content: {

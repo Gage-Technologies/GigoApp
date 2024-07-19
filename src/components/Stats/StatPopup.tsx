@@ -1,34 +1,30 @@
 import React from 'react';
 import {StyleSheet, View, Dimensions, Modal} from 'react-native';
 import {Text, Button, useTheme} from 'react-native-paper';
-import ProgressionBox from './ProgressionBox';
+import StatBox from './StatBox';
 
 const {width: SCREEN_WIDTH, height: SCREEN_HEIGHT} = Dimensions.get('window');
 const POPUP_WIDTH = SCREEN_WIDTH * 0.85;
 const POPUP_HEIGHT = SCREEN_HEIGHT * 0.6;
-const PROGRESSION_BOX_WIDTH = POPUP_WIDTH * 0.8;
-const PROGRESSION_BOX_HEIGHT = PROGRESSION_BOX_WIDTH * 0.4;
+const STAT_BOX_WIDTH = POPUP_WIDTH * 0.8;
+const STAT_BOX_HEIGHT = STAT_BOX_WIDTH * 0.6;
 
-interface ProgressionPopupProps {
+interface StatPopupProps {
   visible: boolean;
   onClose: () => void;
   title: string;
-  value: number;
-  max: number;
-  colorType: string;
-  level: number;
-  description: string;
+  icon: string;
+  value: string;
+  tooltip: string;
 }
 
-const ProgressionPopup: React.FC<ProgressionPopupProps> = ({
+const StatPopup: React.FC<StatPopupProps> = ({
   visible,
   onClose,
   title,
+  icon,
   value,
-  max,
-  colorType,
-  level,
-  description,
+  tooltip,
 }) => {
   const theme = useTheme();
 
@@ -51,18 +47,16 @@ const ProgressionPopup: React.FC<ProgressionPopupProps> = ({
             </Button>
           </View>
           <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
-          <View style={styles.progressionBoxWrapper}>
-            <ProgressionBox
+          <View style={styles.statBoxWrapper}>
+            <StatBox
+              icon={icon}
               title={title}
               value={value}
-              max={max}
-              colorType={colorType}
-              level={level}
-              onPress={() => {}}
+              tooltip={tooltip}
             />
           </View>
           <Text style={[styles.description, {color: theme.colors.text}]}>
-            {description}
+            {tooltip}
           </Text>
         </View>
       </View>
@@ -111,14 +105,14 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
   },
-  progressionBoxWrapper: {
-    width: PROGRESSION_BOX_WIDTH,
-    height: PROGRESSION_BOX_HEIGHT + 30,
-    marginBottom: -5,
+  statBoxWrapper: {
+    width: STAT_BOX_WIDTH - 45,
+    height: STAT_BOX_HEIGHT - 30,
+    marginBottom: 15,
   },
   description: {
     textAlign: 'center',
   },
 });
 
-export default ProgressionPopup;
+export default StatPopup;

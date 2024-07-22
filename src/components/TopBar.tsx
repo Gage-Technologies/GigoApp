@@ -9,10 +9,9 @@ import CSharpLogo from '../img/Logo_C_sharp.svg';
 import JavaScriptLogo from '../img/logo-javascript.svg';
 import RustLogo from '../img/logo-rust.svg';
 import PythonLogo from '../img/python-logo.svg';
-import {useSelector} from 'react-redux';
-import {selectRemainingHearts} from '../reducers/hearts';
 import HeartTracker from './HeartTracker';
 import Config from 'react-native-config';
+import ProPopup from './ProPopup'; // Import the ProPopup component
 
 // define the available programming languages with their icons
 const programmingLanguages = [
@@ -40,9 +39,12 @@ const TopBar = () => {
   );
   const userMembershipLevel = 'Basic'; // hardcoded value for development
   const [streakData, setStreakData] = useState<StreakData | null>(null);
+  const [proPopupVisible, setProPopupVisible] = useState(false); // State for ProPopup visibility
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
+  const openProPopup = () => setProPopupVisible(true); // Open ProPopup
+  const closeProPopup = () => setProPopupVisible(false); // Close ProPopup
 
   const getStreakData = async () => {
     try {
@@ -124,16 +126,18 @@ const TopBar = () => {
         ))}
       </Menu>
 
-      <View
+      <TouchableOpacity
         style={[
           styles.membershipContainer,
           {backgroundColor: theme.colors.primary + '20'},
-        ]}>
+        ]}
+        onPress={openProPopup}
+      >
         <Icon name="crown" size={20} color={theme.colors.primary} />
         <Text style={[styles.membershipText, {color: theme.colors.primary}]}>
           Pro Level: {userMembershipLevel}
         </Text>
-      </View>
+      </TouchableOpacity>
 
       <View style={styles.statsContainer}>
         {streakData && (
@@ -146,6 +150,8 @@ const TopBar = () => {
         )}
         <HeartTracker />
       </View>
+
+      <ProPopup visible={proPopupVisible} onDismiss={closeProPopup} />
     </View>
   );
 };

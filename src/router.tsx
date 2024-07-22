@@ -16,6 +16,7 @@ import Stats from './pages/stats.tsx';
 import AboutJourney from './pages/aboutJourney.tsx';
 import SpeedDial from './components/SpeedDial';
 import BottomBar from './components/BottomBar';
+import TopBar from './components/TopBar'; // new import
 import {selectAuthState} from './reducers/auth.ts';
 import {handleDeepLink} from './deepLinking.tsx';
 import {useSelector} from 'react-redux';
@@ -54,6 +55,7 @@ const AppRouter = () => {
       ref={navigationRef}
       onStateChange={() => getCurrentRouteName()}>
       <View style={styles.container}>
+        <ConditionalTopBar currentRouteName={currentRouteName} />
         <Stack.Navigator>
           <Stack.Screen
             name="JourneyMain"
@@ -106,6 +108,20 @@ const AppRouter = () => {
       </View>
     </NavigationContainer>
   );
+};
+
+const ConditionalTopBar = ({currentRouteName}: {currentRouteName: string}) => {
+  if (
+    currentRouteName === 'Login' ||
+    currentRouteName === 'SignUp' ||
+    currentRouteName === 'ForgotPassword' ||
+    currentRouteName === 'Byte'
+  ) {
+    return null;
+  }
+
+  // show topbar on all other pages
+  return <TopBar />;
 };
 
 const ConditionalBottomBar = ({

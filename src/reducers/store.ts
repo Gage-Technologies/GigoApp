@@ -1,5 +1,6 @@
 import {configureStore} from '@reduxjs/toolkit';
 import authReducer from './auth.ts';
+import heartsReducer from './hearts.ts';
 import {combineReducers} from 'redux';
 import {persistReducer} from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -13,6 +14,7 @@ const persistConfig = {
 
 const reducers = combineReducers({
   auth: authReducer,
+  hearts: heartsReducer,
 });
 
 export const persistedReducer = persistReducer(persistConfig, reducers);

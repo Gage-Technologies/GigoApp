@@ -1,6 +1,7 @@
-import React, {useState} from 'react';
+/* eslint-disable react-native/no-inline-styles */
+import React, {useState, useEffect} from 'react';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
-import {Text, useTheme, Menu, Button} from 'react-native-paper';
+import {Text, useTheme, Menu} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import CppLogo from '../img/Cpp_Logo.svg';
 import GoLogo from '../img/Go-Logo-Blue.svg';
@@ -8,6 +9,9 @@ import CSharpLogo from '../img/Logo_C_sharp.svg';
 import JavaScriptLogo from '../img/logo-javascript.svg';
 import RustLogo from '../img/logo-rust.svg';
 import PythonLogo from '../img/python-logo.svg';
+import {useSelector} from 'react-redux';
+import {selectRemainingHearts} from '../reducers/hearts';
+import HeartTracker from './HeartTracker';
 
 // define the available programming languages with their icons
 const programmingLanguages = [
@@ -19,24 +23,37 @@ const programmingLanguages = [
   {name: 'C#', icon: CSharpLogo},
 ];
 
+// define a custom fire orange color
+const FIRE_ORANGE = '#FF6B35';
+
 const TopBar = () => {
   const theme = useTheme();
   const [visible, setVisible] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(
     programmingLanguages[0],
   );
-  const userHearts = 5; // hardcoded value for development
+  const userHearts = useSelector(selectRemainingHearts);
   const userStreak = 7; // hardcoded value for development
+  const userMembershipLevel = 'Basic'; // hardcoded value for development
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-shadow
   const renderLogo = (Icon: React.ComponentType<any>) => (
     <Icon width={24} height={24} style={styles.logo} />
   );
 
   return (
-    <View style={[styles.container, {backgroundColor: theme.colors.surface}]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.colors.surface,
+          borderBottomColor: theme.colors.primary + '80',
+          borderBottomWidth: 2,
+        },
+      ]}>
       <Menu
         visible={visible}
         onDismiss={closeMenu}
@@ -76,28 +93,25 @@ const TopBar = () => {
         ))}
       </Menu>
 
-      <Button
-        mode="contained"
-        onPress={() => console.log('Get Pro pressed')}
-        style={styles.getProButton}
-        labelStyle={styles.getProButtonLabel}
-        contentStyle={styles.getProButtonContent}>
-        Get Pro
-      </Button>
+      <View
+        style={[
+          styles.membershipContainer,
+          {backgroundColor: theme.colors.primary + '20'},
+        ]}>
+        <Icon name="crown" size={20} color={theme.colors.primary} />
+        <Text style={[styles.membershipText, {color: theme.colors.primary}]}>
+          Pro Level: {userMembershipLevel}
+        </Text>
+      </View>
 
       <View style={styles.statsContainer}>
         <View style={styles.streakContainer}>
-          <Icon name="fire" size={24} color={theme.colors.primary} />
+          <Icon name="fire" size={24} color={FIRE_ORANGE} />
           <Text style={[styles.statsText, {color: theme.colors.onSurface}]}>
             {userStreak}
           </Text>
         </View>
-        <View style={styles.heartsContainer}>
-          <Icon name="heart" size={24} color={theme.colors.error} />
-          <Text style={[styles.statsText, {color: theme.colors.onSurface}]}>
-            {userHearts}
-          </Text>
-        </View>
+        <HeartTracker />
       </View>
     </View>
   );
@@ -121,25 +135,6 @@ const styles = StyleSheet.create({
   logo: {
     marginRight: 8,
   },
-  getProButton: {
-    marginHorizontal: 0,
-    borderRadius: 4,
-    elevation: 12,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 20},
-    shadowOpacity: 0.25,
-    shadowRadius: 6.84,
-  },
-  getProButtonLabel: {
-    fontSize: 14,
-    marginVertical: 0,
-    marginHorizontal: 6,
-    fontWeight: 'bold',
-  },
-  getProButtonContent: {
-    height: 36,
-    paddingHorizontal: 12,
-  },
   statsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -148,10 +143,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginRight: 16,
-  },
-  heartsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   statsText: {
     fontSize: 16,
@@ -164,6 +155,18 @@ const styles = StyleSheet.create({
   menuItemText: {
     marginLeft: 8,
     fontSize: 16,
+  },
+  membershipContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  membershipText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginLeft: 6,
   },
 });
 

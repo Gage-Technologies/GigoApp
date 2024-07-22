@@ -12,6 +12,7 @@ import PythonLogo from '../img/python-logo.svg';
 import {useSelector} from 'react-redux';
 import {selectRemainingHearts} from '../reducers/hearts';
 import HeartTracker from './HeartTracker';
+import Config from 'react-native-config';
 
 // define the available programming languages with their icons
 const programmingLanguages = [
@@ -23,6 +24,11 @@ const programmingLanguages = [
   {name: 'C#', icon: CSharpLogo},
 ];
 
+interface StreakData {
+  current_streak: number;
+  // add other fields from the API response as needed
+}
+
 // define a custom fire orange color
 const FIRE_ORANGE = '#FF6B35';
 
@@ -32,12 +38,37 @@ const TopBar = () => {
   const [selectedLanguage, setSelectedLanguage] = useState(
     programmingLanguages[0],
   );
-  const userHearts = useSelector(selectRemainingHearts);
-  const userStreak = 7; // hardcoded value for development
   const userMembershipLevel = 'Basic'; // hardcoded value for development
+  const [streakData, setStreakData] = useState<StreakData | null>(null);
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
+
+  const getStreakData = async () => {
+    try {
+      const response = await fetch(`${Config.API_URL}/api/user/streakPage`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      const res = await response.json();
+
+      if (res && res.stats && res.stats.length > 0) {
+        setStreakData(res.stats[0]);
+      } else {
+        console.error('Invalid response from streakPage');
+      }
+    } catch (error) {
+      console.error('Error fetching streak data:', error);
+    }
+  };
+
+  useEffect(() => {
+    getStreakData();
+  }, []);
 
   // eslint-disable-next-line @typescript-eslint/no-shadow
   const renderLogo = (Icon: React.ComponentType<any>) => (
@@ -105,12 +136,14 @@ const TopBar = () => {
       </View>
 
       <View style={styles.statsContainer}>
-        <View style={styles.streakContainer}>
-          <Icon name="fire" size={24} color={FIRE_ORANGE} />
-          <Text style={[styles.statsText, {color: theme.colors.onSurface}]}>
-            {userStreak}
-          </Text>
-        </View>
+        {streakData && (
+          <View style={styles.streakContainer}>
+            <Icon name="fire" size={24} color={FIRE_ORANGE} />
+            <Text style={[styles.statsText, {color: theme.colors.onSurface}]}>
+              {streakData.current_streak}
+            </Text>
+          </View>
+        )}
         <HeartTracker />
       </View>
     </View>

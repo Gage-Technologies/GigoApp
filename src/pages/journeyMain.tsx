@@ -152,6 +152,8 @@ const JourneyMain = () => {
       .slice(0, index)
       .reduce((acc, unit) => acc + unit.tasks.length, 0);
 
+    const isUnitStarted = unit.tasks.some(task => task.completed);
+
     return (
       <View
         style={
@@ -179,6 +181,7 @@ const JourneyMain = () => {
             unitId={unit._id}
             unitIndex={index}
             taskOffset={taskOffset}
+            isUnitStarted={isUnitStarted}
           />
         </View>
         {isPendingAcceptance && (

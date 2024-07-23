@@ -1,14 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, ScrollView, ActivityIndicator, StyleSheet, Alert, Dimensions } from 'react-native';
-import { Svg, Path } from 'react-native-svg';
-import { Button, useTheme } from 'react-native-paper';
+/* eslint-disable react-native/no-inline-styles */
+/* eslint-disable react/no-unstable-nested-components */
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+  ActivityIndicator,
+  StyleSheet,
+  Alert,
+  Dimensions,
+} from 'react-native';
+import {Svg, Path} from 'react-native-svg';
+import {Button, useTheme} from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // For modern icons
 import Config from 'react-native-config';
-import { useNavigation } from '@react-navigation/native';
-import { Task } from '../../models/Journey';
-import AwesomeButton from "react-native-really-awesome-button";
+import {useNavigation} from '@react-navigation/native';
+import {Task} from '../../models/Journey';
+import AwesomeButton from 'react-native-really-awesome-button';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withRepeat,
+  withTiming,
+  Easing,
+} from 'react-native-reanimated';
 
-const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitIndex: number, taskOffset: number }) => {
+const JourneyMap = ({
+  unitId,
+  unitIndex,
+  taskOffset,
+  isUnitStarted, // Add this prop
+}: {
+  unitId: string;
+  unitIndex: number;
+  taskOffset: number;
+  isUnitStarted: boolean; // Add this prop
+}) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -30,7 +59,7 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ unit_id: unitId, user_id: 1684239109222039552 })
+          body: JSON.stringify({unit_id: unitId, user_id: 1684239109222039552}),
         });
 
         const result = await response.json();
@@ -62,14 +91,18 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
     // navigate to the byte page
     console.log(JSON.stringify(task));
     // @ts-ignore
-    navigation.navigate('Byte', { byteId: task.code_source_id, isJourney: true });
+    navigation.navigate('Byte', {byteId: task.code_source_id, isJourney: true});
   };
 
   const toggleHandout = () => {
     setHandoutVisible(!handoutVisible);
   };
 
-  const renderTaskIcon = (task: Task, index: number, previousTask: Task | null) => {
+  const renderTaskIcon = (
+    task: Task,
+    index: number,
+    previousTask: Task | null,
+  ) => {
     if (task.completed) {
       return (
         <View style={[styles.iconContainer, styles.completedIcon]}>
@@ -96,17 +129,47 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
       animationType="slide"
       transparent={true}
       visible={modalVisible}
-      onRequestClose={() => setModalVisible(false)}
-    >
+      onRequestClose={() => setModalVisible(false)}>
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <Text style={styles.modalTextTitle}>{selectedTask?.name}</Text>
-          <Text style={styles.modalTextDescription}>{selectedTask?.description}</Text>
-          <Button mode="contained" onPress={() => setModalVisible(false)}>close</Button>
+          <Text style={styles.modalTextDescription}>
+            {selectedTask?.description}
+          </Text>
+          <Button mode="contained" onPress={() => setModalVisible(false)}>
+            close
+          </Button>
         </View>
       </View>
     </Modal>
   );
+
+  // add this new component for the start sign
+  const StartSign = ({visible}: {visible: boolean}) => {
+    const translateY = useSharedValue(0);
+
+    useEffect(() => {
+      translateY.value = withRepeat(
+        withTiming(5, {duration: 1000, easing: Easing.inOut(Easing.ease)}),
+        -1,
+        true,
+      );
+    }, []);
+
+    const animatedStyle = useAnimatedStyle(() => {
+      return {
+        transform: [{translateY: translateY.value}],
+      };
+    });
+
+    if (!visible) return null;
+
+    return (
+      <Animated.View style={[styles.startSign, animatedStyle]}>
+        <Text style={styles.startSignText}>Start</Text>
+      </Animated.View>
+    );
+  };
 
   const JourneyStops = () => {
     const buttonSpacing = 40; // space between buttons
@@ -117,7 +180,7 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
       // update the index relative to the taskOffset
       index += taskOffset;
 
-      const maxOffset = (screenWidth / 2); // maximum offset from center
+      const maxOffset = screenWidth / 2; // maximum offset from center
       const offsetBase = 4;
       let offset = 0;
 
@@ -132,13 +195,16 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
       let scalingFactor = (index - lastCenter) / (offsetBase / 2);
       if (index % offsetBase > Math.floor(offsetBase / 2)) {
         // calculate steps from midpoint
-        let stepsFromMidpoint = index % offsetBase - Math.floor(offsetBase / 2);
+        let stepsFromMidpoint =
+          (index % offsetBase) - Math.floor(offsetBase / 2);
 
         // calculate the scaling factor for this position inverse from the midpoint
-        scalingFactor = Math.abs(index - (stepsFromMidpoint * 2) - lastCenter) / (offsetBase / 2);
+        scalingFactor =
+          Math.abs(index - stepsFromMidpoint * 2 - lastCenter) /
+          (offsetBase / 2);
       }
 
-      console.log(index, scalingFactor)
+      console.log(index, scalingFactor);
 
       // calculate offset to create a zigzag pattern
       offset = inverse ? maxOffset : -maxOffset;
@@ -158,7 +224,6 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
         return [theme.colors.primary, theme.colors.primaryVariant];
       }
 
-
       return ['#808080', '#5D5D5D'];
     };
 
@@ -166,8 +231,25 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
       <View style={styles.pathContainer}>
         {tasks.map((task, index) => {
           let c = getButtonStyles(task, index);
+          const isUnlocked =
+            index === 0 || (index > 0 && tasks[index - 1].completed);
+          // show start sign on the first task of unstarted units or unlocked tasks of started units
+          const showStartSign =
+            (!isUnitStarted && index === 0) ||
+            (isUnitStarted && isUnlocked && !task.completed);
+
           return (
-            <View key={task._id + index} style={[styles.taskButtonWrapper, { marginBottom: buttonSpacing, marginLeft: calculateOffset(index) }]}>
+            <View
+              key={task._id + index}
+              style={[
+                styles.taskButtonWrapper,
+                {
+                  marginBottom: buttonSpacing,
+                  marginLeft: calculateOffset(index),
+                  marginTop: !isUnitStarted && index === 0 ? 35 : 0, // add margin to the first task so the start sign has space
+                },
+              ]}>
+              <StartSign visible={showStartSign} />
               <AwesomeButton
                 borderRadius={100}
                 height={100}
@@ -179,14 +261,17 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
                 backgroundPlaceholder={c[0]}
                 backgroundProgress={c[0]}
                 backgroundDarker={c[1]}
-                disabled={!(index === 0 || (index > 0 && tasks[index - 1].completed))}
+                disabled={!isUnlocked}
                 onPress={() => {
-                  if (index === 0 || (index > 0 && tasks[index - 1].completed)) {
+                  if (isUnlocked) {
                     handlePressTask(task);
                   }
-                }}
-              >
-                {renderTaskIcon(task, index, index > 0 ? tasks[index - 1] : null)}
+                }}>
+                {renderTaskIcon(
+                  task,
+                  index,
+                  index > 0 ? tasks[index - 1] : null,
+                )}
               </AwesomeButton>
               {/* <Text style={styles.taskName}>{task.name}</Text> */}
             </View>
@@ -203,9 +288,7 @@ const JourneyMap = ({ unitId, unitIndex, taskOffset }: { unitId: string, unitInd
       ) : (
         <View style={styles.contentContainer}>
           <View style={styles.unitHeader}>
-            <Text style={styles.unitTitle}>
-              {unitTitle}
-            </Text>
+            <Text style={styles.unitTitle}>{unitTitle}</Text>
           </View>
           {handoutVisible ? (
             <View style={styles.handoutContainer}>
@@ -335,6 +418,20 @@ const styles = StyleSheet.create({
   },
   handoutText: {
     fontSize: 16,
+  },
+  startSign: {
+    position: 'absolute',
+    top: -40,
+    backgroundColor: '#feee62',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+    zIndex: 1,
+  },
+  startSignText: {
+    color: 'black',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
 });
 

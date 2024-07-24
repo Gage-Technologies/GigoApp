@@ -22,6 +22,7 @@ import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import XpPopup from '../components/XpPopup';
 import {useLanguage} from '../LanguageContext';
+import EmptyJourney from '../components/Journey/EmptyJourney';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
@@ -30,6 +31,7 @@ const JourneyMain = () => {
   const [showHandout, setShowHandout] = useState<number | null>(null);
   const [openDetourPop, setOpenDetourPop] = useState(false);
   const [showXpPopup, setShowXpPopup] = useState(false);
+  const [showEmptyJourney, setShowEmptyJourney] = useState(false);
 
   const API_URL = Config.API_URL;
   const theme = useTheme();
@@ -142,6 +144,17 @@ const JourneyMain = () => {
     console.log('Fetching tasks...');
     getTasks();
   }, []);
+
+  useEffect(() => {
+    console.log('Selected Language:', selectedLanguage);
+    console.log('Units:', units);
+
+    setShowEmptyJourney(
+      selectedLanguage !== 'All' &&
+        units.filter(unit => unit.langs.includes(selectedLanguage)).length ===
+          0,
+    );
+  }, [selectedLanguage, units]);
 
   const handleMap = (unit: Unit, index: number) => {
     const isLastIndex = index === units.length - 1;
@@ -256,21 +269,66 @@ const JourneyMain = () => {
     setShowXpPopup(false);
   };
 
+  const handleStartIntroductoryJourney = async () => {
+    const journeyMap = {
+      JavaScript: '1775630331836104704',
+      Python: '1769720326918242304',
+      Go: '1767257082752401408',
+      Rust: '1775923721366667264',
+      'C#': 'example_id_csharp',
+      'C++': 'example_id_cpp',
+    };
+
+    const unitId = journeyMap[selectedLanguage];
+
+    if (!unitId) {
+      console.error('No introductory journey found for', selectedLanguage);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/journey/addUnitToMap`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({unit_id: unitId}),
+      });
+
+      const res = await response.json();
+
+      if (res && res.success) {
+        console.log('Introductory unit added successfully!');
+        await getTasks();
+      } else {
+        console.error('Failed to add introductory unit to map');
+      }
+    } catch (error) {
+      console.error('Failed to add introductory unit to map', error);
+    }
+  };
+
   return (
     <>
       <ScrollView
         style={[styles.scrollView, {backgroundColor: theme.colors.background}]}
         contentContainerStyle={styles.scrollViewContent}>
         {activeJourney ? (
-          units
-            .filter(unit => {
-              if (selectedLanguage === 'All') {
-                return true; // Show all units when 'All' is selected
-              }
-              const shouldInclude = unit.langs.includes(selectedLanguage);
-              return shouldInclude;
-            })
-            .map((unit, index) => handleMap(unit, index))
+          selectedLanguage === 'All' ? (
+            // Show all units when 'All' is selected
+            units.map((unit, index) => handleMap(unit, index))
+          ) : showEmptyJourney ? (
+            // Show EmptyJourney component when a specific language is selected and no units are available
+            <EmptyJourney
+              language={selectedLanguage}
+              onStartJourney={handleStartIntroductoryJourney}
+            />
+          ) : (
+            // Show filtered units for the selected language
+            units
+              .filter(unit => unit.langs.includes(selectedLanguage))
+              .map((unit, index) => handleMap(unit, index))
+          )
         ) : (
           <GetStarted getTasks={getTasks} />
         )}
@@ -280,12 +338,18 @@ const JourneyMain = () => {
           unit={units[showHandout ?? 0]}
         />
       </ScrollView>
-      <TouchableOpacity
-        style={styles.detourButton}
-        onPress={handleDetourNavigation}>
-        <MaterialCommunityIcons name="sign-direction" size={30} color="white" />
-      </TouchableOpacity>
-
+      {/* Only show the detour button if not showing EmptyJourney */}
+      {activeJourney && !showEmptyJourney && (
+        <TouchableOpacity
+          style={styles.detourButton}
+          onPress={handleDetourNavigation}>
+          <MaterialCommunityIcons
+            name="sign-direction"
+            size={30}
+            color="white"
+          />
+        </TouchableOpacity>
+      )}
       {showXpPopup && (
         <XpPopup
           oldXP={50}

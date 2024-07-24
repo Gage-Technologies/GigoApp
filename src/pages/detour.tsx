@@ -14,6 +14,7 @@ import {debounce} from 'lodash';
 import DetourCard from '../components/DetourCard';
 import JourneyDetourPopup from '../components/JourneyDetourPopup';
 import {Unit} from '../models/Journey';
+import {useRoute} from '@react-navigation/native';
 
 interface JourneyGroups {
   [key: string]: Unit[];
@@ -31,6 +32,16 @@ const Detour = () => {
   // state to manage popup visibility and selected unit
   const [isPopupVisible, setPopupVisible] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
+
+  const route = useRoute();
+  const initialSearchQuery = route.params?.searchQuery || '';
+
+  useEffect(() => {
+    if (initialSearchQuery) {
+      setSearchText(initialSearchQuery);
+      searchJourneyUnits(initialSearchQuery);
+    }
+  }, [initialSearchQuery]);
 
   useEffect(() => {
     getGroups();
@@ -300,6 +311,7 @@ const Detour = () => {
       flex: 1,
       height: 40,
       fontSize: 16,
+      color: theme.colors.text,
       ...theme.fonts.regular,
     },
     content: {
@@ -356,7 +368,7 @@ const Detour = () => {
         <TextInput
           style={styles.searchBar}
           placeholder="Search Detours..."
-          placeholderTextColor="#888"
+          placeholderTextColor={theme.colors.placeholder}
           value={searchText}
           onChangeText={handleSearchTextChange}
         />

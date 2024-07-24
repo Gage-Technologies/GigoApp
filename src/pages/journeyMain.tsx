@@ -21,6 +21,7 @@ import {BlurView} from '@react-native-community/blur';
 import {useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import XpPopup from '../components/XpPopup';
+import {useLanguage} from '../LanguageContext';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
@@ -32,6 +33,7 @@ const JourneyMain = () => {
 
   const API_URL = Config.API_URL;
   const theme = useTheme();
+  const {selectedLanguage} = useLanguage();
 
   const navigation = useNavigation();
 
@@ -73,7 +75,6 @@ const JourneyMain = () => {
       });
 
       let res = await response.json();
-      console.log('User map response:', res);
       if (!response.ok) {
         throw new Error('Failed to fetch user map');
       }
@@ -246,8 +247,6 @@ const JourneyMain = () => {
     );
   }
 
-  console.log('Units:', units.length);
-
   const handleDetourNavigation = () => {
     // @ts-ignore
     navigation.navigate('Detour');
@@ -263,7 +262,15 @@ const JourneyMain = () => {
         style={[styles.scrollView, {backgroundColor: theme.colors.background}]}
         contentContainerStyle={styles.scrollViewContent}>
         {activeJourney ? (
-          units.map((unit, index) => handleMap(unit, index))
+          units
+            .filter(unit => {
+              if (selectedLanguage === 'All') {
+                return true; // Show all units when 'All' is selected
+              }
+              const shouldInclude = unit.langs.includes(selectedLanguage);
+              return shouldInclude;
+            })
+            .map((unit, index) => handleMap(unit, index))
         ) : (
           <GetStarted getTasks={getTasks} />
         )}

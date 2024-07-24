@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, {useEffect} from 'react';
 import {Provider as PaperProvider} from 'react-native-paper';
 import {Provider as ReduxProvider} from 'react-redux';
@@ -15,7 +16,7 @@ import {
   onNotificationOpenedAppFromBackground,
   onNotificationOpenedAppFromQuit,
 } from './src/pushNotifications/notificationHandlers.ts';
-
+import {LanguageProvider} from './src/LanguageContext';
 const persistor = persistStore(store);
 
 const App = () => {
@@ -24,7 +25,9 @@ const App = () => {
       <ReduxProvider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <PaperProvider theme={theme}>
-            <AppRouter />
+            <LanguageProvider>
+              <AppRouter />
+            </LanguageProvider>
           </PaperProvider>
         </PersistGate>
       </ReduxProvider>

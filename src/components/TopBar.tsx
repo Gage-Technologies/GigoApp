@@ -12,9 +12,12 @@ import PythonLogo from '../img/python-logo.svg';
 import HeartTracker from './HeartTracker';
 import Config from 'react-native-config';
 import ProPopup from './ProPopup'; // Import the ProPopup component
+import {useLanguage} from '../LanguageContext';
+import AllLogo from '../img/yellow_laptop.svg'; // Import the new SVG
 
 // define the available programming languages with their icons
 const programmingLanguages = [
+  {name: 'All', icon: AllLogo},
   {name: 'JavaScript', icon: JavaScriptLogo},
   {name: 'Python', icon: PythonLogo},
   {name: 'Go', icon: GoLogo},
@@ -34,9 +37,7 @@ const FIRE_ORANGE = '#FF6B35';
 const TopBar = () => {
   const theme = useTheme();
   const [visible, setVisible] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState(
-    programmingLanguages[0],
-  );
+  const {selectedLanguage, setSelectedLanguage} = useLanguage();
   const userMembershipLevel = 'Basic'; // hardcoded value for development
   const [streakData, setStreakData] = useState<StreakData | null>(null);
   const [proPopupVisible, setProPopupVisible] = useState(false); // State for ProPopup visibility
@@ -93,7 +94,10 @@ const TopBar = () => {
         contentStyle={{backgroundColor: theme.colors.surface}}
         anchor={
           <TouchableOpacity style={styles.languageSelector} onPress={openMenu}>
-            {renderLogo(selectedLanguage.icon)}
+            {renderLogo(
+              programmingLanguages.find(lang => lang.name === selectedLanguage)
+                ?.icon,
+            )}
             <Icon
               name="chevron-down"
               size={24}
@@ -107,8 +111,9 @@ const TopBar = () => {
           <Menu.Item
             key={lang.name}
             onPress={() => {
-              setSelectedLanguage(lang);
+              setSelectedLanguage(lang.name);
               closeMenu();
+              console.log('Setting new language:', lang.name);
             }}
             title={
               <View style={styles.menuItemContent}>
@@ -131,8 +136,7 @@ const TopBar = () => {
           styles.membershipContainer,
           {backgroundColor: theme.colors.primary + '20'},
         ]}
-        onPress={openProPopup}
-      >
+        onPress={openProPopup}>
         <Icon name="crown" size={20} color={theme.colors.primary} />
         <Text style={[styles.membershipText, {color: theme.colors.primary}]}>
           Pro Level: {userMembershipLevel}

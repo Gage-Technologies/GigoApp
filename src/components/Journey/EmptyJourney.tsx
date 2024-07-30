@@ -5,6 +5,7 @@ import {Button, useTheme} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import Animated, {FadeInDown} from 'react-native-reanimated';
 import LinearGradient from 'react-native-linear-gradient';
+import Config from 'react-native-config';
 
 // Import language icons
 import PythonLogo from '../../img/python-logo.svg';
@@ -17,6 +18,7 @@ import CSharpLogo from '../../img/Logo_C_sharp.svg';
 interface EmptyJourneyProps {
   language: string;
   onStartJourney: () => void;
+  refetchJourneys: () => Promise<void>;
 }
 
 const {width} = Dimensions.get('window');
@@ -24,9 +26,11 @@ const {width} = Dimensions.get('window');
 const EmptyJourney: React.FC<EmptyJourneyProps> = ({
   language,
   onStartJourney,
+  refetchJourneys,
 }) => {
   const theme = useTheme();
   const navigation = useNavigation();
+  const API_URL = Config.API_URL;
 
   const handleSearchDetour = () => {
     // @ts-ignore
@@ -49,6 +53,57 @@ const EmptyJourney: React.FC<EmptyJourneyProps> = ({
         return <CSharpLogo width={80} height={80} />;
       default:
         return null;
+    }
+  };
+
+  const handleStartIntroductoryJourney = async () => {
+    const journeyMap = {
+      'JavaScript': '1775630331836104704',
+      'Python': '1769720326918242304',
+      'Go': '1767257082752401408',
+      'Rust': '1775923721366667264',
+      'C#': 'example_id_csharp',
+      'C++': 'example_id_cpp',
+    };
+
+    const unitId = journeyMap[language];
+
+    if (!unitId) {
+      console.error('No introductory journey found for', language);
+      return;
+    }
+
+    try {
+      console.log('Attempting to add unit:', unitId);
+      const response = await fetch(`${API_URL}/api/journey/addUnitToMap`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({unit_id: unitId}),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const res = await response.json();
+      console.log('Server response:', res);
+
+      if (res && res.success) {
+        console.log('Introductory unit added successfully!');
+        await refetchJourneys(); // Refetch journeys after successful addition
+        onStartJourney(); // Call this after refetching to ensure the UI updates
+      } else {
+        console.error('Failed to add introductory unit to map:', res.message || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error adding introductory unit to map:', error);
+      if (error.message.includes('Duplicate entry')) {
+        console.log('Journey already exists. Refetching journeys...');
+        await refetchJourneys(); // Refetch journeys if it's a duplicate entry error
+        onStartJourney(); // Call this after refetching to ensure the UI updates
+      }
     }
   };
 
@@ -143,7 +198,6 @@ const EmptyJourney: React.FC<EmptyJourneyProps> = ({
           It looks like you haven't started your Journey with {language}. Choose
           an option below:
         </Text>
-
         <Text style={styles.optionTitle}>New to {language}?</Text>
         <Text style={styles.optionDescription}>
           Start with our introductory {language} Journey, perfect for beginners.
@@ -153,7 +207,7 @@ const EmptyJourney: React.FC<EmptyJourneyProps> = ({
             mode="contained"
             style={styles.startButton}
             labelStyle={{fontSize: 16}}
-            onPress={onStartJourney}>
+            onPress={handleStartIntroductoryJourney}>
             Start Learning {language}
           </Button>
         </View>

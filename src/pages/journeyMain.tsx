@@ -32,6 +32,7 @@ const JourneyMain = () => {
   const [openDetourPop, setOpenDetourPop] = useState(false);
   const [showXpPopup, setShowXpPopup] = useState(false);
   const [showEmptyJourney, setShowEmptyJourney] = useState(false);
+  const [filteredUnits, setFilteredUnits] = useState<Unit[]>([]);
 
   const API_URL = Config.API_URL;
   const theme = useTheme();
@@ -146,23 +147,29 @@ const JourneyMain = () => {
   }, []);
 
   useEffect(() => {
-    console.log('Selected Language:', selectedLanguage);
-    console.log('Units:', units);
-
-    setShowEmptyJourney(
-      selectedLanguage !== 'All' &&
-        units.filter(unit => unit.langs.includes(selectedLanguage)).length ===
-          0,
-    );
+    if (selectedLanguage === 'All') {
+      setFilteredUnits(units);
+    } else {
+      const filtered = units.filter(unit =>
+        unit.langs.includes(selectedLanguage),
+      );
+      setFilteredUnits(filtered);
+    }
   }, [selectedLanguage, units]);
 
+  useEffect(() => {
+    setShowEmptyJourney(
+      activeJourney && selectedLanguage !== 'All' && filteredUnits.length === 0,
+    );
+  }, [activeJourney, selectedLanguage, filteredUnits]);
+
   const handleMap = (unit: Unit, index: number) => {
-    const isLastIndex = index === units.length - 1;
+    const isLastIndex = index === filteredUnits.length - 1;
     const allCompleted = unit.tasks.every(task => task.completed);
-    const isPendingAcceptance = index === units.length - 1;
+    const isPendingAcceptance = isLastIndex && !allCompleted;
 
     // calculate task offset by summing the length of all previous units
-    const taskOffset = units
+    const taskOffset = filteredUnits
       .slice(0, index)
       .reduce((acc, unit) => acc + unit.tasks.length, 0);
 
@@ -247,6 +254,10 @@ const JourneyMain = () => {
     );
   };
 
+  const refetchJourneys = async () => {
+    await getTasks();
+  };
+
   if (loading) {
     return (
       <View
@@ -314,20 +325,14 @@ const JourneyMain = () => {
         style={[styles.scrollView, {backgroundColor: theme.colors.background}]}
         contentContainerStyle={styles.scrollViewContent}>
         {activeJourney ? (
-          selectedLanguage === 'All' ? (
-            // Show all units when 'All' is selected
-            units.map((unit, index) => handleMap(unit, index))
-          ) : showEmptyJourney ? (
-            // Show EmptyJourney component when a specific language is selected and no units are available
+          showEmptyJourney ? (
             <EmptyJourney
               language={selectedLanguage}
-              onStartJourney={handleStartIntroductoryJourney}
+              onStartJourney={() => setShowEmptyJourney(false)}
+              refetchJourneys={refetchJourneys}
             />
           ) : (
-            // Show filtered units for the selected language
-            units
-              .filter(unit => unit.langs.includes(selectedLanguage))
-              .map((unit, index) => handleMap(unit, index))
+            filteredUnits.map((unit, index) => handleMap(unit, index))
           )
         ) : (
           <GetStarted getTasks={getTasks} />
@@ -335,11 +340,10 @@ const JourneyMain = () => {
         <HandoutOverlay
           isVisible={showHandout !== null}
           onClose={() => setShowHandout(null)}
-          unit={units[showHandout ?? 0]}
+          unit={filteredUnits[showHandout ?? 0]}
         />
       </ScrollView>
-      {/* Only show the detour button if not showing EmptyJourney */}
-      {activeJourney && !showEmptyJourney && (
+      {activeJourney && !showEmptyJourney && filteredUnits.length > 0 && (
         <TouchableOpacity
           style={styles.detourButton}
           onPress={handleDetourNavigation}>

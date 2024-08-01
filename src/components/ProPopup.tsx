@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, ScrollView, StyleSheet, Image} from 'react-native';
+import {View, StyleSheet, Dimensions, Image} from 'react-native';
 import {
   Modal,
   Portal,
@@ -7,94 +7,76 @@ import {
   Button,
   useTheme,
   IconButton,
-  Card,
-  Title,
-  Paragraph,
 } from 'react-native-paper';
+import Animated, {FadeInDown, FadeIn} from 'react-native-reanimated';
+import LinearGradient from 'react-native-linear-gradient';
+import Svg, {RadialGradient, Defs, Rect, Stop} from 'react-native-svg';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-// Define benefit types and arrays here
-type Benefit = {
-  title: string;
-  description: string;
-};
-
-const basicBenefits: Benefit[] = [
-  {
-    title: 'Unlimited Retries',
-    description: 'No daily restrictions on Journeys & Bytes.',
-  },
-  {
-    title: 'Freeze Your Streak',
-    description:
-      'Get two streak freezes per week to keep your streak alive on your off days.',
-  },
-];
-
-const advancedBenefits: Benefit[] = [
-  {title: 'Basic', description: 'Everything from the Basic plan.'},
-  {
-    title: 'Access to Challenges',
-    description: "GIGO's project-based learning experience.",
-  },
-  {title: 'Larger DevSpaces', description: '8 CPU cores, 8GB RAM, 50GB disk'},
-];
-
-const maxBenefits: Benefit[] = [
-  {title: 'Advanced', description: 'Everything from the Advanced plan.'},
-  {
-    title: 'Smarter Code Teacher',
-    description:
-      'Learn faster with the smartest version of Code Teacher, your personal tutor on GIGO.',
-  },
-];
+// import the PNG image
+import ProPopupIcon from '../img/pro-pop-up-icon-plain.png';
 
 interface ProPopupProps {
   visible: boolean;
   onDismiss: () => void;
 }
 
+const {width, height} = Dimensions.get('window');
+
 const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
   const theme = useTheme();
 
-  const renderSubscriptionCard = (
-    title: string,
-    benefits: Benefit[],
-    price: string,
-  ) => (
-    <Card style={[styles.card, {backgroundColor: theme.colors.surface}]}>
-      <Card.Content>
-        <Title style={{color: theme.colors.onSurface}}>{title}</Title>
-        {benefits.map((benefit, index) => (
-          <View key={index} style={styles.benefitItem}>
-            <Paragraph
-              style={[styles.benefitTitle, {color: theme.colors.onSurface}]}>
-              {benefit.title}
-            </Paragraph>
-            <Paragraph style={{color: theme.colors.onSurface}}>
-              {benefit.description}
-            </Paragraph>
-          </View>
-        ))}
-      </Card.Content>
-      <Card.Actions>
-        <Button
-          mode="contained"
-          onPress={() => console.log(`Upgrade to ${title}`)}>
-          {price}
-        </Button>
-      </Card.Actions>
-    </Card>
-  );
+  // function to handle pro upgrade
+  const handleProUpgrade = () => {
+    console.log('Upgrade to GIGO Pro');
+    // implement pro upgrade logic here
+  };
 
   return (
     <Portal>
       <Modal
         visible={visible}
         onDismiss={onDismiss}
-        contentContainerStyle={[
-          styles.modalContainer,
-          {backgroundColor: theme.colors.background},
-        ]}>
+        contentContainerStyle={styles.modalContainer}>
+        <LinearGradient
+          colors={[
+            theme.colors.background,
+            theme.colors.background,
+            theme.colors.primary + '45',
+          ]}
+          style={StyleSheet.absoluteFill}
+          start={{x: 0, y: 0}}
+          end={{x: 0, y: 1}}
+          locations={[0, 0.5, 1]}
+        />
+        <Svg style={StyleSheet.absoluteFill}>
+          <Defs>
+            <RadialGradient
+              id="grad"
+              cx="50%"
+              cy="50%"
+              rx="50%"
+              ry="50%"
+              gradientUnits="userSpaceOnUse">
+              <Stop
+                offset="0%"
+                stopColor={theme.colors.primary}
+                stopOpacity="0.4"
+              />
+              <Stop
+                offset="70%"
+                stopColor={theme.colors.primary}
+                stopOpacity="0.1"
+              />
+              <Stop
+                offset="100%"
+                stopColor={theme.colors.background}
+                stopOpacity="0"
+              />
+            </RadialGradient>
+          </Defs>
+          <Rect x="0" y="0" width="100%" height="100%" fill="url(#grad)" />
+        </Svg>
         <IconButton
           icon="close"
           size={24}
@@ -102,32 +84,89 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
           style={styles.closeButton}
           color={theme.colors.onBackground}
         />
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Image
-            source={require('../img/premium-gorilla.svg')}
-            style={styles.image}
-          />
-          <Text style={[styles.title, {color: theme.colors.onBackground}]}>
-            GIGO Pro
-          </Text>
-          <Text style={[styles.subtitle, {color: theme.colors.onBackground}]}>
-            Unlimited retries on Journeys & Bytes.
-          </Text>
-          <Text style={[styles.subtitle, {color: theme.colors.onBackground}]}>
-            Freeze your Streak.
-          </Text>
-
-          {renderSubscriptionCard('Basic', basicBenefits, '$3/month')}
-          {renderSubscriptionCard('Advanced', advancedBenefits, '$8/month')}
-          {renderSubscriptionCard('Max', maxBenefits, '$15/month')}
-
-          <Button
-            mode="text"
-            onPress={() => console.log('Learn more about Pro')}
-            style={styles.learnMoreButton}>
-            Learn More About Pro
-          </Button>
-        </ScrollView>
+        <View style={styles.content}>
+          <Animated.View
+            entering={FadeInDown.duration(800).springify()}
+            style={[styles.card, {backgroundColor: theme.colors.background}]}>
+            <View style={styles.headerContainer}>
+              <Animated.View entering={FadeIn.delay(300).duration(600)} style={styles.imageContainer}>
+                <Image
+                  source={ProPopupIcon}
+                  style={styles.image}
+                  resizeMode="contain"
+                />
+              </Animated.View>
+              <View style={styles.titleContainer}>
+                <Animated.Text
+                  entering={FadeIn.delay(600).duration(600)}
+                  style={[styles.title, {color: theme.colors.primary}]}>
+                  GIGO Pro
+                </Animated.Text>
+                <Animated.Text
+                  entering={FadeIn.delay(900).duration(600)}
+                  style={[styles.subtitle, {color: theme.colors.onBackground}]}>
+                  Unlimited Learning, Unlimited Potential
+                </Animated.Text>
+              </View>
+            </View>
+            <Animated.View
+              entering={FadeIn.delay(1200).duration(600)}
+              style={styles.benefitContainer}>
+              <Icon
+                name="heart"
+                size={40}
+                color={theme.colors.error}
+                style={styles.benefitIcon}
+              />
+              <Text
+                style={[
+                  styles.benefitText,
+                  {color: theme.colors.onBackground},
+                ]}>
+                Unlimited Hearts for Journeys and Bytes
+              </Text>
+            </Animated.View>
+            <Animated.Text
+              entering={FadeIn.delay(1500).duration(600)}
+              style={[styles.description, {color: theme.colors.onBackground}]}>
+              Never stop learning! With GIGO Pro, you'll have unlimited attempts
+              on all Journeys and Bytes. Keep practicing, keep improving, and
+              reach your coding goals without interruptions.
+            </Animated.Text>
+            <Animated.View
+              entering={FadeIn.delay(1800).duration(600)}
+              style={styles.infoContainer}>
+              <Icon
+                name="information"
+                size={24}
+                color="#4A90E2"
+                style={styles.infoIcon}
+              />
+              <Text
+                style={[styles.infoText, {color: theme.colors.onBackground}]}>
+                Upgrade now and take your coding skills to the next level. More
+                advanced features and other membership options are available on
+                our web platform at gigo.dev
+              </Text>
+            </Animated.View>
+            <Animated.View entering={FadeIn.delay(2100).duration(600)} style={styles.buttonContainer}>
+              <Button
+                mode="contained"
+                onPress={handleProUpgrade}
+                style={styles.upgradeButton}
+                contentStyle={styles.upgradeButtonContent}
+                labelStyle={styles.upgradeButtonLabel}>
+                Upgrade $3/month
+              </Button>
+              <Button
+                mode="text"
+                onPress={() => console.log('Learn more about Pro')}
+                style={styles.learnMoreButton}>
+                Learn More About Pro
+              </Button>
+            </Animated.View>
+          </Animated.View>
+        </View>
       </Modal>
     </Portal>
   );
@@ -135,14 +174,30 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
 
 const styles = StyleSheet.create({
   modalContainer: {
-    padding: 20,
-    margin: 20,
-    borderRadius: 10,
-    maxHeight: '90%',
-  },
-  scrollContent: {
-    flexGrow: 1,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+  },
+  content: {
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 16,
+  },
+  card: {
+    borderRadius: 20,
+    padding: 24,
+    width: width * 0.95,
+    maxHeight: height * 0.9,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   closeButton: {
     position: 'absolute',
@@ -150,32 +205,100 @@ const styles = StyleSheet.create({
     top: 10,
     zIndex: 1,
   },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    width: '100%',
+  },
+  imageContainer: {
+    flex: 1,
+    alignItems: 'center',
+  },
   image: {
     width: 100,
     height: 100,
-    marginBottom: 20,
+  },
+  titleContainer: {
+    flex: 2,
   },
   title: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: 'bold',
-    marginBottom: 10,
+    textAlign: 'left',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   subtitle: {
-    fontSize: 16,
-    marginBottom: 5,
+    fontSize: 18,
+    textAlign: 'left',
+    fontStyle: 'italic',
   },
-  card: {
+  benefitContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 15,
+    padding: 16,
     width: '100%',
-    marginVertical: 10,
   },
-  benefitItem: {
-    marginBottom: 5,
+  benefitIcon: {
+    marginRight: 16,
   },
-  benefitTitle: {
+  benefitText: {
+    fontSize: 18,
     fontWeight: 'bold',
+    flex: 1,
+  },
+  description: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 24,
+    width: '100%',
+  },
+  infoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(74, 144, 226, 0.1)',
+    borderRadius: 15,
+    padding: 16,
+    marginBottom: 35,
+    width: '100%',
+  },
+  infoIcon: {
+    marginRight: 12,
+  },
+  infoText: {
+    fontSize: 14,
+    flex: 1,
+    lineHeight: 20,
+  },
+  buttonContainer: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  upgradeButton: {
+    marginBottom: 12,
+    borderRadius: 5,
+    elevation: 4,
+    shadowColor: '#29C18C',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  upgradeButtonContent: {
+    height: 56,
+    width: 240,
+  },
+  upgradeButtonLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    letterSpacing: 1,
   },
   learnMoreButton: {
-    marginTop: 20,
+    marginTop: 8,
   },
 });
 

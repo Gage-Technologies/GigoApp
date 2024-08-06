@@ -11,7 +11,13 @@ interface StatBoxProps {
   onPress: () => void;
 }
 
-const StatBox: React.FC<StatBoxProps> = ({icon, title, value, tooltip, onPress}) => {
+const StatBox: React.FC<StatBoxProps> = ({
+  icon,
+  title,
+  value,
+  tooltip,
+  onPress,
+}) => {
   const theme = useTheme();
 
   // function to determine icon color based on icon name
@@ -34,16 +40,50 @@ const StatBox: React.FC<StatBoxProps> = ({icon, title, value, tooltip, onPress})
     }
   };
 
+  // function to format time for avg completion time
+  const formatTime = (seconds: number): string => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.round(seconds % 60);
+    return `${minutes}m ${remainingSeconds}s`;
+  };
+
+  // function to format value based on stat type
+  const formatValue = (title: string, value: string): string => {
+    if (title === 'Avg Completion Time') {
+      const seconds = parseFloat(value);
+      return isNaN(seconds) ? 'N/A' : formatTime(seconds);
+    }
+    return value;
+  };
+
+  const formattedValue = formatValue(title, value);
+
   return (
     <TouchableOpacity onPress={onPress}>
-      <Card style={[styles.container, {backgroundColor: theme.colors.surface, borderColor: theme.colors.primary}]}>
+      <Card
+        style={[
+          styles.container,
+          {
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.primary,
+          },
+        ]}>
         <Card.Content style={styles.content}>
           <View style={styles.iconContainer}>
-            <Icon name={icon} size={24} color={getIconColor(icon)} style={styles.icon} />
+            <Icon
+              name={icon}
+              size={24}
+              color={getIconColor(icon)}
+              style={styles.icon}
+            />
           </View>
           <View style={styles.textContainer}>
-            <Text style={[styles.value, {color: theme.colors.text}]}>{value}</Text>
-            <Text style={[styles.title, {color: theme.colors.text}]}>{title}</Text>
+            <Text style={[styles.value, {color: theme.colors.text}]}>
+              {formattedValue}
+            </Text>
+            <Text style={[styles.title, {color: theme.colors.text}]}>
+              {title}
+            </Text>
           </View>
         </Card.Content>
       </Card>

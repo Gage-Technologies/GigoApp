@@ -9,6 +9,7 @@ interface ProgressionBoxProps {
   colorType: 'primary' | 'secondary' | 'golden' | 'custom';
   level: number;
   onPress: () => void;
+  isDataHog?: boolean; // new prop to indicate if it's data_hog type
 }
 
 const ProgressionBox: React.FC<ProgressionBoxProps> = ({
@@ -18,6 +19,7 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({
   colorType,
   level,
   onPress,
+  isDataHog = false, // default to false
 }) => {
   const theme = useTheme();
 
@@ -73,7 +75,7 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({
             </View>
           </View>
           <Text style={[styles.progressText, {color: theme.colors.text}]}>
-            {`${value}/${max}`}
+            {`${value.toFixed(2)}${isDataHog ? 'KB' : ''}/${max.toFixed(2)}${isDataHog ? 'KB' : ''}`}
           </Text>
         </Card.Content>
       </Card>

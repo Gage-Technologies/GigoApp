@@ -33,6 +33,7 @@ const {width, height} = Dimensions.get('window');
 import moment from 'moment-timezone';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import messaging from '@react-native-firebase/messaging';
 
 const API_URL = Config.API_URL;
 
@@ -131,7 +132,7 @@ const CreateNewAccount = () => {
       justifyContent: 'center',
       padding: 20,
       position: 'absolute',
-      bottom: -215,
+      bottom: 105,
     },
     creationBox: {
       backgroundColor: '#1c3f30',
@@ -141,7 +142,7 @@ const CreateNewAccount = () => {
       alignItems: 'center',
       justifyContent: 'center',
       position: 'absolute',
-      bottom: -615,
+      bottom: 55,
     },
     header: {
       fontSize: 24,
@@ -671,7 +672,7 @@ const CreateNewAccount = () => {
         return false;
       } else {
         // @ts-ignore
-        if (res['valid'] === false) {
+        if (res.valid === false) {
           Alert.alert(
             'Invalid Email Address',
             'Please enter a valid email address and retry',
@@ -679,7 +680,7 @@ const CreateNewAccount = () => {
           );
           return false;
           //@ts-ignore
-        } else if (res['valid'] === true) {
+        } else if (res.valid === true) {
           return true; // Ensure returning true when valid
         }
       }
@@ -775,29 +776,29 @@ const CreateNewAccount = () => {
       res = await res.json();
 
       // @ts-ignore
-      if (res['message']) {
+      if (res.message) {
         setLoading(false);
         // @ts-ignore
-        if (res['message'].includes('required')) {
+        if (res.message.includes('required')) {
           // @ts-ignore
-          if (res['message'].includes('username')) {
+          if (res.message.includes('username')) {
             setMissingUser(true);
           }
           // @ts-ignore
-          if (res['message'].includes('password')) {
+          if (res.message.includes('password')) {
             setMissingPassword(true);
           }
           // @ts-ignore
-          if (res['message'].includes('email')) {
+          if (res.message.includes('email')) {
             setMissingEmail(true);
           }
           // @ts-ignore
-          if (res['message'].includes('phone number')) {
+          if (res.message.includes('phone number')) {
             setMissingPhone(true);
           }
         }
         // @ts-ignore
-        return res['message'] === 'User Cleared.';
+        return res.message === 'User Cleared.';
       }
     } catch (error) {
       Alert.alert('Network Error', 'Unable to connect to the server.');
@@ -866,8 +867,22 @@ const CreateNewAccount = () => {
     }
   };
 
+  const getFcmToken = async () => {
+    const fcmToken = await messaging().getToken();
+    if (fcmToken) {
+      console.log('FCM Token:', fcmToken);
+      // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
+      // Save the token to your backend if needed
+      return fcmToken;
+    } else {
+      console.log('Failed to get FCM token');
+    }
+  };
+
   const accountCreation = async () => {
     setLoading(true);
+    let token = await getFcmToken();
+    console.log("fcm token in creation: ", token)
 
     // const svgString = profilePic;
 
@@ -947,6 +962,7 @@ const CreateNewAccount = () => {
         skinColor: Attributes.skinColor,
       },
       force_pass: forcePass,
+      fcm_token: token,
     };
 
     try {

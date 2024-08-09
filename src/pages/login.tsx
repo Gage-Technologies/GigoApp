@@ -22,6 +22,7 @@ import {useDispatch} from 'react-redux';
 import LoginGithub from '../components/Login/Github/LoginGithub';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import messaging from "@react-native-firebase/messaging";
 
 const {width} = Dimensions.get('window');
 
@@ -355,8 +356,22 @@ const Login = () => {
     Alert.alert('Login Failed', 'GitHub login failed. Please try again.');
   };
 
+  // const getFcmToken = async () => {
+  //   const fcmToken = await messaging().getToken();
+  //   if (fcmToken) {
+  //     console.log('FCM Token:', fcmToken);
+  //     // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
+  //     // Save the token to your backend if needed
+  //     return fcmToken;
+  //   } else {
+  //     console.log('Failed to get FCM token');
+  //   }
+  // };
+
   const loginFunction = async () => {
     setLoading(true);
+    // let token = getFcmToken();
+    // console.log("token is: ", token)
 
     //         const payload = {
     //             event: 'LoginStart',
@@ -365,9 +380,13 @@ const Login = () => {
     //         trackEvent(payload);
 
     try {
+      console.log("username is: ", username)
       let res = await authorize(username, password);
       let auth = res.data;
       let token = res.token;
+      console.log("res is: ", res)
+      console.log("token is: ", token)
+      console.log("auth is: ", auth)
 
       if (auth.user !== undefined) {
         let authState = {
@@ -418,6 +437,7 @@ const Login = () => {
       }
     } catch (error) {
       Alert.alert('Login Error', 'An unexpected error occurred.');
+      console.log('error is: ', error)
       setLoading(false);
     }
   };

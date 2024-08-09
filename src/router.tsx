@@ -58,6 +58,16 @@ const AppRouter = () => {
         <ConditionalTopBar currentRouteName={currentRouteName} />
         <Stack.Navigator>
           <Stack.Screen
+            name="AccountSettings"
+            component={AccountSettings}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Login"
+            component={Login}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
             name="JourneyMain"
             component={JourneyMain}
             options={{headerShown: false}}
@@ -83,11 +93,6 @@ const AppRouter = () => {
             options={{headerShown: false}}
           />
           <Stack.Screen
-            name="Login"
-            component={Login}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
             name="Byte"
             // @ts-ignore
             component={Byte}
@@ -96,11 +101,6 @@ const AppRouter = () => {
           <Stack.Screen
             name="ForgotPassword"
             component={ForgotPassword}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="AccountSettings"
-            component={AccountSettings}
             options={{headerShown: false}}
           />
         </Stack.Navigator>

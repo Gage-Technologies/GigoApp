@@ -132,7 +132,7 @@ const CreateNewAccount = () => {
       justifyContent: 'center',
       padding: 20,
       position: 'absolute',
-      bottom: 105,
+      bottom: -215,
     },
     creationBox: {
       backgroundColor: '#1c3f30',
@@ -142,7 +142,7 @@ const CreateNewAccount = () => {
       alignItems: 'center',
       justifyContent: 'center',
       position: 'absolute',
-      bottom: 55,
+      bottom: -615,
     },
     header: {
       fontSize: 24,

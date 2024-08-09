@@ -674,34 +674,43 @@ const AccountSettings = () => {
             <Portal>
               <Dialog
                 visible={deleteAccount}
-                onDismiss={() => setDeleteAccount(false)}>
-                <Dialog.Title>Delete Account</Dialog.Title>
+                onDismiss={() => setDeleteAccount(false)}
+                style={{backgroundColor: '#1c1c1a'}}>
+                <Dialog.Title style={{color: 'white'}}>
+                  Delete Account
+                </Dialog.Title>
                 <Dialog.Content>
-                  <Text>Are you sure you want to delete your account?</Text>
-                  <Text>
+                  <Text style={{color: 'white'}}>
+                    Are you sure you want to delete your account?
+                  </Text>
+                  <Text style={{color: 'white', paddingBottom: '10px', marginBottom: 20}}>
                     Account deletion is permanent and cannot be undone. If you
                     delete your account, you will lose all of your work.
                   </Text>
                   <TextInput
-                    style={styles.input}
+                    style={styles.inputDelete}
                     placeholder="Type Confirm"
                     placeholderTextColor="#888" // Placeholder color
                     value={confirmDeletionContent}
                     onChangeText={setConfirmDeletionContent}
                   />
                 </Dialog.Content>
-                <Dialog.Actions>
+                <Dialog.Actions style={styles.actions}>
                   <Button
-                    title="Cancel"
                     onPress={() => setDeleteAccount(false)}
+                    style={styles.button}
+                    labelStyle={styles.buttonLabel}
+                    title={'Cancel'}
                   />
                   <Button
-                    title="Confirm"
-                    color="red"
                     onPress={deleteUserAccount}
                     disabled={
                       confirmDeletionContent.toLowerCase() !== 'confirm'
                     }
+                    color={"red"}
+                    style={styles.button}
+                    labelStyle={styles.buttonLabel}
+                    title={'Confirm'}
                   />
                 </Dialog.Actions>
               </Dialog>
@@ -1599,6 +1608,17 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     borderColor: 'gray',
   },
+  inputDelete: {
+    width: Dimensions.get('window').width - 100,
+    height: 50,
+    marginBottom: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    padding: 10,
+    color: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'gray',
+  },
   rowWithSpacing: {
     marginTop: 50,
   },
@@ -2069,6 +2089,20 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  button: {
+    borderRadius: 20,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  buttonLabel: {
+    fontSize: 14,
   },
 });
 

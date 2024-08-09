@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Config from 'react-native-config'
 import { Buffer } from "buffer"
+import messaging from "@react-native-firebase/messaging";
 
 
 const API_URL = Config.API_URL; // Ensure this is the correct path to your API
@@ -18,10 +19,37 @@ function createBasicAuthHeader(username, password) {
     return `Basic ${base64Credentials}`;
 }
 
+// const getFcmToken = async () => {
+//   const fcmToken = await messaging().getToken();
+//   if (fcmToken) {
+//     console.log('FCM Token:', fcmToken);
+//     // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
+//     // Save the token to your backend if needed
+//     return fcmToken;
+//   } else {
+//     console.log('Failed to get FCM token');
+//   }
+// };
+async function getFcmToken() {
+  const fcmToken = await messaging().getToken();
+  if (fcmToken) {
+    console.log('FCM Token in func:', fcmToken);
+    // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
+    // Save the token to your backend if needed
+    return fcmToken;
+  } else {
+    console.log('Failed to get FCM token');
+  }
+}
+
+
 async function makeRequest(endpoint, method, body=null, username=null, password=null) {
   try {
+    let fcmToken = await getFcmToken();
+    console.log("fcm token: ", fcmToken)
     let header = {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'FCM-Token': fcmToken,
     }
     if (username !== null) {
         header['Authorization'] = createBasicAuthHeader(username, password)
@@ -55,6 +83,8 @@ export async function authorize(username, password) {
 
   await AsyncStorage.clear();
 
+  console.log("auth res: ", res)
+
   if (res.message && res.message.includes("Too many failed attempts")) {
     Alert.alert("Too many failed login attempts", "Please try again later.");
     return res.message;
@@ -62,8 +92,11 @@ export async function authorize(username, password) {
 
   let decodedToken = decodeToken(res.token);
   if (!decodedToken) {
+    console.log("here is")
     return false;
   }
+
+  console.log("auth decoded token: ", decodedToken)
 
 
   await AsyncStorage.setItem("user", JSON.stringify(decodedToken.user));

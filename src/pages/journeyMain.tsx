@@ -52,6 +52,8 @@ const JourneyMain = () => {
         body: JSON.stringify({}),
       });
 
+      console.log("response is: ", response)
+
       if (!response.ok) {
         throw new Error(
           `Failed to fetch start of journey, status ${response.status}`,

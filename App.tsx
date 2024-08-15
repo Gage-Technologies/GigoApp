@@ -79,8 +79,8 @@ const App = () => {
     // Create a notification channel
     const createNotificationChannel = async () => {
       await notifee.createChannel({
-        id: 'default',
-        name: 'Default Channel',
+        id: 'gigoApp',
+        name: 'GIGO Dev',
         importance: AndroidImportance.HIGH,
       });
     };
@@ -96,15 +96,10 @@ const App = () => {
         title: remoteMessage.notification?.title || 'Default Title',
         body: remoteMessage.notification?.body || 'Default Message',
         android: {
-          channelId: 'gigo_logo_email_cropped',
-          smallIcon: premiumGorilla, // Ensure you have this icon in your resources
-          color: remoteMessage.notification?.android?.color || '#4caf50',
+          channelId: 'gigoApp',
+          smallIcon: 'ic_notification', // Ensure you have this icon in your resources
+          color: '#176e51',
           importance: AndroidImportance.HIGH,
-          // largeIcon: 'https://yourdomain.com/your-large-icon.png', // URL to a large icon
-          // style: {
-          //   type: 'bigPicture',
-          //   picture: remoteMessage.notification?.image, // Image URL from the payload
-          // },
         },
       });
     });

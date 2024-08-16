@@ -11,8 +11,7 @@ import AppRouter from './src/router';
 import {LanguageProvider} from './src/LanguageContext';
 import {Alert, PermissionsAndroid, Platform} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
-import notifee, { AndroidImportance } from '@notifee/react-native';
-import premiumGorilla from './src/img/premiumGorilla.png'
+import notifee, {AndroidImportance} from '@notifee/react-native';
 
 const persistor = persistStore(store);
 

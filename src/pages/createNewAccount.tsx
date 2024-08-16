@@ -383,11 +383,39 @@ const CreateNewAccount = () => {
     //   return;
     // }
     //
+    // let token = await getFcmToken();
+    //
     // const svgString = profilePic;
     //
     // setLoading(true);
     // try {
     //   const svgBlob = await svgToBlob(svgString);
+    //
+    //   let params = {
+    //     external_auth: externalToken,
+    //     password: password,
+    //     start_user_info: {
+    //       usage: 'I want to learn how to code by doing really cool projects.',
+    //       proficiency: 'Beginner',
+    //       tags: 'python,javascript,golang,web development,game development,machine learning,artificial intelligence',
+    //       preferred_language: 'Python, Javascript, Golang, Typescript',
+    //     },
+    //     timezone: timezone ? timezone.value : 'America/Chicago',
+    //     avatar_settings: {
+    //       topType: Attributes.topType,
+    //       accessoriesType: Attributes.accessoriesType,
+    //       hairColor: Attributes.hairColor,
+    //       facialHairType: Attributes.facialHairType,
+    //       clotheType: Attributes.clotheType,
+    //       clotheColor: Attributes.clotheColor,
+    //       eyeType: Attributes.eyeType,
+    //       eyebrowType: Attributes.eyebrowType,
+    //       mouthType: Attributes.mouthType,
+    //       avatarStyle: Attributes.avatarStyle,
+    //       skinColor: Attributes.skinColor,
+    //       fcm_token: token,
+    //     },
+    //   };
     //   let create = await fetchWithUpload(
     //     `${API_URL}/api/auth/confirmLoginWithGithub`,
     //     svgBlob,
@@ -522,6 +550,7 @@ const CreateNewAccount = () => {
 
   const googleCreate = async () => {
     setLoading(true);
+    let token = await getFcmToken();
 
     if (password !== confirmPass || password.length < 5) {
       Alert.alert('Error', 'Passwords do not match or too short');
@@ -559,6 +588,7 @@ const CreateNewAccount = () => {
         mouthType: Attributes.mouthType,
         avatarStyle: Attributes.avatarStyle,
         skinColor: Attributes.skinColor,
+        fcm_token: token,
       },
     };
 
@@ -882,7 +912,6 @@ const CreateNewAccount = () => {
   const accountCreation = async () => {
     setLoading(true);
     let token = await getFcmToken();
-    console.log("fcm token in creation: ", token)
 
     // const svgString = profilePic;
 

@@ -380,13 +380,9 @@ const Login = () => {
     //         trackEvent(payload);
 
     try {
-      console.log("username is: ", username)
       let res = await authorize(username, password);
       let auth = res.data;
       let token = res.token;
-      console.log("res is: ", res)
-      console.log("token is: ", token)
-      console.log("auth is: ", auth)
 
       if (auth.user !== undefined) {
         let authState = {
@@ -437,7 +433,6 @@ const Login = () => {
       }
     } catch (error) {
       Alert.alert('Login Error', 'An unexpected error occurred.');
-      console.log('error is: ', error)
       setLoading(false);
     }
   };

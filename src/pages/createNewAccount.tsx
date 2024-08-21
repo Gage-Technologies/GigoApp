@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useEffect, useState } from "react";
 import {TextInput, Button} from 'react-native-paper';
 import {
   View,
@@ -10,14 +10,14 @@ import {
   Alert,
   ScrollView,
   KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+  Platform, Linking
+} from "react-native";
 // @ts-ignore
 import googleLogo from '../components/Icons/login/google_g.png';
 import {SvgXml} from 'react-native-svg';
 import {useNavigation} from '@react-navigation/native';
 import debounce from 'lodash/debounce';
-import LoginGithub from '../components/Login/Github/LoginGithub';
+import CreateGithub from '../components/Login/Github/CreateGithub.tsx';
 import profilePic from '../components/Avatar/profile-pic.svg';
 import Config from 'react-native-config';
 import {useDispatch} from 'react-redux';
@@ -99,6 +99,42 @@ const CreateNewAccount = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [creationStep, setCreationStep] = React.useState(0);
+
+  const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
+  const [windowWidth, setWindowWidth] = useState(
+    Dimensions.get('window').width,
+  );
+
+  // useEffect(() => {
+  //   const updateDimensions = () => {
+  //     setWindowHeight(Dimensions.get('window').height);
+  //     setWindowWidth(Dimensions.get('window').width);
+  //   };
+  //
+  //   const handleOpenURL = (event: { url: string }) => {
+  //     console.log('Received deep link:', event.url);
+  //     // Handle the deep link logic here
+  //   };
+  //
+  //   // Set up the deep link listener
+  //   const linkingSubscription = Linking.addEventListener('url', handleOpenURL);
+  //
+  //   // Handle the case when the app is opened from a deep link
+  //   Linking.getInitialURL().then((url) => {
+  //     if (url) {
+  //       handleOpenURL({ url });
+  //     }
+  //   });
+  //
+  //   // Set up the dimensions listener
+  //   const dimensionsSubscription = Dimensions.addEventListener('change', updateDimensions);
+  //
+  //   // Cleanup function to remove event listeners
+  //   return () => {
+  //     linkingSubscription.remove(); // Properly remove the deep link listener
+  //     dimensionsSubscription.remove(); // Properly remove the dimensions listener
+  //   };
+  // }, []);
 
   const styles = StyleSheet.create({
     keyboardContainer: {
@@ -315,14 +351,17 @@ const CreateNewAccount = () => {
     setExternalLogin('Google');
   };
 
-  const onSuccessGithub = async (gh: {code: string}) => {
+  const onSuccessGithubCreate = async (gh: {code: string}) => {
     console.log('here in success');
 
-    console.log("gh is: ", gh)
+    console.log("gh is: ", gh.code)
 
-    // setExternalToken(gh.code);
-    // setExternalLogin('Github');
-    // setLoading(true);
+    setExternalToken(gh.code);
+    console.log("here 1")
+    setExternalLogin('Github');
+    console.log("here 2")
+    setLoading(true);
+    console.log("here 3")
   };
 
   const testProfilePic = `<svg width="264px" height="280px" viewBox="0 0 264 280" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width: 150px; height: 150px; position: relative; top: 35px;"><desc>Created with getavataaars.com</desc><defs><circle id="react-path-1" cx="120" cy="120" r="120"></circle><path d="M12,160 C12,226.27417 65.72583,280 132,280 C198.27417,280 252,226.27417 252,160 L264,160 L264,-1.42108547e-14 L-3.19744231e-14,-1.42108547e-14 L-3.19744231e-14,160 L12,160 Z" id="react-path-2"></path><path d="M124,144.610951 L124,163 L128,163 L128,163 C167.764502,163 200,195.235498 200,235 L200,244 L0,244 L0,235 C-4.86974701e-15,195.235498 32.235498,163 72,163 L72,163 L76,163 L76,144.610951 C58.7626345,136.422372 46.3722246,119.687011 44.3051388,99.8812385 C38.4803105,99.0577866 34,94.0521096 34,88 L34,74 C34,68.0540074 38.3245733,63.1180731 44,62.1659169 L44,56 L44,56 C44,25.072054 69.072054,5.68137151e-15 100,0 L100,0 L100,0 C130.927946,-5.68137151e-15 156,25.072054 156,56 L156,62.1659169 C161.675427,63.1180731 166,68.0540074 166,74 L166,88 C166,94.0521096 161.51969,99.0577866 155.694861,99.8812385 C153.627775,119.687011 141.237365,136.422372 124,144.610951 Z" id="react-path-3"></path></defs><g id="Avataaar" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-825.000000, -1100.000000)" id="Avataaar/Circle"><g transform="translate(825.000000, 1100.000000)">
@@ -385,11 +424,14 @@ const CreateNewAccount = () => {
     //   return;
     // }
 
+    setLoading(true);
+
     let token = await getFcmToken();
+    console.log("token is: ", token)
 
     const svgString = profilePic;
 
-    setLoading(true);
+    console.log("here i am")
     try {
       //@ts-ignore
       const svgBlob = await svgToBlob(svgString);
@@ -898,7 +940,7 @@ const CreateNewAccount = () => {
   const getFcmToken = async () => {
     const fcmToken = await messaging().getToken();
     if (fcmToken) {
-      console.log('FCM Token:', fcmToken);
+      console.log('FCM Token in create:', fcmToken);
       // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
       // Save the token to your backend if needed
       return fcmToken;
@@ -1050,6 +1092,7 @@ const CreateNewAccount = () => {
   const debouncedAccountCreation = debounce(accountCreation, 3000);
 
   const renderExternal = () => {
+    console.log("in render external")
     return step === 0 ? (
       <View style={styles.box}>
         <Text style={styles.header}>Create a Password</Text>
@@ -1258,7 +1301,7 @@ const CreateNewAccount = () => {
                     <Image style={styles.logo} source={googleLogo} />
                   </View>
                 </TouchableOpacity>
-                <LoginGithub
+                <CreateGithub
                   //@ts-ignore
                   color={'primary'}
                   sx={{
@@ -1268,8 +1311,10 @@ const CreateNewAccount = () => {
                   }}
                   clientId="Ov23liWncdWCkys9HUil"
                   // this redirect URI is for production, testing on dev will not work
-                  redirectUri={'gigoApp://callback'}
-                  onSuccess={onSuccessGithub}
+                  redirectUri={'gigoapp://callback'}
+                  containerHeight={windowHeight} // Pass the height
+                  containerWidth={windowWidth}   // Pass the width
+                  onSuccess={onSuccessGithubCreate}
                   onFailure={onFailureGithub}>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
                     <SvgXml
@@ -1278,7 +1323,7 @@ const CreateNewAccount = () => {
                       height={imageWidth}
                     />
                   </View>
-                </LoginGithub>
+                </CreateGithub>
               </View>
             </View>
           </View>

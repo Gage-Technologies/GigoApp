@@ -58,13 +58,13 @@ const AppRouter = () => {
         <ConditionalTopBar currentRouteName={currentRouteName} />
         <Stack.Navigator>
           <Stack.Screen
-            name="AccountSettings"
-            component={AccountSettings}
+            name="Login"
+            component={Login}
             options={{headerShown: false}}
           />
           <Stack.Screen
-            name="Login"
-            component={Login}
+            name="AccountSettings"
+            component={AccountSettings}
             options={{headerShown: false}}
           />
           <Stack.Screen

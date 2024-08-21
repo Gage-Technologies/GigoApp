@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Text, Linking, StyleSheet } from 'react-native'
 import { WebView } from 'react-native-webview';
 import { toQuery } from './utils';
 
-interface LoginGithubProps {
+interface CreateGithubProps {
   buttonText?: string;
   children?: React.ReactNode;
   clientId: string;
@@ -19,14 +19,14 @@ interface LoginGithubProps {
   initialWidth: number;    // Initial width before expanding
 }
 
-interface LoginGithubState {
+interface CreateGithubState {
   showWebView: boolean;
   url: string;
   isExpanded: boolean;
 }
 
-class LoginGithub extends Component<LoginGithubProps, LoginGithubState> {
-  static defaultProps: Partial<LoginGithubProps> = {
+class CreateGithub extends Component<CreateGithubProps, CreateGithubState> {
+  static defaultProps: Partial<CreateGithubProps> = {
     buttonText: 'Sign in with GitHub',
     scope: 'user:email',
     onRequest: () => {},
@@ -36,7 +36,7 @@ class LoginGithub extends Component<LoginGithubProps, LoginGithubState> {
 
   private linkingSubscription: any;
 
-  constructor(props: LoginGithubProps) {
+  constructor(props: CreateGithubProps) {
     super(props);
     this.state = {
       showWebView: false,
@@ -168,4 +168,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginGithub;
+export default CreateGithub;

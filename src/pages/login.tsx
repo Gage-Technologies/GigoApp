@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from "react";
 import {TextInput, Button} from 'react-native-paper';
 import {
   View,
@@ -23,6 +23,7 @@ import LoginGithub from '../components/Login/Github/LoginGithub';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from "@react-native-firebase/messaging";
+import Config from "react-native-config";
 
 const {width} = Dimensions.get('window');
 
@@ -35,6 +36,8 @@ const githubLogo = `
 `;
 
 const screenWidth = Dimensions.get('window').width;
+
+const API_URL = Config.API_URL;
 const imageWidth = screenWidth * 0.1; // 15% of the screen width
 
 const Login = () => {
@@ -195,6 +198,10 @@ const Login = () => {
   const [externalToken, setExternalToken] = React.useState('');
   const [showPass, setShowPass] = React.useState(false);
   const [ghConfirm, setGhConfirm] = React.useState(false);
+  const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
+  const [windowWidth, setWindowWidth] = useState(
+    Dimensions.get('window').width,
+  );
 
   const startGoogle = async () => {
     //     const payload = {
@@ -254,7 +261,19 @@ const Login = () => {
     }
   };
 
-  const onSuccessGithub = async (gh: {code: React.SetStateAction<string>}) => {
+  const getFcmToken = async () => {
+    const fcmToken = await messaging().getToken();
+    if (fcmToken) {
+      console.log('FCM Token:', fcmToken);
+      // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
+      // Save the token to your backend if needed
+      return fcmToken;
+    } else {
+      console.log('Failed to get FCM token');
+    }
+  };
+
+  const onSuccessGithub = async (gh: {code: string}) => {
     //         trackEvent({
     //             host: 'mobile_app', // Since there's no window.location in RN
     //             event: 'LoginStart',
@@ -268,17 +287,21 @@ const Login = () => {
     setExternalToken(gh.code);
     setExternalLogin('Github');
     setLoading(true);
+    let token = await getFcmToken();
 
     //can't test until github is done
+    console.log("why are we here")
 
     try {
-      let res = await fetch('/api/auth/loginWithGithub', {
+      let res = await fetch(`${API_URL}/api/auth/loginWithGithub`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({external_auth: gh.code}),
+        body: JSON.stringify({external_auth: gh.code, fcm_token: token}),
       });
+
+      console.log("res is: ", res)
 
       // @ts-ignore
       if (!res.auth) {
@@ -305,7 +328,7 @@ const Login = () => {
     setLoading(true);
     try {
       //not done because its not up to test github
-      let res = await fetch('/api/auth/confirmLoginWithGithub', {
+      let res = await fetch(`${API_URL}/api/auth/confirmLoginWithGithub`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -608,8 +631,10 @@ const Login = () => {
             }}
             clientId="Ov23liWncdWCkys9HUil"
             // this redirect URI is for production, testing on dev will not work
-            redirectUri={''}
+            redirectUri={'gigoapp://callback'}
             onSuccess={onSuccessGithub}
+            containerHeight={windowHeight} // Pass the height
+            containerWidth={windowWidth}   // Pass the width
             onFailure={onFailureGithub}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <SvgXml xml={githubLogo} width={imageWidth} height={imageWidth} />

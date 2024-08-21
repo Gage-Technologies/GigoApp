@@ -9,7 +9,7 @@ import {PersistGate} from 'redux-persist/integration/react';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import AppRouter from './src/router';
 import {LanguageProvider} from './src/LanguageContext';
-import {Alert, PermissionsAndroid, Platform} from 'react-native';
+import {Alert, PermissionsAndroid, Platform, Linking} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {AndroidImportance} from '@notifee/react-native';
 
@@ -65,6 +65,38 @@ const App = () => {
   //
   // useEffect(() => {
   //   setupFirebase();
+  // }, []);
+
+  // useEffect(() => {
+  //   const handleDeepLink = (event: {url: string}) => {
+  //     const url = event.url;
+  //     if (url) {
+  //       const parsedUrl = new URL(url);
+  //       const code = parsedUrl.searchParams.get('code');
+  //       if (code) {
+  //         console.log('Authorization code from deep link:', code);
+  //         // Here, you can pass the code to a global state, context, or directly navigate to a specific screen
+  //         Alert.alert('Authorization Code', `Code: ${code}`);
+  //       } else {
+  //         console.log('No code found in the deep link URL.');
+  //       }
+  //     }
+  //   };
+  //
+  //   // Add the event listener for handling deep links
+  //   const subscription = Linking.addEventListener('url', handleDeepLink);
+  //
+  //   // Handle the initial deep link if the app was opened via a deep link
+  //   Linking.getInitialURL().then(url => {
+  //     if (url) {
+  //       handleDeepLink({url});
+  //     }
+  //   });
+  //
+  //   // Clean up the event listener when the component unmounts
+  //   return () => {
+  //     subscription.remove(); // Properly remove the event listener
+  //   };
   // }, []);
 
   useEffect(() => {

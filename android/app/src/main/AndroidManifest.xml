@@ -23,7 +23,9 @@
               <action android:name="android.intent.action.VIEW" />
               <category android:name="android.intent.category.DEFAULT" />
               <category android:name="android.intent.category.BROWSABLE" />
-              <data android:scheme="gigoApp://auth/github/callback" />
+              <data android:scheme="gigoApp"
+                    android:host="callback"
+              />
           </intent-filter>
       </activity>
     </application>

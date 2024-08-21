@@ -128,6 +128,8 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    implementation 'com.android.billingclient:billing:6.0.0'
 }
 
 apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"

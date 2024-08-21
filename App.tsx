@@ -17,9 +17,20 @@ import {
   onNotificationOpenedAppFromQuit,
 } from './src/pushNotifications/notificationHandlers.ts';
 import {LanguageProvider} from './src/LanguageContext';
+import InAppPurchases from './src/services/InAppPurchases';
+
 const persistor = persistStore(store);
 
 const App = () => {
+  useEffect(() => {
+    InAppPurchases.init();
+    InAppPurchases.setupListeners();
+
+    return () => {
+      InAppPurchases.removeListeners();
+    };
+  }, []);
+
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <ReduxProvider store={store}>

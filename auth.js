@@ -111,6 +111,7 @@ export async function authorize(username, password) {
 
 export async function authorizeGithub(password) {
   let res = await makeRequest("/api/auth/confirmLoginWithGithub", "POST", { password });
+  console.log("res in authorize: ", res)
 
   let decodedToken = decodeToken(res.token);
   if (!decodedToken) {

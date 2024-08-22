@@ -46,6 +46,7 @@ class CreateGithub extends Component<CreateGithubProps, CreateGithubState> {
   }
 
   componentDidMount() {
+    console.log("in mount")
     this.linkingSubscription = Linking.addEventListener('url', this.handleDeepLink);
     Linking.getInitialURL().then((url) => {
       if (url) {
@@ -55,6 +56,7 @@ class CreateGithub extends Component<CreateGithubProps, CreateGithubState> {
   }
 
   componentWillUnmount() {
+    console.log("in unmount")
     if (this.linkingSubscription) {
       this.linkingSubscription.remove();
     }

@@ -14,7 +14,7 @@ import {
 // @ts-ignore
 import googleLogo from '../components/Icons/login/google_g.png';
 import {SvgXml} from 'react-native-svg';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation, useNavigationState } from "@react-navigation/native";
 import {authorizeGithub, authorizeGoogle} from '../services/auth.js';
 import {authorize} from '../../auth.js';
 import {initialAuthStateUpdate, updateAuthState} from '../reducers/auth.ts';
@@ -273,6 +273,11 @@ const Login = () => {
     }
   };
 
+  const currentRouteName = useNavigationState(
+    state => state.routes[state.index].name,
+  );
+
+
   const onSuccessGithub = async (gh: {code: string}) => {
     //         trackEvent({
     //             host: 'mobile_app', // Since there's no window.location in RN
@@ -284,7 +289,15 @@ const Login = () => {
     //             metadata: { "auth_provider": "github" },
     //         });
 
+    // You can now check which page is currently active
+    console.log("Current route:", currentRouteName);
+
+    if (currentRouteName === "SignUp") {
+      return
+    }
+
     setExternalToken(gh.code);
+    setExternal(true)
     setExternalLogin('Github');
     setLoading(true);
     let token = await getFcmToken();
@@ -304,11 +317,12 @@ const Login = () => {
       console.log("res is: ", res)
 
       // @ts-ignore
-      if (!res.auth) {
+      if (res["auth"] === false) {
         Alert.alert('Login Error', 'Incorrect credentials, please try again.');
         setLoading(false);
         return;
       }
+      console.log("github confirmed")
 
       setGhConfirm(true);
     } catch (error) {
@@ -319,61 +333,165 @@ const Login = () => {
   };
 
   const githubConfirm = async () => {
+    console.log("in github confirm: ", ghConfirm);
     if (!ghConfirm) {
       Alert.alert('Error', 'BAD');
       setLoading(false);
       return;
     }
+    console.log("here we go");
 
     setLoading(true);
     try {
-      //not done because its not up to test github
+      // Initial API call to confirm GitHub login
       let res = await fetch(`${API_URL}/api/auth/confirmLoginWithGithub`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({password: password}),
+        body: JSON.stringify({ password: password }),
       });
-      await AsyncStorage.setItem(
-        'loginXP',
-        JSON.stringify(
-          //@ts-ignore
-          res.xp,
-        ),
-      );
+      console.log("new res is: ", res);
 
-      res = await authorizeGithub(password);
-      //@ts-ignore
-      let auth = res.data;
-      //@ts-ignore
-      let token = res.token;
+      // Extract the token from the set-cookie header
+      const setCookieHeader = res.headers.get('set-cookie');
+      let gigoAuthToken = '';
 
-      if (auth.user) {
-        let authState = {
-          ...initialAuthStateUpdate,
-          authenticated: true,
-          token: token,
-          ...auth,
-        };
-        dispatch(updateAuthState(authState));
-
-        setTimeout(() => {
-          // @ts-ignore
-          navigation.navigate('JourneyMain');
-        }, 1000);
+      if (setCookieHeader) {
+        const tokenMatch = setCookieHeader.match(/gigoAuthToken=([^;]+)/);
+        if (tokenMatch && tokenMatch.length > 1) {
+          gigoAuthToken = tokenMatch[1];
+          console.log("Extracted gigoAuthToken:", gigoAuthToken);
+        } else {
+          console.error('gigoAuthToken not found in set-cookie header.');
+        }
       } else {
-        Alert.alert(
-          'Login Failed',
-          'The provided username or password is incorrect.',
-        );
+        console.error('Set-Cookie header not found.');
       }
+
+      // Authorize GitHub and get the response
+      const resAuth = await authorizeGithub(password);
+      console.log("just authorized");
+
+      // If resAuth is not a standard response object, handle it differently
+      let auth: any;
+      if (typeof resAuth.json === 'function') {
+        auth = await resAuth.json(); // Standard fetch response
+      } else {
+        auth = resAuth; // Directly use resAuth if it's not a fetch Response
+      }
+      console.log("auth here is: ", auth);
+
+      // Populate the authState object with data from the response
+      const authState = {
+        ...initialAuthStateUpdate,
+        authenticated: true,
+        token: gigoAuthToken, // Use the extracted token
+        expiration: auth["exp"],
+        id: auth["user"],
+        role: auth["user_status"],
+        email: auth["email"],
+        phone: auth["phone"],
+        userName: auth["user_name"],
+        thumbnail: auth["thumbnail"],
+        backgroundColor: auth["color_palette"],
+        backgroundName: auth["name"],
+        backgroundRenderInFront: auth["render_in_front"],
+        exclusiveContent: auth["exclusive_account"],
+        exclusiveAgreement: auth["exclusive_agreement"],
+        tutorialState: auth["tutorials"] as TutorialState,
+        tier: auth["tier"],
+        inTrial: auth["in_trial"],
+        alreadyCancelled: auth["already_cancelled"],
+        hasPaymentInfo: auth["has_payment_info"],
+        hasSubscription: auth["has_subscription"],
+        usedFreeTrial: auth["used_free_trial"],
+      };
+
+      dispatch(updateAuthState(authState));
+
+      setTimeout(() => {
+        // @ts-ignore
+        navigation.navigate('JourneyMain');
+      }, 1000);
+
     } catch (error) {
+      console.log("error is: ", error);
       Alert.alert('Login Error', 'An error occurred during the login process.');
     } finally {
       setLoading(false);
     }
   };
+
+
+
+
+  // const githubConfirm = async () => {
+  //   console.log("in github confirm: ", ghConfirm)
+  //   if (!ghConfirm) {
+  //     Alert.alert('Error', 'BAD');
+  //     setLoading(false);
+  //     return;
+  //   }
+  //   console.log("here we go")
+  //
+  //   setLoading(true);
+  //   try {
+  //     //not done because its not up to test github
+  //     let res = await fetch(`${API_URL}/api/auth/confirmLoginWithGithub`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({password: password}),
+  //     });
+  //     console.log("new res is: ", res)
+  //     // await AsyncStorage.setItem(
+  //     //   'loginXP',
+  //     //   JSON.stringify(
+  //     //     //@ts-ignore
+  //     //     res.xp,
+  //     //   ),
+  //     // );
+  //
+  //     console.log("jsut set item")
+  //
+  //     res = await authorizeGithub(password);
+  //     console.log("just authroized")
+  //     //@ts-ignore
+  //     let auth = res.data;
+  //     //@ts-ignore
+  //     let token = res.token;
+  //
+  //     console.log("auth here is: ", res.data)
+  //     console.log("token is: ", res.token)
+  //
+  //     if (auth.user) {
+  //       let authState = {
+  //         ...initialAuthStateUpdate,
+  //         authenticated: true,
+  //         token: token,
+  //         ...auth,
+  //       };
+  //       dispatch(updateAuthState(authState));
+  //
+  //       setTimeout(() => {
+  //         // @ts-ignore
+  //         navigation.navigate('JourneyMain');
+  //       }, 1000);
+  //     } else {
+  //       Alert.alert(
+  //         'Login Failed',
+  //         'The provided username or password is incorrect.',
+  //       );
+  //     }
+  //   } catch (error) {
+  //     console.log("error is: ", error)
+  //     Alert.alert('Login Error', 'An error occurred during the login process.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const onFailureGithub = () => {
     Alert.alert('Login Failed', 'GitHub login failed. Please try again.');

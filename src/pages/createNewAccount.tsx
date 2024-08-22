@@ -356,12 +356,14 @@ const CreateNewAccount = () => {
 
     console.log("gh is: ", gh.code)
 
+    setExternal(true)
+
     setExternalToken(gh.code);
     console.log("here 1")
     setExternalLogin('Github');
     console.log("here 2")
-    setLoading(true);
-    console.log("here 3")
+    // setLoading(true);
+    // console.log("here 3")
   };
 
   const testProfilePic = `<svg width="264px" height="280px" viewBox="0 0 264 280" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width: 150px; height: 150px; position: relative; top: 35px;"><desc>Created with getavataaars.com</desc><defs><circle id="react-path-1" cx="120" cy="120" r="120"></circle><path d="M12,160 C12,226.27417 65.72583,280 132,280 C198.27417,280 252,226.27417 252,160 L264,160 L264,-1.42108547e-14 L-3.19744231e-14,-1.42108547e-14 L-3.19744231e-14,160 L12,160 Z" id="react-path-2"></path><path d="M124,144.610951 L124,163 L128,163 L128,163 C167.764502,163 200,195.235498 200,235 L200,244 L0,244 L0,235 C-4.86974701e-15,195.235498 32.235498,163 72,163 L72,163 L76,163 L76,144.610951 C58.7626345,136.422372 46.3722246,119.687011 44.3051388,99.8812385 C38.4803105,99.0577866 34,94.0521096 34,88 L34,74 C34,68.0540074 38.3245733,63.1180731 44,62.1659169 L44,56 L44,56 C44,25.072054 69.072054,5.68137151e-15 100,0 L100,0 L100,0 C130.927946,-5.68137151e-15 156,25.072054 156,56 L156,62.1659169 C161.675427,63.1180731 166,68.0540074 166,74 L166,88 C166,94.0521096 161.51969,99.0577866 155.694861,99.8812385 C153.627775,119.687011 141.237365,136.422372 124,144.610951 Z" id="react-path-3"></path></defs><g id="Avataaar" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-825.000000, -1100.000000)" id="Avataaar/Circle"><g transform="translate(825.000000, 1100.000000)">
@@ -417,22 +419,13 @@ const CreateNewAccount = () => {
   };
 
   const githubCreate = async () => {
-    // //this is for github and cannot be finished until app is semi launched
-    // if (!ghConfirm) {
-    //   Alert.alert('Error', 'BAD');
-    //   setLoading(false);
-    //   return;
-    // }
-
     setLoading(true);
 
-    let token = await getFcmToken();
-    console.log("token is: ", token)
-
-    const svgString = profilePic;
-
-    console.log("here i am")
     try {
+      let token = await getFcmToken();
+      console.log("FCM token is: ", token);
+
+      const svgString = profilePic;
       //@ts-ignore
       const svgBlob = await svgToBlob(svgString);
 
@@ -458,11 +451,12 @@ const CreateNewAccount = () => {
           mouthType: Attributes.mouthType,
           avatarStyle: Attributes.avatarStyle,
           skinColor: Attributes.skinColor,
-          fcm_token: token,
         },
+        fcm_token: token,
       };
+
       let create = await fetchWithUpload(
-        `${API_URL}/api/auth/confirmLoginWithGithub`,
+        `${API_URL}/api/user/createNewGithubUser`,
         svgBlob,
         {
           method: 'POST',
@@ -472,84 +466,189 @@ const CreateNewAccount = () => {
           body: JSON.stringify(params),
           credentials: 'include',
         },
-        (res: any) => {
-          if (res.message !== 'Google User Added.') {
+        async (res: any) => {
+          console.log("Response from createNewGithubUser:", res);
+
+          if (res.message !== 'Github User Added.') {
             Alert.alert('Something went wrong here...', res.message);
+            return;
           }
 
           if (res === undefined) {
             Alert.alert('Network Error', 'Unable to connect to the server.');
+            return;
           }
 
-          if (res.message === 'Google User Added.') {
-            authorizeGithub(password).then(auth => {
-              // @ts-ignore
-              if (auth.user !== undefined) {
+          if (res.message === 'Github User Added.') {
+            try {
+              const authRes = await authorizeGithub(password);
+              console.log("Authorization response:", authRes);
+
+              // Extract and structure the authorization data
+              const { data: authData, token: gigoAuthToken } = authRes;
+
+              if (authData && authData.user) {
                 let authState = Object.assign({}, initialAuthStateUpdate);
                 authState.authenticated = true;
-                // @ts-ignore
-                authState.expiration = auth.exp;
-                // @ts-ignore
-                authState.id = auth.user;
-                // @ts-ignore
-                authState.role = auth.user_status;
-                // @ts-ignore
-                authState.email = auth.email;
-                // @ts-ignore
-                authState.phone = auth.phone;
-                // @ts-ignore
-                authState.userName = auth.user_name;
-                // @ts-ignore
-                authState.thumbnail = auth.thumbnail;
-                //@ts-ignore
-                authState.exclusiveContent = auth.exclusive_account;
-                //@ts-ignore
-                authState.exclusiveAgreement = auth.exclusive_agreement;
+                authState.token = gigoAuthToken; // Use the token from the auth response
+                authState.expiration = authData.exp;
+                authState.id = authData.user;
+                authState.role = authData.user_status;
+                authState.email = authData.email;
+                authState.phone = authData.phone;
+                authState.userName = authData.user_name;
+                authState.thumbnail = authData.thumbnail;
+                authState.exclusiveContent = authData.exclusive_account;
+                authState.exclusiveAgreement = authData.exclusive_agreement;
+                authState.tutorialState = authData.tutorials as TutorialState;
+                authState.tier = authData.tier;
+                authState.inTrial = authData.in_trial;
+                authState.alreadyCancelled = authData.already_cancelled;
+                authState.hasPaymentInfo = authData.has_payment_info;
+                authState.hasSubscription = authData.has_subscription;
+                authState.usedFreeTrial = authData.used_free_trial;
+
                 dispatch(updateAuthState(authState));
 
-                // this makes sure the dispatch occurs
+                // Navigate after a short delay to ensure state is updated
                 sleep(1000).then(() => {
-                  navigation.navigate(
-                    //@ts-ignore
-                    'JourneyMain',
-                  );
+                  navigation.navigate('JourneyMain');
                 });
               } else {
                 Alert.alert(
-                  'Sorry, we failed to log you in, please try again on login page.',
+                  'Login Failed',
+                  'Sorry, we failed to log you in. Please try again on the login page.'
                 );
               }
-            });
+            } catch (error) {
+              console.log("Error during authorization:", error);
+              Alert.alert('Login Error', 'An error occurred during the authorization process.');
+            }
           }
-        },
+        }
       );
-      //             let res = await call("/api/auth/confirmLoginWithGithub", "post", {
-      //                 password: password, // Ensure password is managed correctly
-      //             });
-      //
-      //             let auth = await authorizeGithub(password);
-      //             await AsyncStorage.setItem("loginXP", JSON.stringify(res["xp"]));
-      //
-      //             if (auth.user) {
-      //                 let authState = {
-      //                     ...initialAuthStateUpdate,
-      //                     authenticated: true,
-      //                     ...auth,
-      //                 };
-      //                 dispatch(updateAuthState(authState));
-      //
-      //                 setTimeout(() => {
-      //                     navigation.navigate("home");
-      //                 }, 1000);
-      //             } else {
-      //                 Alert.alert("Login Failed", "The provided username or password is incorrect.");
-      //             }
     } catch (error) {
-      Alert.alert('Login Error', 'An error occurred during the login process.');
+      console.log("Error during GitHub creation:", error);
+      Alert.alert('Login Error', 'An error occurred during the GitHub user creation process.');
     } finally {
       setLoading(false);
     }
   };
+
+  // const githubCreate = async () => {
+  //   // //this is for github and cannot be finished until app is semi launched
+  //   // if (!ghConfirm) {
+  //   //   Alert.alert('Error', 'BAD');
+  //   //   setLoading(false);
+  //   //   return;
+  //   // }
+  //
+  //   setLoading(true);
+  //
+  //   let token = await getFcmToken();
+  //   console.log("token is: ", token)
+  //
+  //   const svgString = profilePic;
+  //
+  //   console.log("here i am")
+  //   try {
+  //     //@ts-ignore
+  //     const svgBlob = await svgToBlob(svgString);
+  //
+  //     let params = {
+  //       external_auth: externalToken,
+  //       password: password,
+  //       start_user_info: {
+  //         usage: 'I want to learn how to code by doing really cool projects.',
+  //         proficiency: 'Beginner',
+  //         tags: 'python,javascript,golang,web development,game development,machine learning,artificial intelligence',
+  //         preferred_language: 'Python, Javascript, Golang, Typescript',
+  //       },
+  //       timezone: timezone ? timezone.value : 'America/Chicago',
+  //       avatar_settings: {
+  //         topType: Attributes.topType,
+  //         accessoriesType: Attributes.accessoriesType,
+  //         hairColor: Attributes.hairColor,
+  //         facialHairType: Attributes.facialHairType,
+  //         clotheType: Attributes.clotheType,
+  //         clotheColor: Attributes.clotheColor,
+  //         eyeType: Attributes.eyeType,
+  //         eyebrowType: Attributes.eyebrowType,
+  //         mouthType: Attributes.mouthType,
+  //         avatarStyle: Attributes.avatarStyle,
+  //         skinColor: Attributes.skinColor,
+  //       },
+  //       fcm_token: token,
+  //     };
+  //     let create = await fetchWithUpload(
+  //       `${API_URL}/api/user/createNewGithubUser`,
+  //       svgBlob,
+  //       {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify(params),
+  //         credentials: 'include',
+  //       },
+  //       (res: any) => {
+  //         console.log("res is: ", res)
+  //         if (res.message !== 'Github User Added.') {
+  //           Alert.alert('Something went wrong here...', res.message);
+  //         }
+  //
+  //         if (res === undefined) {
+  //           Alert.alert('Network Error', 'Unable to connect to the server.');
+  //         }
+  //
+  //         if (res.message === 'Github User Added.') {
+  //           authorizeGithub(password).then(auth => {
+  //             console.log("auth is: ", auth)
+  //             // @ts-ignore
+  //             if (auth.user !== undefined) {
+  //               let authState = Object.assign({}, initialAuthStateUpdate);
+  //               authState.authenticated = true;
+  //               // @ts-ignore
+  //               authState.expiration = auth.exp;
+  //               // @ts-ignore
+  //               authState.id = auth.user;
+  //               // @ts-ignore
+  //               authState.role = auth.user_status;
+  //               // @ts-ignore
+  //               authState.email = auth.email;
+  //               // @ts-ignore
+  //               authState.phone = auth.phone;
+  //               // @ts-ignore
+  //               authState.userName = auth.user_name;
+  //               // @ts-ignore
+  //               authState.thumbnail = auth.thumbnail;
+  //               //@ts-ignore
+  //               authState.exclusiveContent = auth.exclusive_account;
+  //               //@ts-ignore
+  //               authState.exclusiveAgreement = auth.exclusive_agreement;
+  //               dispatch(updateAuthState(authState));
+  //
+  //               // this makes sure the dispatch occurs
+  //               sleep(1000).then(() => {
+  //                 navigation.navigate(
+  //                   //@ts-ignore
+  //                   'JourneyMain',
+  //                 );
+  //               });
+  //             } else {
+  //               Alert.alert(
+  //                 'Sorry, we failed to log you in, please try again on login page.',
+  //               );
+  //             }
+  //           });
+  //         }
+  //       },
+  //     );
+  //     Alert.alert('Login Error', 'An error occurred during the login process.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const onFailureGithub = () => {
     Alert.alert('Login Failed', 'GitHub login failed. Please try again.');
@@ -628,8 +727,8 @@ const CreateNewAccount = () => {
         mouthType: Attributes.mouthType,
         avatarStyle: Attributes.avatarStyle,
         skinColor: Attributes.skinColor,
-        fcm_token: token,
       },
+      fcm_token: token,
     };
 
     try {

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useState} from 'react';
 import {TextInput, Button} from 'react-native-paper';
 import {
   View,
@@ -14,7 +14,7 @@ import {
 // @ts-ignore
 import googleLogo from '../components/Icons/login/google_g.png';
 import {SvgXml} from 'react-native-svg';
-import { useNavigation, useNavigationState } from "@react-navigation/native";
+import {useNavigation, useNavigationState} from '@react-navigation/native';
 import {authorizeGithub, authorizeGoogle} from '../services/auth.js';
 import {authorize} from '../../auth.js';
 import {initialAuthStateUpdate, updateAuthState} from '../reducers/auth.ts';
@@ -22,8 +22,8 @@ import {useDispatch} from 'react-redux';
 import LoginGithub from '../components/Login/Github/LoginGithub';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import messaging from "@react-native-firebase/messaging";
-import Config from "react-native-config";
+import messaging from '@react-native-firebase/messaging';
+import Config from 'react-native-config';
 
 const {width} = Dimensions.get('window');
 
@@ -198,7 +198,9 @@ const Login = () => {
   const [externalToken, setExternalToken] = React.useState('');
   const [showPass, setShowPass] = React.useState(false);
   const [ghConfirm, setGhConfirm] = React.useState(false);
-  const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
+  const [windowHeight, setWindowHeight] = useState(
+    Dimensions.get('window').height,
+  );
   const [windowWidth, setWindowWidth] = useState(
     Dimensions.get('window').width,
   );
@@ -217,7 +219,7 @@ const Login = () => {
     const userInfo = await GoogleSignin.signIn();
     setExternal(true);
     // @ts-ignore
-    setExternalToken(userInfo['idToken']);
+    setExternalToken(userInfo.idToken);
     setExternalLogin('Google');
     //       const auth = await authorizeGoogle(userInfo.idToken); // Adjust this function to your backend
     //     googleSignIn();
@@ -264,7 +266,6 @@ const Login = () => {
   const getFcmToken = async () => {
     const fcmToken = await messaging().getToken();
     if (fcmToken) {
-      console.log('FCM Token:', fcmToken);
       // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
       // Save the token to your backend if needed
       return fcmToken;
@@ -276,7 +277,6 @@ const Login = () => {
   const currentRouteName = useNavigationState(
     state => state.routes[state.index].name,
   );
-
 
   const onSuccessGithub = async (gh: {code: string}) => {
     //         trackEvent({
@@ -290,20 +290,16 @@ const Login = () => {
     //         });
 
     // You can now check which page is currently active
-    console.log("Current route:", currentRouteName);
 
-    if (currentRouteName === "SignUp") {
-      return
+    if (currentRouteName === 'SignUp') {
+      return;
     }
 
     setExternalToken(gh.code);
-    setExternal(true)
+    setExternal(true);
     setExternalLogin('Github');
     setLoading(true);
     let token = await getFcmToken();
-
-    //can't test until github is done
-    console.log("why are we here")
 
     try {
       let res = await fetch(`${API_URL}/api/auth/loginWithGithub`, {
@@ -314,15 +310,12 @@ const Login = () => {
         body: JSON.stringify({external_auth: gh.code, fcm_token: token}),
       });
 
-      console.log("res is: ", res)
-
       // @ts-ignore
-      if (res["auth"] === false) {
+      if (res.auth === false) {
         Alert.alert('Login Error', 'Incorrect credentials, please try again.');
         setLoading(false);
         return;
       }
-      console.log("github confirmed")
 
       setGhConfirm(true);
     } catch (error) {
@@ -333,13 +326,11 @@ const Login = () => {
   };
 
   const githubConfirm = async () => {
-    console.log("in github confirm: ", ghConfirm);
     if (!ghConfirm) {
       Alert.alert('Error', 'BAD');
       setLoading(false);
       return;
     }
-    console.log("here we go");
 
     setLoading(true);
     try {
@@ -349,9 +340,8 @@ const Login = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ password: password }),
+        body: JSON.stringify({password: password}),
       });
-      console.log("new res is: ", res);
 
       // Extract the token from the set-cookie header
       const setCookieHeader = res.headers.get('set-cookie');
@@ -361,7 +351,6 @@ const Login = () => {
         const tokenMatch = setCookieHeader.match(/gigoAuthToken=([^;]+)/);
         if (tokenMatch && tokenMatch.length > 1) {
           gigoAuthToken = tokenMatch[1];
-          console.log("Extracted gigoAuthToken:", gigoAuthToken);
         } else {
           console.error('gigoAuthToken not found in set-cookie header.');
         }
@@ -371,7 +360,6 @@ const Login = () => {
 
       // Authorize GitHub and get the response
       const resAuth = await authorizeGithub(password);
-      console.log("just authorized");
 
       // If resAuth is not a standard response object, handle it differently
       let auth: any;
@@ -380,32 +368,30 @@ const Login = () => {
       } else {
         auth = resAuth; // Directly use resAuth if it's not a fetch Response
       }
-      console.log("auth here is: ", auth);
 
       // Populate the authState object with data from the response
       const authState = {
         ...initialAuthStateUpdate,
         authenticated: true,
         token: gigoAuthToken, // Use the extracted token
-        expiration: auth["exp"],
-        id: auth["user"],
-        role: auth["user_status"],
-        email: auth["email"],
-        phone: auth["phone"],
-        userName: auth["user_name"],
-        thumbnail: auth["thumbnail"],
-        backgroundColor: auth["color_palette"],
-        backgroundName: auth["name"],
-        backgroundRenderInFront: auth["render_in_front"],
-        exclusiveContent: auth["exclusive_account"],
-        exclusiveAgreement: auth["exclusive_agreement"],
-        tutorialState: auth["tutorials"] as TutorialState,
-        tier: auth["tier"],
-        inTrial: auth["in_trial"],
-        alreadyCancelled: auth["already_cancelled"],
-        hasPaymentInfo: auth["has_payment_info"],
-        hasSubscription: auth["has_subscription"],
-        usedFreeTrial: auth["used_free_trial"],
+        expiration: auth.exp,
+        id: auth.user,
+        role: auth.user_status,
+        email: auth.email,
+        phone: auth.phone,
+        userName: auth.user_name,
+        thumbnail: auth.thumbnail,
+        backgroundColor: auth.color_palette,
+        backgroundName: auth.name,
+        backgroundRenderInFront: auth.render_in_front,
+        exclusiveContent: auth.exclusive_account,
+        exclusiveAgreement: auth.exclusive_agreement,
+        tier: auth.tier,
+        inTrial: auth.in_trial,
+        alreadyCancelled: auth.already_cancelled,
+        hasPaymentInfo: auth.has_payment_info,
+        hasSubscription: auth.has_subscription,
+        usedFreeTrial: auth.used_free_trial,
       };
 
       dispatch(updateAuthState(authState));
@@ -414,17 +400,12 @@ const Login = () => {
         // @ts-ignore
         navigation.navigate('JourneyMain');
       }, 1000);
-
     } catch (error) {
-      console.log("error is: ", error);
       Alert.alert('Login Error', 'An error occurred during the login process.');
     } finally {
       setLoading(false);
     }
   };
-
-
-
 
   // const githubConfirm = async () => {
   //   console.log("in github confirm: ", ghConfirm)
@@ -752,7 +733,7 @@ const Login = () => {
             redirectUri={'gigoapp://callback'}
             onSuccess={onSuccessGithub}
             containerHeight={windowHeight} // Pass the height
-            containerWidth={windowWidth}   // Pass the width
+            containerWidth={windowWidth} // Pass the width
             onFailure={onFailureGithub}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <SvgXml xml={githubLogo} width={imageWidth} height={imageWidth} />

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from 'react';
 import {TextInput, Button} from 'react-native-paper';
 import {
   View,
@@ -10,8 +10,9 @@ import {
   Alert,
   ScrollView,
   KeyboardAvoidingView,
-  Platform, Linking
-} from "react-native";
+  Platform,
+  Linking,
+} from 'react-native';
 // @ts-ignore
 import googleLogo from '../components/Icons/login/google_g.png';
 import {SvgXml} from 'react-native-svg';
@@ -22,7 +23,7 @@ import profilePic from '../components/Avatar/profile-pic.svg';
 import Config from 'react-native-config';
 import {useDispatch} from 'react-redux';
 import {authorizeGoogle} from '../services/auth.js';
-import { authorize, authorizeGithub } from "../../auth.js";
+import {authorize, authorizeGithub} from '../../auth.js';
 import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import {initialAuthStateUpdate, updateAuthState} from '../reducers/auth.ts';
 import fetchWithUpload from '../services/api-call.tsx';
@@ -100,7 +101,9 @@ const CreateNewAccount = () => {
   const navigation = useNavigation();
   const [creationStep, setCreationStep] = React.useState(0);
 
-  const [windowHeight, setWindowHeight] = useState(Dimensions.get('window').height);
+  const [windowHeight, setWindowHeight] = useState(
+    Dimensions.get('window').height,
+  );
   const [windowWidth, setWindowWidth] = useState(
     Dimensions.get('window').width,
   );
@@ -352,16 +355,10 @@ const CreateNewAccount = () => {
   };
 
   const onSuccessGithubCreate = async (gh: {code: string}) => {
-    console.log('here in success');
-
-    console.log("gh is: ", gh.code)
-
-    setExternal(true)
+    setExternal(true);
 
     setExternalToken(gh.code);
-    console.log("here 1")
     setExternalLogin('Github');
-    console.log("here 2")
     // setLoading(true);
     // console.log("here 3")
   };
@@ -423,7 +420,6 @@ const CreateNewAccount = () => {
 
     try {
       let token = await getFcmToken();
-      console.log("FCM token is: ", token);
 
       const svgString = profilePic;
       //@ts-ignore
@@ -454,7 +450,6 @@ const CreateNewAccount = () => {
         },
         fcm_token: token,
       };
-
       let create = await fetchWithUpload(
         `${API_URL}/api/user/createNewGithubUser`,
         svgBlob,
@@ -467,8 +462,6 @@ const CreateNewAccount = () => {
           credentials: 'include',
         },
         async (res: any) => {
-          console.log("Response from createNewGithubUser:", res);
-
           if (res.message !== 'Github User Added.') {
             Alert.alert('Something went wrong here...', res.message);
             return;
@@ -482,10 +475,10 @@ const CreateNewAccount = () => {
           if (res.message === 'Github User Added.') {
             try {
               const authRes = await authorizeGithub(password);
-              console.log("Authorization response:", authRes);
 
               // Extract and structure the authorization data
-              const { data: authData, token: gigoAuthToken } = authRes;
+              //@ts-ignore
+              const {data: authData, token: gigoAuthToken} = authRes;
 
               if (authData && authData.user) {
                 let authState = Object.assign({}, initialAuthStateUpdate);
@@ -500,7 +493,6 @@ const CreateNewAccount = () => {
                 authState.thumbnail = authData.thumbnail;
                 authState.exclusiveContent = authData.exclusive_account;
                 authState.exclusiveAgreement = authData.exclusive_agreement;
-                authState.tutorialState = authData.tutorials as TutorialState;
                 authState.tier = authData.tier;
                 authState.inTrial = authData.in_trial;
                 authState.alreadyCancelled = authData.already_cancelled;
@@ -512,24 +504,30 @@ const CreateNewAccount = () => {
 
                 // Navigate after a short delay to ensure state is updated
                 sleep(1000).then(() => {
+                  //@ts-ignore
                   navigation.navigate('JourneyMain');
                 });
               } else {
                 Alert.alert(
                   'Login Failed',
-                  'Sorry, we failed to log you in. Please try again on the login page.'
+                  'Sorry, we failed to log you in. Please try again on the login page.',
                 );
               }
             } catch (error) {
-              console.log("Error during authorization:", error);
-              Alert.alert('Login Error', 'An error occurred during the authorization process.');
+              //@ts-ignore
+              Alert.alert(
+                'Login Error',
+                'An error occurred during the authorization process.',
+              );
             }
           }
-        }
+        },
       );
     } catch (error) {
-      console.log("Error during GitHub creation:", error);
-      Alert.alert('Login Error', 'An error occurred during the GitHub user creation process.');
+      Alert.alert(
+        'Login Error',
+        'An error occurred during the GitHub user creation process.',
+      );
     } finally {
       setLoading(false);
     }
@@ -938,7 +936,6 @@ const CreateNewAccount = () => {
       });
 
       if (!res.ok) {
-        console.log(' res is: ', res);
         console.error('Network response was not ok', res.statusText); // Log error if response is not ok
         throw new Error(`HTTP error! Status: ${res.status}`);
       }
@@ -1039,7 +1036,6 @@ const CreateNewAccount = () => {
   const getFcmToken = async () => {
     const fcmToken = await messaging().getToken();
     if (fcmToken) {
-      console.log('FCM Token in create:', fcmToken);
       // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
       // Save the token to your backend if needed
       return fcmToken;
@@ -1135,7 +1131,6 @@ const CreateNewAccount = () => {
 
     try {
       const svgBlob = await svgToBlob(testProfilePic);
-      console.log('i am here');
       await fetchWithUpload(
         `${API_URL}/api/user/createNewUser`,
         svgBlob,
@@ -1174,7 +1169,6 @@ const CreateNewAccount = () => {
             //                         }
             //                         trackEvent(payload);
             createLogin();
-            console.log('made it here');
 
             // @ts-ignore
             navigation.navigate('JourneyMain');
@@ -1191,7 +1185,6 @@ const CreateNewAccount = () => {
   const debouncedAccountCreation = debounce(accountCreation, 3000);
 
   const renderExternal = () => {
-    console.log("in render external")
     return step === 0 ? (
       <View style={styles.box}>
         <Text style={styles.header}>Create a Password</Text>
@@ -1412,7 +1405,7 @@ const CreateNewAccount = () => {
                   // this redirect URI is for production, testing on dev will not work
                   redirectUri={'gigoapp://callback'}
                   containerHeight={windowHeight} // Pass the height
-                  containerWidth={windowWidth}   // Pass the width
+                  containerWidth={windowWidth} // Pass the width
                   onSuccess={onSuccessGithubCreate}
                   onFailure={onFailureGithub}>
                   <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -1435,7 +1428,11 @@ const CreateNewAccount = () => {
             <Text style={{color: 'white', fontSize: 16, lineHeight: 18}}>
               Already have an account?
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+            <TouchableOpacity
+              onPress={() =>
+                //@ts-ignore
+                navigation.navigate('Login')
+              }>
               <Text
                 style={{
                   color: '#a4c598',

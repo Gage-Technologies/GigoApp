@@ -361,6 +361,9 @@ const Login = () => {
       // Authorize GitHub and get the response
       const resAuth = await authorizeGithub(password);
 
+      const xpValue = res["xp"] !== undefined ? res["xp"] : 0;
+      await AsyncStorage.setItem('loginXP', JSON.stringify(xpValue));
+
       // If resAuth is not a standard response object, handle it differently
       let auth: any;
       if (typeof resAuth.json === 'function') {

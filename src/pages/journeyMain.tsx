@@ -23,6 +23,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import XpPopup from '../components/XpPopup';
 import {useLanguage} from '../LanguageContext';
 import EmptyJourney from '../components/Journey/EmptyJourney';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {selectAuthState} from '../reducers/auth';
+import {useSelector} from 'react-redux';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
@@ -33,12 +36,44 @@ const JourneyMain = () => {
   const [showXpPopup, setShowXpPopup] = useState(false);
   const [showEmptyJourney, setShowEmptyJourney] = useState(false);
   const [filteredUnits, setFilteredUnits] = useState<Unit[]>([]);
+  const [xpData, setXpData] = useState({
+    oldXP: 0,
+    newXP: 0,
+    nextLevel: 1,
+    maxXP: 100,
+    levelUp: false,
+    gainedXP: 0,
+    renown: 0,
+  });
+  const authState = useSelector(selectAuthState);
 
   const API_URL = Config.API_URL;
   const theme = useTheme();
   const {selectedLanguage} = useLanguage();
 
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchSessionData = async () => {
+      try {
+        const xpLogin = await AsyncStorage.getItem('loginXP');
+        setLoading(true);
+
+        setLoading(false);
+
+        if (xpLogin && xpLogin !== 'undefined' && xpLogin !== '0') {
+          setShowXpPopup(true);
+          console.log("xpLogin: ", xpLogin)
+          setXpData(JSON.parse(xpLogin));
+        }
+      } catch (error) {
+        console.error('Error loading data', error);
+        setLoading(false);
+      }
+    };
+
+    fetchSessionData();
+  }, []);
 
   const getTasks = async () => {
     try {
@@ -358,15 +393,7 @@ const JourneyMain = () => {
       )}
       {showXpPopup && (
         <XpPopup
-          oldXP={50}
-          newXP={100}
-          nextLevel={2}
-          maxXP={150}
-          levelUp={true}
-          gainedXP={50}
-          renown={1}
-          popupClose={handleCloseXpPopup}
-          homePage={false}
+          {...xpData} popupClose={handleCloseXpPopup} homePage={false}
         />
       )}
     </>

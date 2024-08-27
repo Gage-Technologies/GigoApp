@@ -111,6 +111,8 @@ export async function authorize(username, password) {
   await AsyncStorage.setItem('user', JSON.stringify(decodedToken.user));
   await AsyncStorage.setItem('alive', 'true');
   //  await AsyncStorage.setItem("loginXP", JSON.stringify(res.xp));
+  const xpValue = res["xp"] !== undefined ? res["xp"] : 0;
+  await AsyncStorage.setItem('loginXP', JSON.stringify(xpValue));
 
   return {
     token: res.token,

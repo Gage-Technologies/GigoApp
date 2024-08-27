@@ -12,6 +12,7 @@ import Config from 'react-native-config';
 import {useSelector} from 'react-redux';
 import {selectAuthState} from '../reducers/auth';
 import Svg, {RadialGradient, Defs, Rect, Stop} from 'react-native-svg';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface XpPopupProps {
   oldXP: number;
@@ -88,10 +89,11 @@ const XpPopup: React.FC<XpPopupProps> = props => {
     return null;
   };
 
-  const confirmButton = useCallback(() => {
+  const confirmButton = useCallback(async () => {
     if (props.popupClose) {
       props.popupClose();
     }
+    await AsyncStorage.setItem('loginXP', 'undefined');
   }, [props.popupClose]);
 
   const renderXPPopup = () => {

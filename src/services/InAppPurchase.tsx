@@ -1,9 +1,4 @@
-import RNIap, {
-  purchaseErrorListener,
-  purchaseUpdatedListener,
-  type ProductPurchase,
-  type PurchaseError,
-} from 'react-native-iap';
+import * as RNIap from 'react-native-iap';
 
 class InAppPurchases {
   purchaseUpdateSubscription: any;
@@ -12,25 +7,30 @@ class InAppPurchases {
   // initialize iap connection
   async init() {
     try {
-      await RNIap.initConnection();
-      console.log('iap connection initialized');
+      const result = await RNIap.initConnection();
+      console.log('iap connection initialized', result);
+      await RNIap.flushFailedPurchasesCachedAsPendingAndroid();
     } catch (error) {
       console.error('error initializing iap', error);
+      if (error.message.includes('Billing is unavailable')) {
+        console.log('Billing is unavailable. This may be due to using an emulator or Play Store issues.');
+        // You might want to disable IAP features in your app when this occurs
+      }
     }
   }
 
   // set up listeners
   setupListeners() {
-    this.purchaseUpdateSubscription = purchaseUpdatedListener(
-      async (purchase: ProductPurchase) => {
+    this.purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
+      async (purchase: RNIap.ProductPurchase) => {
         console.log('purchase', purchase);
         // handle purchase
         // you might want to call a method to validate the purchase here
       },
     );
 
-    this.purchaseErrorSubscription = purchaseErrorListener(
-      (error: PurchaseError) => {
+    this.purchaseErrorSubscription = RNIap.purchaseErrorListener(
+      (error: RNIap.PurchaseError) => {
         console.error('purchaseErrorListener', error);
       },
     );

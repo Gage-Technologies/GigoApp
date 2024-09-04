@@ -17,7 +17,7 @@ import {
   onNotificationOpenedAppFromQuit,
 } from './src/pushNotifications/notificationHandlers.ts';
 import {LanguageProvider} from './src/LanguageContext';
-import InAppPurchases from './src/services/InAppPurchases';
+import InAppPurchases from './src/services/InAppPurchase';
 
 const persistor = persistStore(store);
 
@@ -32,6 +32,7 @@ const App = () => {
   }, []);
 
   return (
+    // eslint-disable-next-line react-native/no-inline-styles
     <GestureHandlerRootView style={{flex: 1}}>
       <ReduxProvider store={store}>
         <PersistGate loading={null} persistor={persistor}>

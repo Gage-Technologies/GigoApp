@@ -51,6 +51,8 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
     }
   }, [open]);
 
+  
+
   const getUnitMap = async (unitId: string) => {
     try {
       const response = await fetch(

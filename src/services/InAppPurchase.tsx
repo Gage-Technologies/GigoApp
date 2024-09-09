@@ -1,4 +1,7 @@
 import * as RNIap from 'react-native-iap';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {ProductPurchase, Purchase} from 'react-native-iap';
+import Config from "react-native-config";
 import Platform from 'react-native';
 
 class InAppPurchases {
@@ -24,6 +27,7 @@ class InAppPurchases {
       return true; // return true if initialization was successful
     } catch (error) {
       console.error('error initializing iap', error);
+      // @ts-ignore
       if (error.message.includes('Billing is unavailable')) {
         console.log(
           'Billing is unavailable. This may be due to using an emulator or Play Store issues.',
@@ -35,13 +39,68 @@ class InAppPurchases {
     }
   }
 
+  PRO_UPGRADE_SKU_BASIC = Config.GIGO_PRO_UPGRADE_BASIC;
+  PRO_UPGRADE_SKU_ADVANCED = Config.GIGO_PRO_UPGRADE_ADVANCED;
+  PRO_UPGRADE_SKU_MAX = Config.GIGO_PRO_UPGRADE_MAX;
+
   // set up listeners
   setupListeners() {
     this.purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
-      async (purchase: RNIap.ProductPurchase) => {
+      async (purchase: Purchase | ProductPurchase) => {
         console.log('purchase', purchase);
-        // handle purchase
-        // you might want to call a method to validate the purchase here
+
+        if (purchase.productId === this.PRO_UPGRADE_SKU_BASIC) {
+          // Grant Pro features to the user
+          await AsyncStorage.setItem('isPro', 'true');
+          console.log('Pro upgrade purchased successfully');
+
+          // Acknowledge the purchase to Google Play Store
+          try {
+            if (purchase.transactionReceipt) {
+              await RNIap.finishTransaction({
+                purchase: purchase,
+                isConsumable: false,
+                developerPayloadAndroid: '',
+              });
+            }
+          } catch (error) {
+            console.error('Error finishing transaction', error);
+          }
+        } else if (purchase.productId === this.PRO_UPGRADE_SKU_ADVANCED) {
+          // Grant Pro features to the user
+          await AsyncStorage.setItem('isPro', 'true');
+          console.log('Pro upgrade purchased successfully');
+
+          // Acknowledge the purchase to Google Play Store
+          try {
+            if (purchase.transactionReceipt) {
+              await RNIap.finishTransaction({
+                purchase: purchase,
+                isConsumable: false,
+                developerPayloadAndroid: '',
+              });
+            }
+          } catch (error) {
+            console.error('Error finishing transaction', error);
+          }
+        } else {
+          // Grant Pro features to the user
+          await AsyncStorage.setItem('isPro', 'true');
+          console.log('Pro upgrade purchased successfully');
+
+          // Acknowledge the purchase to Google Play Store
+          try {
+            if (purchase.transactionReceipt) {
+              await RNIap.finishTransaction({
+                purchase: purchase,
+                isConsumable: false,
+                developerPayloadAndroid: '',
+              });
+            }
+          } catch (error) {
+            console.error('Error finishing transaction', error);
+          }
+        }
       },
     );
 
@@ -67,7 +126,9 @@ class InAppPurchases {
   // method to request purchase
   async requestPurchase(sku: string) {
     try {
-      await RNIap.requestPurchase(sku);
+      await RNIap.requestPurchase({
+        sku: sku,
+      });
     } catch (error) {
       console.error('error in requestPurchase', error);
     }

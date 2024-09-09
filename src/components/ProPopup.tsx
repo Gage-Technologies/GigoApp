@@ -16,7 +16,10 @@ import Svg, {RadialGradient, Defs, Rect, Stop} from 'react-native-svg';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // import the PNG image
+//@ts-ignore
 import ProPopupIcon from '../img/pro-pop-up-icon-plain.png';
+import InAppPurchases from '../services/InAppPurchase.tsx';
+import Config from 'react-native-config';
 
 interface ProPopupProps {
   visible: boolean;
@@ -24,6 +27,10 @@ interface ProPopupProps {
 }
 
 const {width, height} = Dimensions.get('window');
+
+const PRO_UPGRADE_SKU_BASIC = Config.GIGO_PRO_UPGRADE_BASIC;
+const PRO_UPGRADE_SKU_ADVANCED = Config.GIGO_PRO_UPGRADE_ADVANCED;
+const PRO_UPGRADE_SKU_MAX = Config.GIGO_PRO_UPGRADE_MAX;
 
 const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
   const theme = useTheme();
@@ -36,10 +43,36 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
     }
   }, [visible]);
 
-  // function to handle pro upgrade
-  const handleProUpgrade = () => {
+  // // function to handle pro upgrade
+  // const handleProUpgrade = () => {
+  //   console.log('Upgrade to GIGO Pro');
+  //   // implement pro upgrade logic here
+  // };
+
+  const handleProUpgrade = async (plan: string) => {
     console.log('Upgrade to GIGO Pro');
-    // implement pro upgrade logic here
+
+    let finalSku: string;
+
+    if (plan === 'Basic') {
+      finalSku = PRO_UPGRADE_SKU_BASIC!;
+    } else if (plan === 'Advanced') {
+      finalSku = PRO_UPGRADE_SKU_ADVANCED!;
+    } else {
+      finalSku = PRO_UPGRADE_SKU_MAX!;
+    }
+
+    try {
+      // Request the purchase of the Pro upgrade using the SKU
+      await InAppPurchases.requestPurchase(finalSku);
+    } catch (error) {
+      console.error('Error requesting Pro upgrade purchase', error);
+      // You can provide user feedback if the purchase request fails
+    }
+  };
+
+  const handlePlanSelection = async (plan: string) => {
+    handleProUpgrade(plan);
   };
 
   // function to toggle learn more section
@@ -112,7 +145,7 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
         style={styles.buttonContainer}>
         <Button
           mode="contained"
-          onPress={handleProUpgrade}
+          onPress={() => handleProUpgrade('basic')}
           style={styles.upgradeButton}
           contentStyle={styles.upgradeButtonContent}
           labelStyle={styles.upgradeButtonLabel}>
@@ -234,6 +267,7 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
     </ScrollView>
   );
 
+  // @ts-ignore
   return (
     <Portal>
       <Modal
@@ -284,6 +318,7 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
           size={24}
           onPress={onDismiss}
           style={styles.closeButton}
+          //@ts-ignore
           color={theme.colors.onBackground}
         />
         <View style={styles.content}>

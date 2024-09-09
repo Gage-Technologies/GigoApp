@@ -9,9 +9,6 @@ import {PersistGate} from 'redux-persist/integration/react';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import AppRouter from './src/router';
 import {LanguageProvider} from './src/LanguageContext';
-import {Alert, PermissionsAndroid, Platform, Linking} from 'react-native';
-import messaging from '@react-native-firebase/messaging';
-import notifee, {AndroidImportance} from '@notifee/react-native';
 
 import {Alert, PermissionsAndroid, Platform, Linking} from 'react-native';
 import messaging from '@react-native-firebase/messaging';

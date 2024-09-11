@@ -1,8 +1,12 @@
 import * as RNIap from 'react-native-iap';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ProductPurchase, Purchase} from 'react-native-iap';
-import Config from "react-native-config";
-import Platform from 'react-native';
+import Config from 'react-native-config';
+import {Platform} from 'react-native';
+
+const PRO_UPGRADE_SKU_BASIC = Config.GIGO_PRO_UPGRADE_BASIC;
+const PRO_UPGRADE_SKU_ADVANCED = Config.GIGO_PRO_UPGRADE_ADVANCED;
+const PRO_UPGRADE_SKU_MAX = Config.GIGO_PRO_UPGRADE_MAX;
 
 class InAppPurchases {
   purchaseUpdateSubscription: any;
@@ -21,7 +25,13 @@ class InAppPurchases {
       }
 
       // get available products (define these)
-      const products = await RNIap.getProducts(['your_product_id_1', 'your_product_id_2']);
+      const products = await RNIap.getSubscriptions({
+        skus: [
+          PRO_UPGRADE_SKU_BASIC,
+          PRO_UPGRADE_SKU_ADVANCED,
+          PRO_UPGRADE_SKU_MAX,
+        ],
+      });
       console.log('available products:', products);
 
       return true; // return true if initialization was successful

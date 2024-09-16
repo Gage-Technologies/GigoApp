@@ -55,11 +55,11 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
     let finalSku: string;
 
     if (plan === 'Basic') {
-      finalSku = PRO_UPGRADE_SKU_BASIC!;
+      finalSku = 'gigo_pro_subscription_basic';
     } else if (plan === 'Advanced') {
-      finalSku = PRO_UPGRADE_SKU_ADVANCED!;
+      finalSku = 'gigo_pro_subscription_advanced';
     } else {
-      finalSku = PRO_UPGRADE_SKU_MAX!;
+      finalSku = 'gigo_pro_subscription_max';
     }
 
     try {
@@ -145,7 +145,7 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
         style={styles.buttonContainer}>
         <Button
           mode="contained"
-          onPress={() => handleProUpgrade('basic')}
+          onPress={() => handleProUpgrade('Basic')}
           style={styles.upgradeButton}
           contentStyle={styles.upgradeButtonContent}
           labelStyle={styles.upgradeButtonLabel}>

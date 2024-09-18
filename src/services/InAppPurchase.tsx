@@ -58,7 +58,7 @@ class InAppPurchases {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          purchaseToken: purchaseToken,
+          purchase_token: purchaseToken,
           // Add any other necessary data, such as user ID
         }),
       });
@@ -75,6 +75,9 @@ class InAppPurchases {
 
   // set up listeners
   setupListeners() {
+    if (this.purchaseUpdateSubscription){
+      this.purchaseUpdateSubscription.removeListeners()
+    }
     this.purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
       async (purchase: Purchase | ProductPurchase) => {
         console.log('purchase', purchase);
@@ -84,69 +87,31 @@ class InAppPurchases {
           await AsyncStorage.setItem('isPro', 'true');
           console.log('Pro upgrade purchased successfully');
           const googlePurchaseToken = purchase.purchaseToken;
+          await this.updatePurchaseTokenOnServer(googlePurchaseToken);
+          console.log("we made it beyond api call")
 
           // Acknowledge the purchase to Google Play Store
           try {
-            await this.updatePurchaseTokenOnServer(googlePurchaseToken);
+            console.log("within the try")
             if (purchase.transactionReceipt) {
+              console.log("within receipt")
               await RNIap.finishTransaction({
                 purchase: purchase,
                 isConsumable: false,
                 developerPayloadAndroid: '',
               });
+              console.log("finished transaction")
             }
           } catch (error) {
             console.error('Error finishing transaction', error);
           }
         }
-        //
-        // else if (
-        //   purchase.productId === 'gigo_pro_subscription_advanced' &&
-        //   purchase.transactionReceipt
-        // ) {
-        //   // Grant Pro features to the user
-        //   await AsyncStorage.setItem('isPro', 'true');
-        //   console.log('Pro upgrade purchased successfully');
-        //   const googlePurchaseToken = purchase.purchaseToken;
-        //
-        //   // Acknowledge the purchase to Google Play Store
-        //   try {
-        //     await this.updatePurchaseTokenOnServer(googlePurchaseToken);
-        //     if (purchase.transactionReceipt) {
-        //       await RNIap.finishTransaction({
-        //         purchase: purchase,
-        //         isConsumable: false,
-        //         developerPayloadAndroid: '',
-        //       });
-        //     }
-        //   } catch (error) {
-        //     console.error('Error finishing transaction', error);
-        //   }
-        // } else if (
-        //   purchase.productId === 'gigo_pro_subscription_max' &&
-        //   purchase.transactionReceipt
-        // ) {
-        //   // Grant Pro features to the user
-        //   await AsyncStorage.setItem('isPro', 'true');
-        //   console.log('Pro upgrade purchased successfully');
-        //   const googlePurchaseToken = purchase.purchaseToken;
-        //
-        //   // Acknowledge the purchase to Google Play Store
-        //   try {
-        //     await this.updatePurchaseTokenOnServer(googlePurchaseToken);
-        //     if (purchase.transactionReceipt) {
-        //       await RNIap.finishTransaction({
-        //         purchase: purchase,
-        //         isConsumable: false,
-        //         developerPayloadAndroid: '',
-        //       });
-        //     }
-        //   } catch (error) {
-        //     console.error('Error finishing transaction', error);
-        //   }
-        // }
       },
     );
+
+    if (this.purchaseErrorSubscription) {
+      this.purchaseErrorSubscription.remove();
+    }
 
     this.purchaseErrorSubscription = RNIap.purchaseErrorListener(
       (error: RNIap.PurchaseError) => {

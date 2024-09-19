@@ -75,35 +75,39 @@ class InAppPurchases {
 
   // set up listeners
   setupListeners() {
-    if (this.purchaseUpdateSubscription){
-      this.purchaseUpdateSubscription.removeListeners()
+    if (this.purchaseUpdateSubscription) {
+      this.purchaseUpdateSubscription.removeListeners();
     }
     this.purchaseUpdateSubscription = RNIap.purchaseUpdatedListener(
       async (purchase: Purchase | ProductPurchase) => {
         console.log('purchase', purchase);
 
         if (purchase.transactionReceipt && purchase.purchaseToken) {
-          // Grant Pro features to the user
-          await AsyncStorage.setItem('isPro', 'true');
+          // // Grant Pro features to the user
+          // await AsyncStorage.setItem('isPro', 'true');
           console.log('Pro upgrade purchased successfully');
           const googlePurchaseToken = purchase.purchaseToken;
-          await this.updatePurchaseTokenOnServer(googlePurchaseToken);
-          console.log("we made it beyond api call")
+          const updateResponse = await this.updatePurchaseTokenOnServer(
+            googlePurchaseToken,
+          );
+          console.log('we made it beyond api call');
 
-          // Acknowledge the purchase to Google Play Store
-          try {
-            console.log("within the try")
-            if (purchase.transactionReceipt) {
-              console.log("within receipt")
-              await RNIap.finishTransaction({
-                purchase: purchase,
-                isConsumable: false,
-                developerPayloadAndroid: '',
-              });
-              console.log("finished transaction")
+          if (updateResponse) {
+            // Acknowledge the purchase to Google Play Store
+            try {
+              console.log('within the try');
+              if (purchase.transactionReceipt) {
+                console.log('within receipt');
+                await RNIap.finishTransaction({
+                  purchase: purchase,
+                  isConsumable: false,
+                  developerPayloadAndroid: '',
+                });
+                console.log('finished transaction');
+              }
+            } catch (error) {
+              console.error('Error finishing transaction', error);
             }
-          } catch (error) {
-            console.error('Error finishing transaction', error);
           }
         }
       },

@@ -116,7 +116,9 @@ const JourneyMain = () => {
 
       let res = await response.json();
       if (!response.ok) {
-        throw new Error('Failed to fetch user map');
+        // throw new Error('Failed to fetch user map');
+        //todo fix backend later
+        console.log("Failed to fetch user map")
       }
 
       if (!res.success) {

@@ -78,6 +78,7 @@ const AccountSettings = () => {
   const [hasPaymentInfo, setHasPaymentInfo] = React.useState(false);
   const [alreadyCancelled, setAlreadyCancelled] = React.useState(false);
   const [membershipCost, setMembershipCost] = React.useState('');
+  const [membershipString, setMembershipString] = React.useState('');
   const [hasSubscriptionId, setHasSubscriptionId] = React.useState(false);
   const [userInfo, setUserInfo] = React.useState(null);
   const [selectedTab, setSelectedTab] = useState('Main');
@@ -498,7 +499,7 @@ const AccountSettings = () => {
     //             null,
     //             config.rootPath
     //         )
-    let followResponse = await fetch(`${API_URL}/api/user/subscription`, {
+    let followResponse = await fetch(`${API_URL}/api/user/subscriptionApp`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -514,17 +515,32 @@ const AccountSettings = () => {
     const res = await followResponse.json();
     console.log('res is: ', res);
 
+    if (res.current_subscription === 0) {
+      setMembershipString('Free');
+    } else if (res.current_subscription === 1) {
+      setMembershipString('Basic');
+      setMembershipCost("3.00")
+    } else if (res.current_subscription === 2) {
+      setMembershipString('Advanced');
+      setMembershipCost("8.00")
+    } else if (res.current_subscription === 3) {
+      setMembershipString('Max');
+      setMembershipCost("15.00")
+    } else {
+      setMembershipString('Free');
+    }
+
     setMembership(res.current_subscription);
-    setMembershipCost(res.payment);
-    setMembershipDates({
-      start: res.membershipStart,
-      last: res.lastPayment,
-      upcoming: res.upcomingPayment,
-    });
-    setInTrial(res.inTrial);
-    setHasPaymentInfo(res.hasPaymentInfo);
-    setHasSubscriptionId(res.hasSubscription);
-    setAlreadyCancelled(res.alreadyCancelled);
+    // setMembershipCost(res.payment);
+    // setMembershipDates({
+    //   start: res.membershipStart,
+    //   last: res.lastPayment,
+    //   upcoming: res.upcomingPayment,
+    // });
+    // setInTrial(res.inTrial);
+    // setHasPaymentInfo(res.hasPaymentInfo);
+    // setHasSubscriptionId(res.hasSubscription);
+    // setAlreadyCancelled(res.alreadyCancelled);
     setSubscription(res);
 
     if (userInfo === null) {
@@ -683,7 +699,12 @@ const AccountSettings = () => {
                   <Text style={{color: 'white'}}>
                     Are you sure you want to delete your account?
                   </Text>
-                  <Text style={{color: 'white', paddingBottom: '10px', marginBottom: 20}}>
+                  <Text
+                    style={{
+                      color: 'white',
+                      paddingBottom: '10px',
+                      marginBottom: 20,
+                    }}>
                     Account deletion is permanent and cannot be undone. If you
                     delete your account, you will lose all of your work.
                   </Text>
@@ -707,7 +728,7 @@ const AccountSettings = () => {
                     disabled={
                       confirmDeletionContent.toLowerCase() !== 'confirm'
                     }
-                    color={"red"}
+                    color={'red'}
                     style={styles.button}
                     labelStyle={styles.buttonLabel}
                     title={'Confirm'}
@@ -836,7 +857,7 @@ const AccountSettings = () => {
               }}>
               {/*current stripe setup is not fully done*/}
               {/*{subscription?.current_subscription_string || 'Free'}*/}
-              Free
+              {membershipString}
             </Text>
             {membership === 0 && (
               <Text
@@ -850,32 +871,32 @@ const AccountSettings = () => {
                 (lame)
               </Text>
             )}
-            {membership > 0 &&
-              inTrial &&
-              (!hasPaymentInfo || alreadyCancelled) && (
-                <Text
-                  style={{
-                    fontWeight: '200',
-                    textTransform: 'none',
-                    fontSize: 14,
-                    marginLeft: 3,
-                  }}>
-                  trial
-                </Text>
-              )}
-            {membership > 0 &&
-              !inTrial &&
-              (!hasPaymentInfo || alreadyCancelled) && (
-                <Text
-                  style={{
-                    fontWeight: '200',
-                    textTransform: 'none',
-                    fontSize: 14,
-                    marginLeft: 3,
-                  }}>
-                  cancelled
-                </Text>
-              )}
+            {/*{membership > 0 &&*/}
+            {/*  inTrial &&*/}
+            {/*  (!hasPaymentInfo || alreadyCancelled) && (*/}
+            {/*    <Text*/}
+            {/*      style={{*/}
+            {/*        fontWeight: '200',*/}
+            {/*        textTransform: 'none',*/}
+            {/*        fontSize: 14,*/}
+            {/*        marginLeft: 3,*/}
+            {/*      }}>*/}
+            {/*      trial*/}
+            {/*    </Text>*/}
+            {/*  )}*/}
+            {/*{membership > 0 &&*/}
+            {/*  !inTrial &&*/}
+            {/*  (!hasPaymentInfo || alreadyCancelled) && (*/}
+            {/*    <Text*/}
+            {/*      style={{*/}
+            {/*        fontWeight: '200',*/}
+            {/*        textTransform: 'none',*/}
+            {/*        fontSize: 14,*/}
+            {/*        marginLeft: 3,*/}
+            {/*      }}>*/}
+            {/*      cancelled*/}
+            {/*    </Text>*/}
+            {/*  )}*/}
           </Text>
           <Card
             style={{
@@ -898,34 +919,34 @@ const AccountSettings = () => {
                     />
                   </View>
                 </View>
-                <View style={styles.detailsContainerMembership}>
-                  <View style={styles.detailItemMembership}>
-                    <Text style={styles.detailTitleMembership}>
-                      {inTrial ? 'Trial Start' : 'Last Payment'}
-                    </Text>
-                    <Text style={styles.detailTextMembership}>
-                      {formatDate(membershipDates.last)}
-                    </Text>
-                  </View>
-                  <View style={styles.detailItemMembership}>
-                    <Text style={styles.detailTitleMembership}>
-                      {/*the stripe setup is not done until it is released*/}
-                      {/*{inTrial && !hasPaymentInfo*/}
-                      {/*  ? 'Trial End'*/}
-                      {/*  : alreadyCancelled*/}
-                      {/*  ? 'End of Pro Access'*/}
-                      {/*  : subscription?.scheduledDowngrade*/}
-                      {/*  ? `Downgrade To ${proStatusToString(*/}
-                      {/*      subscription?.scheduledDowngrade,*/}
-                      {/*    )}`*/}
-                      {/*  : 'Next Payment'}*/}
-                      Trial End
-                    </Text>
-                    <Text style={styles.detailTextMembership}>
-                      {formatDate(membershipDates.upcoming)}
-                    </Text>
-                  </View>
-                </View>
+                {/*<View style={styles.detailsContainerMembership}>*/}
+                {/*  /!*<View style={styles.detailItemMembership}>*!/*/}
+                {/*  /!*  <Text style={styles.detailTitleMembership}>*!/*/}
+                {/*  /!*    {inTrial ? 'Trial Start' : 'Last Payment'}*!/*/}
+                {/*  /!*  </Text>*!/*/}
+                {/*  /!*  <Text style={styles.detailTextMembership}>*!/*/}
+                {/*  /!*    {formatDate(membershipDates.last)}*!/*/}
+                {/*  /!*  </Text>*!/*/}
+                {/*  /!*</View>*!/*/}
+                {/*  <View style={styles.detailItemMembership}>*/}
+                {/*    <Text style={styles.detailTitleMembership}>*/}
+                {/*      /!*the stripe setup is not done until it is released*!/*/}
+                {/*      /!*{inTrial && !hasPaymentInfo*!/*/}
+                {/*      /!*  ? 'Trial End'*!/*/}
+                {/*      /!*  : alreadyCancelled*!/*/}
+                {/*      /!*  ? 'End of Pro Access'*!/*/}
+                {/*      /!*  : subscription?.scheduledDowngrade*!/*/}
+                {/*      /!*  ? `Downgrade To ${proStatusToString(*!/*/}
+                {/*      /!*      subscription?.scheduledDowngrade,*!/*/}
+                {/*      /!*    )}`*!/*/}
+                {/*      /!*  : 'Next Payment'}*!/*/}
+                {/*      Trial End*/}
+                {/*    </Text>*/}
+                {/*    <Text style={styles.detailTextMembership}>*/}
+                {/*      {formatDate(membershipDates.upcoming)}*/}
+                {/*    </Text>*/}
+                {/*  </View>*/}
+                {/*</View>*/}
                 <View style={styles.separator} />
                 <View style={styles.paymentContainerMembership}>
                   {(!inTrial || hasPaymentInfo) && !alreadyCancelled && (
@@ -939,14 +960,14 @@ const AccountSettings = () => {
                         }>{`$${membershipCost}`}</Text>
                     </View>
                   )}
-                  <View style={styles.paymentItemMembership}>
-                    <Text style={styles.paymentTextMembership}>
-                      Membership Start Date
-                    </Text>
-                    <Text style={styles.paymentTextMembership}>
-                      {formatDate(membershipDates.start)}
-                    </Text>
-                  </View>
+                  {/*<View style={styles.paymentItemMembership}>*/}
+                  {/*  <Text style={styles.paymentTextMembership}>*/}
+                  {/*    Membership Start Date*/}
+                  {/*  </Text>*/}
+                  {/*  <Text style={styles.paymentTextMembership}>*/}
+                  {/*    {formatDate(membershipDates.start)}*/}
+                  {/*  </Text>*/}
+                  {/*</View>*/}
                 </View>
               </View>
             ) : (

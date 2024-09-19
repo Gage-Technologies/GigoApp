@@ -41,6 +41,8 @@ const TopBar = () => {
   const userMembershipLevel = 'Basic'; // hardcoded value for development
   const [streakData, setStreakData] = useState<StreakData | null>(null);
   const [proPopupVisible, setProPopupVisible] = useState(false); // State for ProPopup visibility
+  const [membershipString, setMembershipString] = React.useState('');
+  const [membership, setMembership] = React.useState(0);
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
@@ -69,7 +71,47 @@ const TopBar = () => {
     }
   };
 
+  const getProStatus = async () => {
+    try {
+      let followResponse = await fetch(
+        `${Config.API_URL}/api/user/subscriptionApp`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        },
+      );
+
+      if (!followResponse.ok) {
+        console.log('follow response is: ', followResponse.ok);
+        throw new Error('Network response was not ok');
+      }
+
+      const res = await followResponse.json();
+      console.log('res is: ', res);
+
+      if (res.current_subscription === 0) {
+        setMembershipString('Free');
+      } else if (res.current_subscription === 1) {
+        setMembershipString('Basic');
+      } else if (res.current_subscription === 2) {
+        setMembershipString('Advanced');
+      } else if (res.current_subscription === 3) {
+        setMembershipString('Max');
+      } else {
+        setMembershipString('Free');
+      }
+
+      setMembership(res.current_subscription);
+    } catch (error) {
+      console.log('error getting user membership level');
+    }
+  };
+
   useEffect(() => {
+    getProStatus();
     getStreakData();
   }, []);
 
@@ -139,7 +181,7 @@ const TopBar = () => {
         onPress={openProPopup}>
         <Icon name="crown" size={20} color={theme.colors.primary} />
         <Text style={[styles.membershipText, {color: theme.colors.primary}]}>
-          Pro Level: {userMembershipLevel}
+          Pro Level: {membershipString}
         </Text>
       </TouchableOpacity>
 
@@ -155,7 +197,7 @@ const TopBar = () => {
         <HeartTracker />
       </View>
 
-      <ProPopup visible={proPopupVisible} onDismiss={closeProPopup} />
+      <ProPopup visible={proPopupVisible} onDismiss={closeProPopup} membershipLevel={membership} />
     </View>
   );
 };

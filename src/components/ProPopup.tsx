@@ -24,6 +24,7 @@ import Config from 'react-native-config';
 interface ProPopupProps {
   visible: boolean;
   onDismiss: () => void;
+  membershipLevel: number;
 }
 
 const {width, height} = Dimensions.get('window');
@@ -32,7 +33,11 @@ const PRO_UPGRADE_SKU_BASIC = Config.GIGO_PRO_UPGRADE_BASIC;
 const PRO_UPGRADE_SKU_ADVANCED = Config.GIGO_PRO_UPGRADE_ADVANCED;
 const PRO_UPGRADE_SKU_MAX = Config.GIGO_PRO_UPGRADE_MAX;
 
-const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
+const ProPopup: React.FC<ProPopupProps> = ({
+  visible,
+  onDismiss,
+  membershipLevel,
+}) => {
   const theme = useTheme();
   const [showLearnMore, setShowLearnMore] = useState(false);
 
@@ -137,7 +142,7 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
         <Text style={[styles.infoText, {color: theme.colors.onBackground}]}>
           Upgrade now and take your coding skills to the next level. More
           advanced features and other membership options are available on our
-          web platform at gigo.dev
+          our web platform at gigo.dev
         </Text>
       </Animated.View>
       <Animated.View
@@ -151,6 +156,64 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
           labelStyle={styles.upgradeButtonLabel}>
           Upgrade $3/month
         </Button>
+        <Button
+          mode="text"
+          onPress={toggleLearnMore}
+          style={styles.learnMoreButton}>
+          Learn More About Pro
+        </Button>
+      </Animated.View>
+    </>
+  );
+
+  const renderMainContentPaid = () => (
+    <>
+      <View style={styles.headerContainer}>
+        <Animated.View
+          entering={FadeIn.delay(300).duration(600)}
+          style={styles.imageContainer}>
+          <Image
+            source={ProPopupIcon}
+            style={styles.image}
+            resizeMode="contain"
+          />
+        </Animated.View>
+        <View style={styles.titleContainer}>
+          <Animated.Text
+            entering={FadeIn.delay(600).duration(600)}
+            style={[styles.title, {color: theme.colors.primary}]}>
+            GIGO Pro
+          </Animated.Text>
+          <Animated.Text
+            entering={FadeIn.delay(900).duration(600)}
+            style={[styles.subtitle, {color: theme.colors.onBackground}]}>
+            Unlimited Learning, Unlimited Potential
+          </Animated.Text>
+        </View>
+      </View>
+      <Animated.View
+        entering={FadeIn.delay(1200).duration(600)}
+        style={styles.benefitContainer}>
+        <Icon
+          name="heart"
+          size={40}
+          color={theme.colors.error}
+          style={styles.benefitIcon}
+        />
+        <Text style={[styles.benefitText, {color: theme.colors.onBackground}]}>
+          Unlimited Hearts for Journeys and Bytes
+        </Text>
+      </Animated.View>
+      <Animated.Text
+        entering={FadeIn.delay(1500).duration(600)}
+        style={[styles.description, {color: theme.colors.onBackground}]}>
+        Never stop learning! With GIGO Pro, you'll have unlimited attempts on
+        all Journeys and Bytes. Keep practicing, keep improving, and reach your
+        coding goals without interruptions.
+      </Animated.Text>
+      <Animated.View
+        entering={FadeIn.delay(2100).duration(600)}
+        style={styles.buttonContainer}>
         <Button
           mode="text"
           onPress={toggleLearnMore}
@@ -325,13 +388,18 @@ const ProPopup: React.FC<ProPopupProps> = ({visible, onDismiss}) => {
           <Animated.View
             entering={FadeInDown.duration(800).springify()}
             style={[styles.card, {backgroundColor: theme.colors.background}]}>
-            {showLearnMore ? renderLearnMoreContent() : renderMainContent()}
+            {showLearnMore
+              ? renderLearnMoreContent()
+              : membershipLevel === 0
+              ? renderMainContent()
+              : renderMainContentPaid()}
           </Animated.View>
         </View>
       </Modal>
     </Portal>
   );
 };
+
 
 const styles = StyleSheet.create({
   modalContainer: {

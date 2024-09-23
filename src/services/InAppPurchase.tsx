@@ -51,42 +51,6 @@ class InAppPurchases {
     }
   }
 
-  // async getProStatus() {
-  //   try {
-  //     let followResponse = await fetch(
-  //       `${Config.API_URL}/api/user/subscriptionApp`,
-  //       {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify({}),
-  //       },
-  //     );
-  //
-  //     if (!followResponse.ok) {
-  //       console.log('follow response is: ', followResponse.ok);
-  //       throw new Error('Network response was not ok');
-  //     }
-  //
-  //     const res = await followResponse.json();
-  //
-  //     let authState = Object.assign({}, initialAuthStateUpdate);
-  //     // @ts-ignore
-  //     authState.role = res.current_subscription;
-  //     console.log('res auth role: ', res.current_subscription);
-  //     if (this.dispatch) {
-  //       this.dispatch(updateAuthState(authState));
-  //     } else {
-  //       console.log('Dispatch function is not set');
-  //     }
-  //     // dispatch(updateAuthState(authState));
-  //     console.log('res is: ', res);
-  //   } catch (error) {
-  //     console.log('error getting user membership level');
-  //   }
-  // }
-
   async updatePurchaseTokenOnServer(purchaseToken: string) {
     try {
       const response = await fetch(`${API_URL}/api/google/upgradePro`, {
@@ -185,32 +149,6 @@ class InAppPurchases {
       this.purchaseErrorSubscription = null;
     }
   }
-
-  // async fetchSubscriptions () {
-  //   try {
-  //     const subscriptions = await getSubscriptions({
-  //       skus: [
-  //         'gigo_pro_subscription_basic',
-  //         'gigo_pro_subscription_advanced',
-  //         'gigo_pro_subscription_max',
-  //       ],
-  //     });
-  //     console.log('Available subscriptions:', subscriptions);
-  //     return subscriptions;
-  //   } catch (error) {
-  //     console.error('Error fetching subscriptions:', error);
-  //   }
-  // }
-
-  // method to request purchase
-  // async requestPurchase(sku: string) {
-  //   try {
-  //     console.log("sku is: ", sku)
-  //     await RNIap.requestSubscription({sku: sku});
-  //   } catch (error) {
-  //     console.error('error in requestPurchase', error);
-  //   }
-  // }
 
   async requestPurchase(sku: string) {
     try {

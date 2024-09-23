@@ -290,77 +290,6 @@ const AccountSettings = () => {
     }
   };
 
-  //stripe cannot be fully integrated until later
-  // const getPortalLink = async () => {
-  //   setPortalLinkLoading(true);
-  //
-  //   let name = fetch(`${API_URL}/api/stripe/portalSession`, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({}),
-  //   });
-  //
-  //   if (!name.ok) {
-  //     console.log('response here is: ', name);
-  //     throw new Error('Network response was not ok');
-  //   }
-  //   const res = await name.json();
-  //
-  //   setPortalLinkLoading(false);
-  //
-  //   if (res !== undefined && res.session !== undefined) {
-  //     window.location.replace(res.session);
-  //     // setPortalLink(res["session"])
-  //   }
-  // };
-
-  //stripe is not fully integrated until later
-  // const stripeNavigate = async (yearly: boolean | null) => {
-  //   let stripe = fetch(`${API_URL}/api/stripe/premiumMembershipSession`, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({}),
-  //   });
-  //
-  //   if (!stripe.ok) {
-  //     console.log('response here is: ', stripe);
-  //     throw new Error('Network response was not ok');
-  //   }
-  //   const res = await stripe.json();
-  //
-  //   if (res.message === 'You must be logged in to access the GIGO system.') {
-  //     let authState = Object.assign({}, initialAuthStateUpdate);
-  //     // @ts-ignore
-  //     dispatch(updateAuthState(authState));
-  //     navigation.navigate('Login');
-  //   }
-  //   if (
-  //     res !== undefined &&
-  //     res['return url'] !== undefined &&
-  //     res['return year'] !== undefined
-  //   ) {
-  //     //todo figure out how to change this for app
-  //     if (yearly != null && yearly) {
-  //       window.location.replace(res['return year']);
-  //     } else {
-  //       window.location.replace(res['return url']);
-  //     }
-  //   }
-  // };
-
-  // const handleCloseAgree = (yearly: boolean | null) => {
-  //   if (hasSubscriptionId) {
-  //     getPortalLink();
-  //   } else {
-  //     stripeNavigate(yearly);
-  //   }
-  //   setOpen(false);
-  // };
-
   const checkUserHoliday = async () => {
     console.log('1');
     try {
@@ -531,34 +460,9 @@ const AccountSettings = () => {
     }
 
     setMembership(res.current_subscription);
-    // setMembershipCost(res.payment);
-    // setMembershipDates({
-    //   start: res.membershipStart,
-    //   last: res.lastPayment,
-    //   upcoming: res.upcomingPayment,
-    // });
-    // setInTrial(res.inTrial);
-    // setHasPaymentInfo(res.hasPaymentInfo);
-    // setHasSubscriptionId(res.hasSubscription);
-    // setAlreadyCancelled(res.alreadyCancelled);
     setSubscription(res);
 
     if (userInfo === null) {
-      //             let name = call(
-      //                 "/api/user/get",
-      //                 "post",
-      //                 null,
-      //                 null,
-      //                 null,
-      //                 //@ts-ignore
-      //                 {},
-      //                 null,
-      //                 config.rootPath
-      //             )
-      //
-      //             const [res] = await Promise.all([
-      //                 name,
-      //             ])
 
       let nameResponse = await fetch(`${API_URL}/api/user/get`, {
         method: 'POST',

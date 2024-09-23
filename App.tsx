@@ -19,95 +19,9 @@ import InAppPurchases from './src/services/InAppPurchase';
 const persistor = persistStore(store);
 
 const App = () => {
-  // const requestNotificationPermission = async () => {
-  //   if (Platform.OS === 'android' && Platform.Version >= 33) {
-  //     try {
-  //       const granted = await PermissionsAndroid.request(
-  //         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-  //       );
-  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //         console.log('Notification permission granted.');
-  //       } else {
-  //         console.log('Notification permission denied.');
-  //       }
-  //     } catch (err) {
-  //       console.warn(err);
-  //     }
-  //   }
-  // };
-
   PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
-  //   const getFcmToken = async () => {
-  //     const fcmToken = await messaging().getToken();
-  //     if (fcmToken) {
-  //       console.log('FCM Token:', fcmToken);
-  //       Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
-  //       // Save the token to your backend if needed
-  //     } else {
-  //       console.log('Failed to get FCM token');
-  //     }
-  //   };
-
-  // const setupFirebase = async () => {
-  //   await requestNotificationPermission();
-  //
-  //   //     // Retrieve the FCM token
-  //   //     await getFcmToken();
-  //
-  //   // Handle foreground messages
-  //   messaging().onMessage(async remoteMessage => {
-  //     Alert.alert(
-  //       JSON.stringify(remoteMessage.notification.title),
-  //       JSON.stringify(remoteMessage.notification.body),
-  //     );
-  //   });
-  // };
-  //
-  // useEffect(() => {
-  //   setupFirebase();
-  // }, []);
-
-  // useEffect(() => {
-  //   const handleDeepLink = (event: {url: string}) => {
-  //     const url = event.url;
-  //     if (url) {
-  //       const parsedUrl = new URL(url);
-  //       const code = parsedUrl.searchParams.get('code');
-  //       if (code) {
-  //         console.log('Authorization code from deep link:', code);
-  //         // Here, you can pass the code to a global state, context, or directly navigate to a specific screen
-  //         Alert.alert('Authorization Code', `Code: ${code}`);
-  //       } else {
-  //         console.log('No code found in the deep link URL.');
-  //       }
-  //     }
-  //   };
-  //
-  //   // Add the event listener for handling deep links
-  //   const subscription = Linking.addEventListener('url', handleDeepLink);
-  //
-  //   // Handle the initial deep link if the app was opened via a deep link
-  //   Linking.getInitialURL().then(url => {
-  //     if (url) {
-  //       handleDeepLink({url});
-  //     }
-  //   });
-  //
-  //   // Clean up the event listener when the component unmounts
-  //   return () => {
-  //     subscription.remove(); // Properly remove the event listener
-  //   };
-  // }, []);
-
   useEffect(() => {
-    // const unsubscribe = messaging().onMessage(async remoteMessage => {
-    //   Alert.alert(
-    //     remoteMessage.notification.title,
-    //     remoteMessage.notification.body,
-    //   );
-    // });
-
     // Create a notification channel
     const createNotificationChannel = async () => {
       await notifee.createChannel({
@@ -147,95 +61,9 @@ const App = () => {
     };
   }, []);
 
-  // const requestNotificationPermission = async () => {
-  //   if (Platform.OS === 'android' && Platform.Version >= 33) {
-  //     try {
-  //       const granted = await PermissionsAndroid.request(
-  //         PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-  //       );
-  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //         console.log('Notification permission granted.');
-  //       } else {
-  //         console.log('Notification permission denied.');
-  //       }
-  //     } catch (err) {
-  //       console.warn(err);
-  //     }
-  //   }
-  // };
-
   PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
-  //   const getFcmToken = async () => {
-  //     const fcmToken = await messaging().getToken();
-  //     if (fcmToken) {
-  //       console.log('FCM Token:', fcmToken);
-  //       Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
-  //       // Save the token to your backend if needed
-  //     } else {
-  //       console.log('Failed to get FCM token');
-  //     }
-  //   };
-
-  // const setupFirebase = async () => {
-  //   await requestNotificationPermission();
-  //
-  //   //     // Retrieve the FCM token
-  //   //     await getFcmToken();
-  //
-  //   // Handle foreground messages
-  //   messaging().onMessage(async remoteMessage => {
-  //     Alert.alert(
-  //       JSON.stringify(remoteMessage.notification.title),
-  //       JSON.stringify(remoteMessage.notification.body),
-  //     );
-  //   });
-  // };
-  //
-  // useEffect(() => {
-  //   setupFirebase();
-  // }, []);
-
-  // useEffect(() => {
-  //   const handleDeepLink = (event: {url: string}) => {
-  //     const url = event.url;
-  //     if (url) {
-  //       const parsedUrl = new URL(url);
-  //       const code = parsedUrl.searchParams.get('code');
-  //       if (code) {
-  //         console.log('Authorization code from deep link:', code);
-  //         // Here, you can pass the code to a global state, context, or directly navigate to a specific screen
-  //         Alert.alert('Authorization Code', `Code: ${code}`);
-  //       } else {
-  //         console.log('No code found in the deep link URL.');
-  //       }
-  //     }
-  //   };
-  //
-  //   // Add the event listener for handling deep links
-  //   const subscription = Linking.addEventListener('url', handleDeepLink);
-  //
-  //   // Handle the initial deep link if the app was opened via a deep link
-  //   Linking.getInitialURL().then(url => {
-  //     if (url) {
-  //       handleDeepLink({url});
-  //     }
-  //   });
-  //
-  //   // Clean up the event listener when the component unmounts
-  //   return () => {
-  //     subscription.remove(); // Properly remove the event listener
-  //   };
-  // }, []);
-
   useEffect(() => {
-    // const unsubscribe = messaging().onMessage(async remoteMessage => {
-    //   Alert.alert(
-    //     remoteMessage.notification.title,
-    //     remoteMessage.notification.body,
-    //   );
-    // });
-
     // Create a notification channel
     const createNotificationChannel = async () => {
       await notifee.createChannel({

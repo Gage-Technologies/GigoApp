@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, TouchableOpacity} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import {Text, useTheme, Menu} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import CppLogo from '../img/Cpp_Logo.svg';
@@ -13,7 +13,13 @@ import HeartTracker from './HeartTracker';
 import Config from 'react-native-config';
 import ProPopup from './ProPopup'; // Import the ProPopup component
 import {useLanguage} from '../LanguageContext';
-import AllLogo from '../img/yellow_laptop.svg'; // Import the new SVG
+import AllLogo from '../img/yellow_laptop.svg';
+import {useDispatch, useSelector} from 'react-redux';
+import {
+  initialAuthStateUpdate,
+  selectAuthState,
+  updateAuthState,
+} from '../reducers/auth.ts'; // Import the new SVG
 
 // define the available programming languages with their icons
 const programmingLanguages = [
@@ -43,11 +49,65 @@ const TopBar = () => {
   const [proPopupVisible, setProPopupVisible] = useState(false); // State for ProPopup visibility
   const [membershipString, setMembershipString] = React.useState('');
   const [membership, setMembership] = React.useState(0);
+  const dispatch = useDispatch();
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
   const openProPopup = () => setProPopupVisible(true); // Open ProPopup
-  const closeProPopup = () => setProPopupVisible(false); // Close ProPopup
+  const closeProPopup = async () => {
+    // Close the ProPopup immediately
+    setProPopupVisible(false);
+
+    Alert.alert("Allow a brief moment for pro level to update");
+
+    // Set a timeout to delay the API call and membership update by 45 seconds
+    setTimeout(async () => {
+      try {
+        let followResponse = await fetch(
+          `${Config.API_URL}/api/user/subscriptionApp`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+          },
+        );
+
+        if (!followResponse.ok) {
+          console.log('follow response is: ', followResponse.ok);
+          throw new Error('Network response was not ok');
+        }
+
+        const res = await followResponse.json();
+
+        let authState = Object.assign({}, initialAuthStateUpdate);
+        // @ts-ignore
+        authState.role = res.current_subscription;
+        console.log('res auth role here after 45 seconds: ', res.current_subscription);
+
+        // Dispatch the updated membership status to the store
+        dispatch(updateAuthState(authState));
+        console.log('res is: ', res);
+
+        if (res.current_subscription === 0) {
+          setMembershipString('Free');
+        } else if (res.current_subscription === 1) {
+          setMembershipString('Basic');
+        } else if (res.current_subscription === 2) {
+          setMembershipString('Advanced');
+        } else if (res.current_subscription === 3) {
+          setMembershipString('Max');
+        } else {
+          setMembershipString('Free');
+        }
+
+        setMembership(res.current_subscription);
+      } catch (error) {
+        console.log('error getting user membership level after delay:', error);
+      }
+    }, 10000); // Delay of 45000 milliseconds (45 seconds)
+  };
 
   const getStreakData = async () => {
     try {
@@ -71,7 +131,10 @@ const TopBar = () => {
     }
   };
 
+  const authState = useSelector(selectAuthState);
+
   const getProStatus = async () => {
+    console.log('in get pro status');
     try {
       let followResponse = await fetch(
         `${Config.API_URL}/api/user/subscriptionApp`,
@@ -89,28 +152,31 @@ const TopBar = () => {
         throw new Error('Network response was not ok');
       }
 
+      console.log('authstate role: ', authState.role);
+
       const res = await followResponse.json();
       console.log('res is: ', res);
 
-      if (res.current_subscription === 0) {
+      if (authState.role === 0) {
         setMembershipString('Free');
-      } else if (res.current_subscription === 1) {
+      } else if (authState.role === 1) {
         setMembershipString('Basic');
-      } else if (res.current_subscription === 2) {
+      } else if (authState.role === 2) {
         setMembershipString('Advanced');
-      } else if (res.current_subscription === 3) {
+      } else if (authState.role === 3) {
         setMembershipString('Max');
       } else {
         setMembershipString('Free');
       }
 
-      setMembership(res.current_subscription);
+      setMembership(authState.role);
     } catch (error) {
-      console.log('error getting user membership level');
+      console.log('error getting user membership level: ', error);
     }
   };
 
   useEffect(() => {
+    console.log('in effect');
     getProStatus();
     getStreakData();
   }, []);
@@ -197,7 +263,11 @@ const TopBar = () => {
         <HeartTracker />
       </View>
 
-      <ProPopup visible={proPopupVisible} onDismiss={closeProPopup} membershipLevel={membership} />
+      <ProPopup
+        visible={proPopupVisible}
+        onDismiss={closeProPopup}
+        membershipLevel={membership}
+      />
     </View>
   );
 };

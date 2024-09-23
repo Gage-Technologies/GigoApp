@@ -1,5 +1,4 @@
 import * as RNIap from 'react-native-iap';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {getSubscriptions, ProductPurchase, Purchase} from 'react-native-iap';
 import Config from 'react-native-config';
 import {Platform} from 'react-native';
@@ -12,6 +11,8 @@ const API_URL = Config.API_URL;
 class InAppPurchases {
   purchaseUpdateSubscription: any;
   purchaseErrorSubscription: any;
+
+  // Method to set the dispatch function
 
   // initialize iap connection
   async init() {
@@ -49,6 +50,42 @@ class InAppPurchases {
       throw error; // rethrow other errors
     }
   }
+
+  // async getProStatus() {
+  //   try {
+  //     let followResponse = await fetch(
+  //       `${Config.API_URL}/api/user/subscriptionApp`,
+  //       {
+  //         method: 'POST',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //         body: JSON.stringify({}),
+  //       },
+  //     );
+  //
+  //     if (!followResponse.ok) {
+  //       console.log('follow response is: ', followResponse.ok);
+  //       throw new Error('Network response was not ok');
+  //     }
+  //
+  //     const res = await followResponse.json();
+  //
+  //     let authState = Object.assign({}, initialAuthStateUpdate);
+  //     // @ts-ignore
+  //     authState.role = res.current_subscription;
+  //     console.log('res auth role: ', res.current_subscription);
+  //     if (this.dispatch) {
+  //       this.dispatch(updateAuthState(authState));
+  //     } else {
+  //       console.log('Dispatch function is not set');
+  //     }
+  //     // dispatch(updateAuthState(authState));
+  //     console.log('res is: ', res);
+  //   } catch (error) {
+  //     console.log('error getting user membership level');
+  //   }
+  // }
 
   async updatePurchaseTokenOnServer(purchaseToken: string) {
     try {
@@ -104,6 +141,19 @@ class InAppPurchases {
                   developerPayloadAndroid: '',
                 });
                 console.log('finished transaction');
+
+                // // Set a timeout to delay the next API call by 45 seconds
+                // setTimeout(async () => {
+                //   console.log('45 seconds have passed, making the next API call');
+                //
+                //   try {
+                //     // Call getProStatus and log the result
+                //     const delayedApiResponse = await this.getProStatus();
+                //     console.log('API call after 45 seconds:', delayedApiResponse);
+                //   } catch (error) {
+                //     console.error('Error in delayed API call:', error);
+                //   }
+                // }, 45000);
               }
             } catch (error) {
               console.error('Error finishing transaction', error);

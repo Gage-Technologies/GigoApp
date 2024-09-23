@@ -70,6 +70,7 @@ const ProPopup: React.FC<ProPopupProps> = ({
     try {
       // Request the purchase of the Pro upgrade using the SKU
       await InAppPurchases.requestPurchase(finalSku);
+      onDismiss();
     } catch (error) {
       console.error('Error requesting Pro upgrade purchase', error);
       // You can provide user feedback if the purchase request fails

@@ -24,8 +24,12 @@ import XpPopup from '../components/XpPopup';
 import {useLanguage} from '../LanguageContext';
 import EmptyJourney from '../components/Journey/EmptyJourney';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {selectAuthState} from '../reducers/auth';
-import {useSelector} from 'react-redux';
+import {
+  initialAuthStateUpdate,
+  selectAuthState,
+  updateAuthState,
+} from '../reducers/auth';
+import {useDispatch, useSelector} from 'react-redux';
 
 const JourneyMain = () => {
   const [loading, setLoading] = useState(false);
@@ -53,6 +57,8 @@ const JourneyMain = () => {
 
   const navigation = useNavigation();
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     const fetchSessionData = async () => {
       try {
@@ -63,7 +69,7 @@ const JourneyMain = () => {
 
         if (xpLogin && xpLogin !== 'undefined' && xpLogin !== '0') {
           setShowXpPopup(true);
-          console.log("xpLogin: ", xpLogin)
+          console.log('xpLogin: ', xpLogin);
           setXpData(JSON.parse(xpLogin));
         }
       } catch (error) {
@@ -74,6 +80,42 @@ const JourneyMain = () => {
 
     fetchSessionData();
   }, []);
+
+  useEffect(() => {
+    getProStatus();
+  }, []);
+
+  const getProStatus = async () => {
+    try {
+      let followResponse = await fetch(
+        `${Config.API_URL}/api/user/subscriptionApp`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({}),
+        },
+      );
+
+      if (!followResponse.ok) {
+        console.log('follow response is: ', followResponse.ok);
+        throw new Error('Network response was not ok');
+      }
+
+      const res = await followResponse.json();
+
+      let authState = Object.assign({}, initialAuthStateUpdate);
+      // @ts-ignore
+      authState.role = res.current_subscription;
+      console.log('res auth role here: ', res.current_subscription);
+      dispatch(updateAuthState(authState));
+      // dispatch(updateAuthState(authState));
+      console.log('res is: ', res);
+    } catch (error) {
+      console.log('error getting user membership level');
+    }
+  };
 
   const getTasks = async () => {
     try {
@@ -87,7 +129,7 @@ const JourneyMain = () => {
         body: JSON.stringify({}),
       });
 
-      console.log("response is: ", response)
+      console.log('response is: ', response);
 
       if (!response.ok) {
         throw new Error(
@@ -118,7 +160,7 @@ const JourneyMain = () => {
       if (!response.ok) {
         // throw new Error('Failed to fetch user map');
         //todo fix backend later
-        console.log("Failed to fetch user map")
+        console.log('Failed to fetch user map');
       }
 
       if (!res.success) {
@@ -394,9 +436,7 @@ const JourneyMain = () => {
         </TouchableOpacity>
       )}
       {showXpPopup && (
-        <XpPopup
-          {...xpData} popupClose={handleCloseXpPopup} homePage={false}
-        />
+        <XpPopup {...xpData} popupClose={handleCloseXpPopup} homePage={false} />
       )}
     </>
   );

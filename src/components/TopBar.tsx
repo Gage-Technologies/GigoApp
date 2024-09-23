@@ -58,8 +58,6 @@ const TopBar = () => {
     // Close the ProPopup immediately
     setProPopupVisible(false);
 
-    Alert.alert("Allow a brief moment for pro level to update");
-
     // Set a timeout to delay the API call and membership update by 45 seconds
     setTimeout(async () => {
       try {

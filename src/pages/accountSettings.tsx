@@ -1355,13 +1355,12 @@ const AccountSettings = () => {
       <View style={styles.mainContainer}>
         {selectedTab === 'Main' ? (
           <View style={styles.tabsContainer}>
-            <LinearGradient
-              colors={['#29C18C', '#1c8762', '#145D46']}
-              style={styles.titleContainer}>
-              <Text style={styles.titleText}>Account Settings</Text>
-            </LinearGradient>
-            <View style={{paddingTop: 20, paddingBottom: 10, paddingLeft: 10}}>
-              <Text style={{color: 'white'}}>General</Text>
+            <View style={styles.header}>
+              <Text style={styles.headerTitle}>Account Settings</Text>
+              <View style={styles.headerUnderline} />
+            </View>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionHeaderText}>General</Text>
             </View>
 
             <TouchableOpacity
@@ -1462,17 +1461,6 @@ const AccountSettings = () => {
           </View>
         ) : (
           <View style={styles.userContainer}>
-            <TouchableOpacity
-              onPress={() => setSelectedTab('Main')}
-              style={styles.goBackContainer}>
-              <Icon
-                name="arrow-left"
-                size={20}
-                color="white"
-                style={styles.icon}
-              />
-              <Text style={styles.goBack}>Go Back</Text>
-            </TouchableOpacity>
             <ScrollView>{renderContent()}</ScrollView>
           </View>
         )}
@@ -1486,8 +1474,8 @@ const {width} = Dimensions.get('window');
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
     backgroundColor: '#1c1c1a',
     padding: 20,
   },
@@ -1951,7 +1939,7 @@ const styles = StyleSheet.create({
   logoutContainer: {
     flex: 1,
     justifyContent: 'flex-end',
-    paddingBottom: 30,
+    paddingBottom: 80,
     alignItems: 'center',
   },
   logoutButton: {
@@ -2028,6 +2016,33 @@ const styles = StyleSheet.create({
   },
   buttonLabel: {
     fontSize: 14,
+  },
+  header: {
+    marginTop: 40,
+    marginBottom: 30,
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 10,
+  },
+  headerUnderline: {
+    width: 50,
+    height: 3,
+    backgroundColor: '#29C18C',
+    borderRadius: 2,
+  },
+  sectionHeader: {
+    marginBottom: 15,
+  },
+  sectionHeaderText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#29C18C',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
 });
 

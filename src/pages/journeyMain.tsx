@@ -424,7 +424,7 @@ const JourneyMain = () => {
           unit={filteredUnits[showHandout ?? 0]}
         />
       </ScrollView>
-      {activeJourney && !showEmptyJourney && filteredUnits.length > 0 && (
+      {/* {activeJourney && !showEmptyJourney && filteredUnits.length > 0 && (
         <TouchableOpacity
           style={styles.detourButton}
           onPress={handleDetourNavigation}>
@@ -434,7 +434,7 @@ const JourneyMain = () => {
             color="white"
           />
         </TouchableOpacity>
-      )}
+      )} */}
       {showXpPopup && (
         <XpPopup {...xpData} popupClose={handleCloseXpPopup} homePage={false} />
       )}

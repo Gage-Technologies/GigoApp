@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Dimensions,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import {useTheme, Text, Button} from 'react-native-paper';
 import Config from 'react-native-config';
@@ -14,6 +15,7 @@ import ProgressionBox from '../components/Stats/ProgressionBox';
 import ProgressionPopup from '../components/Stats/ProgressionPopup';
 import StatPopup from '../components/Stats/StatPopup';
 import DetermineProgressionLevel from '../utils/progression.tsx';
+import { useNavigation } from "@react-navigation/native";
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 const STAT_CARD_WIDTH = SCREEN_WIDTH * 0.45;
@@ -50,6 +52,10 @@ const Stats = () => {
   const [loading, setLoading] = useState(true);
   const [selectedProgression, setSelectedProgression] = useState(null);
   const [selectedStat, setSelectedStat] = useState(null);
+  const [statsUnvailable, setStatsUnvailable] = useState(false);
+  const [progressionUnvailable, setProgressionUnavailable] = useState(false);
+
+  const navigation = useNavigation();
 
   // helper function to calculate progression details
   const calculateProgressionDetails = (type: string, value: string) => {
@@ -110,6 +116,7 @@ const Stats = () => {
           setStats(statsData.stats);
         } else {
           console.warn('Stats data is missing or invalid:', statsData);
+          setStatsUnvailable(true)
         }
 
         // fetch progression
@@ -133,6 +140,7 @@ const Stats = () => {
             'Progression data is missing or invalid:',
             progressionData,
           );
+          setProgressionUnavailable(true)
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -220,53 +228,82 @@ const Stats = () => {
     );
   }
 
-  return (
-    <ScrollView
-      style={[styles.container, {backgroundColor: theme.colors.background}]}>
-      <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-        Statistics
-      </Text>
-      <View style={styles.statsContainer}>
-        {processedStats.map((item, index) => (
-          <View key={index} style={styles.statBoxWrapper}>
-            <StatBox {...item} onPress={() => setSelectedStat(item)} />
-          </View>
-        ))}
-      </View>
-      <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
-        Progressions
-      </Text>
-      <View style={styles.progressionsContainer}>
-        {processedProgressions.map((item, index) => (
-          <View key={index} style={styles.progressionBoxWrapper}>
-            <ProgressionBox
-              {...item}
-              onPress={() => setSelectedProgression(item)}
-            />
-          </View>
-        ))}
-      </View>
-      <ProgressionPopup
-        visible={!!selectedProgression}
-        onClose={() => setSelectedProgression(null)}
-        title={selectedProgression?.title || ''}
-        value={selectedProgression?.value || 0}
-        max={selectedProgression?.max || 10}
-        colorType={selectedProgression?.colorType || 'primary'}
-        level={selectedProgression?.level || 1}
-        description={selectedProgression?.description || ''}
-        isDataHog={selectedProgression?.isDataHog || false}
-      />
-      <StatPopup
-        visible={!!selectedStat}
-        onClose={() => setSelectedStat(null)}
-        title={selectedStat?.title || ''}
-        icon={selectedStat?.icon || ''}
-        value={selectedStat?.value || ''}
-        tooltip={selectedStat?.tooltip || ''}
-      />
-    </ScrollView>
-  );
+  console.log("stats: ", statsUnvailable)
+  console.log("progression: ", progressionUnvailable)
+
+  const handleJourneyLink = () => {
+    navigation.navigate('JourneyMain'); // Navigate to the Journeys page
+  };
+
+  if (statsUnvailable && progressionUnvailable) {
+    return (
+      <ScrollView
+        style={[styles.container, {backgroundColor: theme.colors.background}]}>
+        <View style={styles.messageContainer}>
+          <Text style={styles.titleText}>Oh no! It's empty here...</Text>
+          <Text style={styles.descriptionText}>
+            It looks like you haven't completed any Journey Bytes yet. But don't worry! Your adventure awaits.
+          </Text>
+          <Text style={styles.callToActionText}>
+            Start your first journey and watch your stats grow as you progress!
+          </Text>
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: theme.colors.primary }]}
+            onPress={handleJourneyLink}>
+            <Text style={styles.buttonText}>Go to Journeys</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    );
+  } else {
+    return (
+      <ScrollView
+        style={[styles.container, {backgroundColor: theme.colors.background}]}>
+        <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+          Statistics
+        </Text>
+        <View style={styles.statsContainer}>
+          {processedStats.map((item, index) => (
+            <View key={index} style={styles.statBoxWrapper}>
+              <StatBox {...item} onPress={() => setSelectedStat(item)} />
+            </View>
+          ))}
+        </View>
+        <Text style={[styles.sectionTitle, {color: theme.colors.text}]}>
+          Progressions
+        </Text>
+        <View style={styles.progressionsContainer}>
+          {processedProgressions.map((item, index) => (
+            <View key={index} style={styles.progressionBoxWrapper}>
+              <ProgressionBox
+                {...item}
+                onPress={() => setSelectedProgression(item)}
+              />
+            </View>
+          ))}
+        </View>
+        <ProgressionPopup
+          visible={!!selectedProgression}
+          onClose={() => setSelectedProgression(null)}
+          title={selectedProgression?.title || ''}
+          value={selectedProgression?.value || 0}
+          max={selectedProgression?.max || 10}
+          colorType={selectedProgression?.colorType || 'primary'}
+          level={selectedProgression?.level || 1}
+          description={selectedProgression?.description || ''}
+          isDataHog={selectedProgression?.isDataHog || false}
+        />
+        <StatPopup
+          visible={!!selectedStat}
+          onClose={() => setSelectedStat(null)}
+          title={selectedStat?.title || ''}
+          icon={selectedStat?.icon || ''}
+          value={selectedStat?.value || ''}
+          tooltip={selectedStat?.tooltip || ''}
+        />
+      </ScrollView>
+    );
+  }
 };
 
 const styles = StyleSheet.create({
@@ -298,6 +335,42 @@ const styles = StyleSheet.create({
     height: PROGRESSION_CARD_HEIGHT,
     marginBottom: -14,
     alignSelf: 'center',
+  },
+  messageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  titleText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#333',
+  },
+  descriptionText: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+    paddingHorizontal: 20,
+    color: '#666',
+  },
+  callToActionText: {
+    fontSize: 18,
+    fontWeight: '500',
+    textAlign: 'center',
+    marginBottom: 30,
+    color: '#555',
+  },
+  button: {
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
 

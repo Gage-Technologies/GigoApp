@@ -557,7 +557,10 @@ const Login = () => {
         setLoading(false);
       }
     } catch (error) {
-      Alert.alert('Login Error', 'An unexpected error occurred.');
+      Alert.alert(
+        'Login Error',
+        'An unexpected error occurred: ' + (error.message || error.toString()),
+      );
       setLoading(false);
     }
   };

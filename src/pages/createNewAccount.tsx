@@ -142,7 +142,7 @@ const CreateNewAccount = () => {
   const styles = StyleSheet.create({
     keyboardContainer: {
       flex: 1,
-      justifyContent: 'center',
+      justifyContent: 'top',
       alignItems: 'center',
     },
     container: {
@@ -171,7 +171,7 @@ const CreateNewAccount = () => {
       justifyContent: 'center',
       padding: 20,
       position: 'absolute',
-      bottom: 100,
+      bottom: -15,
     },
     creationBox: {
       backgroundColor: '#1c3f30',
@@ -181,7 +181,7 @@ const CreateNewAccount = () => {
       alignItems: 'center',
       justifyContent: 'center',
       position: 'absolute',
-      bottom: 100,
+      bottom: -5,
     },
     header: {
       fontSize: 24,
@@ -1404,7 +1404,7 @@ const CreateNewAccount = () => {
                   clientId="Ov23liWncdWCkys9HUil"
                   // this redirect URI is for production, testing on dev will not work
                   redirectUri={'gigoapp://callback'}
-                  containerHeight={windowHeight} // Pass the height
+                  containerHeight={windowHeight + 40} // Pass the height
                   containerWidth={windowWidth} // Pass the width
                   onSuccess={onSuccessGithubCreate}
                   onFailure={onFailureGithub}>

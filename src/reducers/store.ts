@@ -4,7 +4,6 @@ import heartsReducer from './hearts.ts';
 import {combineReducers} from 'redux';
 import {persistReducer} from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {persistStore} from 'redux-persist';
 
 const persistConfig = {
   key: 'root',

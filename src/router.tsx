@@ -28,22 +28,20 @@ const AppRouter = () => {
   const authState = useSelector(selectAuthState);
 
   useEffect(() => {
-    if (!authState.authenticated) {
+    if (authState.authenticated) {
+      // navigate to journeymain if authenticated
+      navigationRef.current?.navigate('JourneyMain');
+    } else {
+      // navigate to login if not authenticated
       navigationRef.current?.navigate('Login');
     }
 
-    console.log('app page about to call deep link');
     handleDeepLink(navigationRef);
     getCurrentRouteName();
-    return () => {
-      //             Linking.removeEventListener('url');
-    };
-  }, []);
+  }, [authState, authState.authenticated]);
 
   const getCurrentRouteName = () => {
     const state = navigationRef.current?.getRootState();
-    console.log('state is: ', state);
-    console.log('info is: ', state?.routes[state.index]?.name);
     // @ts-ignore
     setCurrentRouteName(state?.routes[state.index]?.name);
   };
@@ -129,7 +127,6 @@ const ConditionalBottomBar = ({
 }: {
   currentRouteName: string;
 }) => {
-  console.log('current route: ', currentRouteName);
   if (
     currentRouteName === 'Login' ||
     currentRouteName === 'SignUp' ||

@@ -42,6 +42,7 @@ yarn-error.log
 
 # firebase
 /android/app/google-services.json
+android/app/src/debug/google-services.json
 
 # fastlane
 #

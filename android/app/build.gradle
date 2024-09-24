@@ -88,8 +88,8 @@ android {
         applicationId "com.gigoapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 36
-        versionName "1.0.35"
+        versionCode 37
+        versionName "1.0.36"
         vectorDrawables.useSupportLibrary = true
         missingDimensionStrategy 'store', 'play'
     }

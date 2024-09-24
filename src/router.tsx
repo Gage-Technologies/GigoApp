@@ -38,7 +38,7 @@ const AppRouter = () => {
 
     handleDeepLink(navigationRef);
     getCurrentRouteName();
-  }, [authState, authState.authenticated]);
+  }, []);
 
   const getCurrentRouteName = () => {
     const state = navigationRef.current?.getRootState();

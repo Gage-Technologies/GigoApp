@@ -301,6 +301,7 @@ const Stats = () => {
           value={selectedStat?.value || ''}
           tooltip={selectedStat?.tooltip || ''}
         />
+        <View style={styles.bottomSpacer} />
       </ScrollView>
     );
   }
@@ -371,6 +372,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  bottomSpacer: {
+    height: 80,
   },
 });
 

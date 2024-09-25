@@ -132,7 +132,15 @@ export const authSlice = createSlice({
       Object.assign(state, initialAuthStateUpdate);
     },
     updateAuthState: (state, action: PayloadAction<AuthStateUpdate>) => {
-      return {...state, ...action.payload};
+      // iterate through the payload and only update non-null values
+      Object.keys(action.payload).forEach(key => {
+        // @ts-ignore
+        if (action.payload[key] !== null) {
+          // @ts-ignore
+          state[key] = action.payload[key];
+        }
+      });
+      return state;
     },
   },
 });

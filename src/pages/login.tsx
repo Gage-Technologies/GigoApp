@@ -543,6 +543,7 @@ const Login = () => {
         //                 };
         //                 trackEvent(payload);
 
+        setLoading(false);
         // @ts-ignore
         navigation.navigate('JourneyMain');
       } else if (auth.includes('Too many failed attempts')) {

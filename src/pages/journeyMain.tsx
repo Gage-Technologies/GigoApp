@@ -321,6 +321,7 @@ const JourneyMain = () => {
             <Text>Add Unit</Text>
           </TouchableOpacity>
         )}
+        {isLastIndex && <View style={styles.bottomSpacer} />}
         <RNModal
           animationType="slide"
           transparent={true}
@@ -559,6 +560,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 5,
     backgroundColor: '#ef9558',
+  },
+  bottomSpacer: {
+    height: 80,
   },
 });
 

@@ -76,6 +76,9 @@ const AboutJourney = () => {
     listItemDescription: {
       color: theme.colors.onSurface,
     },
+    bottomSpacer: {
+      height: 60,
+    },
   });
 
   const renderSection = (
@@ -207,6 +210,7 @@ const AboutJourney = () => {
           'flag-checkered',
         )}
       </View>
+      <View style={styles.bottomSpacer} />
     </ScrollView>
   );
 };

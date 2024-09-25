@@ -318,6 +318,7 @@ const Detour = () => {
       flexGrow: 1,
       alignItems: 'center',
       paddingHorizontal: '5%',
+      paddingBottom: 70,
     },
     journeyGroupsContainer: {
       alignItems: 'center',

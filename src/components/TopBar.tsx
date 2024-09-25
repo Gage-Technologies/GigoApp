@@ -20,6 +20,7 @@ import {
   selectAuthState,
   updateAuthState,
 } from '../reducers/auth.ts'; // Import the new SVG
+import { refreshToken } from '../utils/refreshToken.ts';
 
 // define the available programming languages with their icons
 const programmingLanguages = [
@@ -42,13 +43,25 @@ const FIRE_ORANGE = '#FF6B35';
 
 const TopBar = () => {
   const theme = useTheme();
+
+  const authState = useSelector(selectAuthState);
+
   const [visible, setVisible] = useState(false);
   const {selectedLanguage, setSelectedLanguage} = useLanguage();
-  const userMembershipLevel = 'Basic'; // hardcoded value for development
   const [streakData, setStreakData] = useState<StreakData | null>(null);
   const [proPopupVisible, setProPopupVisible] = useState(false); // State for ProPopup visibility
-  const [membershipString, setMembershipString] = React.useState('');
-  const [membership, setMembership] = React.useState(0);
+  const [membershipString, setMembershipString] = React.useState(
+    authState.role === 0
+      ? 'Free'
+      : authState.role === 1
+      ? 'Basic'
+      : authState.role === 2
+      ? 'Advanced'
+      : authState.role === 3
+      ? 'Max'
+      : 'Free',
+  );
+  const [membership, setMembership] = React.useState(authState.role);
   const dispatch = useDispatch();
 
   const openMenu = () => setVisible(true);
@@ -59,52 +72,7 @@ const TopBar = () => {
     setProPopupVisible(false);
 
     // Set a timeout to delay the API call and membership update by 45 seconds
-    setTimeout(async () => {
-      try {
-        let followResponse = await fetch(
-          `${Config.API_URL}/api/user/subscriptionApp`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({}),
-          },
-        );
-
-        if (!followResponse.ok) {
-          console.log('follow response is: ', followResponse.ok);
-          throw new Error('Network response was not ok');
-        }
-
-        const res = await followResponse.json();
-
-        let authState = Object.assign({}, initialAuthStateUpdate);
-        // @ts-ignore
-        authState.role = res.current_subscription;
-        console.log('res auth role here after 45 seconds: ', res.current_subscription);
-
-        // Dispatch the updated membership status to the store
-        dispatch(updateAuthState(authState));
-        console.log('res is: ', res);
-
-        if (res.current_subscription === 0) {
-          setMembershipString('Free');
-        } else if (res.current_subscription === 1) {
-          setMembershipString('Basic');
-        } else if (res.current_subscription === 2) {
-          setMembershipString('Advanced');
-        } else if (res.current_subscription === 3) {
-          setMembershipString('Max');
-        } else {
-          setMembershipString('Free');
-        }
-
-        setMembership(res.current_subscription);
-      } catch (error) {
-        console.log('error getting user membership level after delay:', error);
-      }
-    }, 10000); // Delay of 45000 milliseconds (45 seconds)
+    setTimeout(() => refreshToken(dispatch), 10000); // Delay of 45000 milliseconds (45 seconds)
   };
 
   const getStreakData = async () => {
@@ -129,53 +97,8 @@ const TopBar = () => {
     }
   };
 
-  const authState = useSelector(selectAuthState);
-
-  const getProStatus = async () => {
-    console.log('in get pro status');
-    try {
-      let followResponse = await fetch(
-        `${Config.API_URL}/api/user/subscriptionApp`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({}),
-        },
-      );
-
-      if (!followResponse.ok) {
-        console.log('follow response is: ', followResponse.ok);
-        throw new Error('Network response was not ok');
-      }
-
-      console.log('authstate role: ', authState.role);
-
-      const res = await followResponse.json();
-      console.log('res is: ', res);
-
-      if (authState.role === 0) {
-        setMembershipString('Free');
-      } else if (authState.role === 1) {
-        setMembershipString('Basic');
-      } else if (authState.role === 2) {
-        setMembershipString('Advanced');
-      } else if (authState.role === 3) {
-        setMembershipString('Max');
-      } else {
-        setMembershipString('Free');
-      }
-
-      setMembership(authState.role);
-    } catch (error) {
-      console.log('error getting user membership level: ', error);
-    }
-  };
-
   useEffect(() => {
     console.log('in effect');
-    getProStatus();
     getStreakData();
   }, []);
 
@@ -194,71 +117,83 @@ const TopBar = () => {
           borderBottomWidth: 2,
         },
       ]}>
-      <Menu
-        visible={visible}
-        onDismiss={closeMenu}
-        contentStyle={{backgroundColor: theme.colors.surface}}
-        anchor={
-          <TouchableOpacity style={styles.languageSelector} onPress={openMenu}>
-            {renderLogo(
-              programmingLanguages.find(lang => lang.name === selectedLanguage)
-                ?.icon,
-            )}
-            <Icon
-              name="chevron-down"
-              size={24}
-              color={theme.colors.onSurface}
+      <View style={styles.leftSection}>
+        <Menu
+          visible={visible}
+          onDismiss={closeMenu}
+          contentStyle={{backgroundColor: theme.colors.surface}}
+          anchor={
+            <TouchableOpacity style={styles.languageSelector} onPress={openMenu}>
+              {renderLogo(
+                programmingLanguages.find(lang => lang.name === selectedLanguage)
+                  ?.icon,
+              )}
+              <Icon
+                name="chevron-down"
+                size={24}
+                color={theme.colors.onSurface}
+              />
+            </TouchableOpacity>
+          }
+          style={{marginTop: 40}} // Adjust this value as needed
+        >
+          {programmingLanguages.map(lang => (
+            <Menu.Item
+              key={lang.name}
+              onPress={() => {
+                setSelectedLanguage(lang.name);
+                closeMenu();
+                console.log('Setting new language:', lang.name);
+              }}
+              title={
+                <View style={styles.menuItemContent}>
+                  {renderLogo(lang.icon)}
+                  <Text
+                    style={[
+                      styles.menuItemText,
+                      {color: theme.colors.onSurface},
+                    ]}>
+                    {lang.name}
+                  </Text>
+                </View>
+              }
             />
-          </TouchableOpacity>
-        }
-        style={{marginTop: 40}} // Adjust this value as needed
-      >
-        {programmingLanguages.map(lang => (
-          <Menu.Item
-            key={lang.name}
-            onPress={() => {
-              setSelectedLanguage(lang.name);
-              closeMenu();
-              console.log('Setting new language:', lang.name);
-            }}
-            title={
-              <View style={styles.menuItemContent}>
-                {renderLogo(lang.icon)}
-                <Text
-                  style={[
-                    styles.menuItemText,
-                    {color: theme.colors.onSurface},
-                  ]}>
-                  {lang.name}
-                </Text>
-              </View>
-            }
-          />
-        ))}
-      </Menu>
+          ))}
+        </Menu>
+      </View>
 
-      <TouchableOpacity
-        style={[
-          styles.membershipContainer,
-          {backgroundColor: theme.colors.primary + '20'},
-        ]}
-        onPress={openProPopup}>
-        <Icon name="crown" size={20} color={theme.colors.primary} />
-        <Text style={[styles.membershipText, {color: theme.colors.primary}]}>
-          Pro Level: {membershipString}
-        </Text>
-      </TouchableOpacity>
-
-      <View style={styles.statsContainer}>
-        {streakData && (
-          <View style={styles.streakContainer}>
-            <Icon name="fire" size={24} color={FIRE_ORANGE} />
-            <Text style={[styles.statsText, {color: theme.colors.onSurface}]}>
-              {streakData.current_streak}
+      <View style={styles.centerSection}>
+        <TouchableOpacity
+          style={[
+            styles.membershipContainer,
+            {backgroundColor: theme.colors.primary + '20'},
+          ]}
+          onPress={openProPopup}>
+          <Icon name="crown" size={20} color={theme.colors.primary} />
+          {membership !== 0 ? (
+            <Text style={[styles.membershipText, {color: theme.colors.primary}]}>
+              Pro Level: {membershipString}
             </Text>
-          </View>
-        )}
-        <HeartTracker />
+          ) : (
+            <Text style={[styles.membershipText, {color: theme.colors.primary}]}>
+              Go Pro
+            </Text>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.rightSection}>
+        <View style={styles.statsContainer}>
+          {streakData && (
+            <View style={styles.streakContainer}>
+              <Icon name="fire" size={24} color={FIRE_ORANGE} />
+              <Text style={[styles.statsText, {color: theme.colors.onSurface}]}>
+                {streakData.current_streak}
+              </Text>
+            </View>
+          )}
+          {membership === 0 && <HeartTracker />}
+        </View>
       </View>
 
       <ProPopup
@@ -280,6 +215,18 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(0, 0, 0, 0.1)',
     elevation: 4,
+  },
+  leftSection: {
+    flex: 1,
+    alignItems: 'flex-start',
+  },
+  centerSection: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  rightSection: {
+    flex: 1,
+    alignItems: 'flex-end',
   },
   languageSelector: {
     flexDirection: 'row',

@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unstable-nested-components */
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, Dimensions, Image, ScrollView} from 'react-native';
+import {View, StyleSheet, Dimensions, Image, ScrollView, Alert} from 'react-native';
 import {
   Modal,
   Portal,
@@ -78,7 +78,15 @@ const ProPopup: React.FC<ProPopupProps> = ({
   };
 
   const handlePlanSelection = async (plan: string) => {
-    handleProUpgrade(plan);
+    if (plan === 'Basic') {
+      handleProUpgrade(plan);
+    } else {
+      Alert.alert(
+        'Advanced Plans',
+        'Plans other than Basic can only be purchased on https://gigo.dev Please visit our website to sign up for this plan.',
+        [{text: 'OK', onPress: () => console.log('OK Pressed')}],
+      );
+    }
   };
 
   // function to toggle learn more section

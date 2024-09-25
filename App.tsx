@@ -13,6 +13,7 @@ import {LanguageProvider} from './src/LanguageContext';
 import {Alert, PermissionsAndroid, Platform, Linking} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {AndroidImportance} from '@notifee/react-native';
+import AppLaunch from './src/components/AppLaunch';
 
 import InAppPurchases from './src/services/InAppPurchase';
 
@@ -70,7 +71,9 @@ const App = () => {
         <PersistGate loading={null} persistor={persistor}>
           <PaperProvider theme={theme}>
             <LanguageProvider>
-              <AppRouter />
+              <AppLaunch>
+                <AppRouter />
+              </AppLaunch>
             </LanguageProvider>
           </PaperProvider>
         </PersistGate>

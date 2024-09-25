@@ -63,37 +63,6 @@ const App = () => {
 
   PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
 
-  useEffect(() => {
-    // Create a notification channel
-    const createNotificationChannel = async () => {
-      await notifee.createChannel({
-        id: 'gigoApp',
-        name: 'GIGO Dev',
-        importance: AndroidImportance.HIGH,
-      });
-    };
-
-    createNotificationChannel();
-
-    // Handle foreground messages
-    const unsubscribe = messaging().onMessage(async remoteMessage => {
-      console.log('A new FCM message arrived!', remoteMessage);
-
-      // Display a styled notification with an image using notifee
-      await notifee.displayNotification({
-        title: remoteMessage.notification?.title || 'Default Title',
-        body: remoteMessage.notification?.body || 'Default Message',
-        android: {
-          channelId: 'gigoApp',
-          smallIcon: 'ic_notification', // Ensure you have this icon in your resources
-          color: '#176e51',
-          importance: AndroidImportance.HIGH,
-        },
-      });
-    });
-
-    return unsubscribe;
-  }, []);
   return (
     // eslint-disable-next-line react-native/no-inline-styles
     <GestureHandlerRootView style={{flex: 1}}>

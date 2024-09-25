@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   ScrollView,
   View,
@@ -32,6 +32,7 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 
 const JourneyMain = () => {
+  const [initialized, setInitialized] = useState(false);
   const [loading, setLoading] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
   const [activeJourney, setActiveJourney] = useState<boolean | null>(null);
@@ -50,6 +51,9 @@ const JourneyMain = () => {
     renown: 0,
   });
   const authState = useSelector(selectAuthState);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const API_URL = Config.API_URL;
   const theme = useTheme();
@@ -117,9 +121,13 @@ const JourneyMain = () => {
     }
   };
 
-  const getTasks = async () => {
+  const getTasks = async (loadMore = false) => {
     try {
-      setLoading(true);
+      if (!loadMore) {
+        setLoading(true);
+      } else {
+        setIsLoadingMore(true);
+      }
 
       let response = await fetch(`${API_URL}/api/journey/determineStart`, {
         method: 'POST',
@@ -151,7 +159,7 @@ const JourneyMain = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          skip: units.length,
+          skip: loadMore ? units.length : 0,
           limit: 5,
         }),
       });
@@ -209,9 +217,16 @@ const JourneyMain = () => {
         }),
       );
 
-      setUnits(prevUnits => [...prevUnits, ...fetchedUnits]);
-      setActiveJourney(true); // Journey has started
+      if (fetchedUnits.length < 5) {
+        setHasMore(false);
+      }
+
+      setUnits(prevUnits =>
+        loadMore ? [...fetchedUnits, ...prevUnits] : fetchedUnits,
+      );
+      setActiveJourney(true);
       setLoading(false);
+      setIsLoadingMore(false);
     } catch (error: any) {
       Alert.alert(
         'Error',
@@ -219,12 +234,13 @@ const JourneyMain = () => {
           'Failed to fetch tasks. Please check your network connection.',
       );
       setLoading(false);
+      setIsLoadingMore(false);
     }
   };
 
   useEffect(() => {
     console.log('Fetching tasks...');
-    getTasks();
+    getTasks().then(() => setInitialized(true));
   }, []);
 
   useEffect(() => {
@@ -340,19 +356,6 @@ const JourneyMain = () => {
     await getTasks();
   };
 
-  if (loading) {
-    return (
-      <View
-        style={[
-          styles.container,
-          // eslint-disable-next-line react-native/no-inline-styles
-          {justifyContent: 'center', alignItems: 'center'},
-        ]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      </View>
-    );
-  }
-
   const handleDetourNavigation = () => {
     // @ts-ignore
     navigation.navigate('Detour');
@@ -401,23 +404,54 @@ const JourneyMain = () => {
     }
   };
 
+  const handleLoadMore = () => {
+    console.log('Loading more...');
+    if (hasMore && !isLoadingMore) {
+      getTasks(true);
+    }
+  };
+
   return (
     <>
       <ScrollView
+        ref={scrollViewRef}
         style={[styles.scrollView, {backgroundColor: theme.colors.background}]}
-        contentContainerStyle={styles.scrollViewContent}>
-        {activeJourney ? (
-          showEmptyJourney ? (
-            <EmptyJourney
-              language={selectedLanguage}
-              onStartJourney={() => setShowEmptyJourney(false)}
-              refetchJourneys={refetchJourneys}
-            />
+        contentContainerStyle={styles.scrollViewContent}
+        onScroll={({nativeEvent}) => {
+          // check if the user has scrolled to the top
+          if (nativeEvent.contentOffset.y <= 0 && !isLoadingMore) {
+            handleLoadMore();
+          }
+        }}
+        scrollEventThrottle={0}>
+        {initialized ? (
+          activeJourney ? (
+            showEmptyJourney ? (
+              <EmptyJourney
+                language={selectedLanguage}
+                onStartJourney={() => setShowEmptyJourney(false)}
+                refetchJourneys={refetchJourneys}
+              />
+            ) : (
+              <>
+                {isLoadingMore && (
+                  <View style={styles.loadingMoreIndicator}>
+                    <ActivityIndicator
+                      size="large"
+                      color={theme.colors.primary}
+                    />
+                  </View>
+                )}
+                {filteredUnits.map((unit, index) => handleMap(unit, index))}
+              </>
+            )
           ) : (
-            filteredUnits.map((unit, index) => handleMap(unit, index))
+            <GetStarted getTasks={getTasks} />
           )
         ) : (
-          <GetStarted getTasks={getTasks} />
+          <View style={styles.loadingIndicator}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+          </View>
         )}
         <HandoutOverlay
           isVisible={showHandout !== null}
@@ -563,6 +597,23 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 80,
+  },
+  loadingMoreIndicator: {
+    // position: 'absolute',
+    // top: 0,
+    // left: 0,
+    // right: 0,
+    zIndex: 1,
+    backgroundColor: 'transparent',
+    paddingVertical: 15,
+    alignItems: 'center',
+  },
+  loadingIndicator: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{translateX: -25}, {translateY: -25}], // assuming a 50x50 loading indicator
+    zIndex: 1,
   },
 });
 

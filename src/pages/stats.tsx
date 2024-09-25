@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   ScrollView,
   View,
@@ -7,6 +7,8 @@ import {
   Dimensions,
   ActivityIndicator,
   TouchableOpacity,
+  Animated,
+  Easing,
 } from 'react-native';
 import {useTheme, Text, Button} from 'react-native-paper';
 import Config from 'react-native-config';
@@ -15,7 +17,7 @@ import ProgressionBox from '../components/Stats/ProgressionBox';
 import ProgressionPopup from '../components/Stats/ProgressionPopup';
 import StatPopup from '../components/Stats/StatPopup';
 import DetermineProgressionLevel from '../utils/progression.tsx';
-import { useNavigation } from "@react-navigation/native";
+import {useNavigation} from '@react-navigation/native';
 
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 const STAT_CARD_WIDTH = SCREEN_WIDTH * 0.45;
@@ -56,6 +58,30 @@ const Stats = () => {
   const [progressionUnvailable, setProgressionUnavailable] = useState(false);
 
   const navigation = useNavigation();
+
+  const {width} = Dimensions.get('window');
+
+  // Animated values for fade-in and slide-up
+  const fadeAnim = useRef(new Animated.Value(0)).current; // Opacity starts at 0
+  const slideAnim = useRef(new Animated.Value(50)).current; // Starts 50px below
+
+  useEffect(() => {
+    // Run animations in parallel
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1, // Fade to opacity 1
+        duration: 1000, // 1 second
+        useNativeDriver: true,
+        easing: Easing.out(Easing.ease),
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0, // Slide to original position
+        duration: 1000, // 1 second
+        useNativeDriver: true,
+        easing: Easing.out(Easing.ease),
+      }),
+    ]).start();
+  }, [fadeAnim, slideAnim]);
 
   // helper function to calculate progression details
   const calculateProgressionDetails = (type: string, value: string) => {
@@ -116,7 +142,7 @@ const Stats = () => {
           setStats(statsData.stats);
         } else {
           console.warn('Stats data is missing or invalid:', statsData);
-          setStatsUnvailable(true)
+          setStatsUnvailable(true);
         }
 
         // fetch progression
@@ -140,7 +166,7 @@ const Stats = () => {
             'Progression data is missing or invalid:',
             progressionData,
           );
-          setProgressionUnavailable(true)
+          setProgressionUnavailable(true);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -165,11 +191,12 @@ const Stats = () => {
         {
           icon: 'target',
           title: 'Completion vs Failure',
-          value: stats.completion_failure_rate != null
-            ? (typeof stats.completion_failure_rate === 'number'
+          value:
+            stats.completion_failure_rate != null
+              ? typeof stats.completion_failure_rate === 'number'
                 ? stats.completion_failure_rate.toFixed(2)
-                : stats.completion_failure_rate.toString())
-            : 'N/A',
+                : stats.completion_failure_rate.toString()
+              : 'N/A',
           tooltip:
             'This stat tracks your ratio of completions to failures when running code. To improve this you must make sure your code works properly before running it!',
         },
@@ -201,12 +228,18 @@ const Stats = () => {
         {
           title: 'Hungry Learner',
           colorType: 'secondary',
-          ...calculateProgressionDetails('hungry_learner', progression.hungry_learner),
+          ...calculateProgressionDetails(
+            'hungry_learner',
+            progression.hungry_learner,
+          ),
         },
         {
           title: 'Man on the Inside',
           colorType: 'golden',
-          ...calculateProgressionDetails('man_of_the_inside', progression.man_of_the_inside),
+          ...calculateProgressionDetails(
+            'man_of_the_inside',
+            progression.man_of_the_inside,
+          ),
         },
         {
           title: 'The Scribe',
@@ -228,8 +261,8 @@ const Stats = () => {
     );
   }
 
-  console.log("stats: ", statsUnvailable)
-  console.log("progression: ", progressionUnvailable)
+  console.log('stats: ', statsUnvailable);
+  console.log('progression: ', progressionUnvailable);
 
   const handleJourneyLink = () => {
     navigation.navigate('JourneyMain'); // Navigate to the Journeys page
@@ -238,21 +271,35 @@ const Stats = () => {
   if (statsUnvailable && progressionUnvailable) {
     return (
       <ScrollView
-        style={[styles.container, {backgroundColor: theme.colors.background}]}>
-        <View style={styles.messageContainer}>
-          <Text style={styles.titleText}>Oh no! It's empty here...</Text>
-          <Text style={styles.descriptionText}>
-            It looks like you haven't completed any Journey Bytes yet. But don't worry! Your adventure awaits.
+        contentContainerStyle={[
+          styles.emptyContainer,
+          {backgroundColor: theme.colors.background},
+        ]}
+        showsVerticalScrollIndicator={false}>
+        <Animated.View style={[styles.contentWrapper, {opacity: fadeAnim, transform: [{translateY: slideAnim}]}]}>
+          <Text style={[styles.titleText, {color: theme.colors.text}]}>
+            Oh no! It's empty here...
           </Text>
-          <Text style={styles.callToActionText}>
+          <Text
+            style={[
+              styles.descriptionText,
+              {color: theme.colors.text},
+            ]}>
+            It looks like you haven't completed any Journey Bytes yet. But don't
+            worry! Your adventure awaits.
+          </Text>
+          <Text style={[styles.callToActionText, {color: theme.colors.text}]}>
             Start your first journey and watch your stats grow as you progress!
           </Text>
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: theme.colors.primary }]}
-            onPress={handleJourneyLink}>
+            style={[styles.button, {backgroundColor: theme.colors.primary}]}
+            onPress={handleJourneyLink}
+            activeOpacity={0.8}
+            accessibilityLabel="Go to Journeys"
+            accessibilityHint="Navigates to the Journeys section to start your first journey">
             <Text style={styles.buttonText}>Go to Journeys</Text>
           </TouchableOpacity>
-        </View>
+        </Animated.View>
       </ScrollView>
     );
   } else {
@@ -375,6 +422,14 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 80,
+  },
+  contentWrapper: {
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    padding: 20,
   },
 });
 

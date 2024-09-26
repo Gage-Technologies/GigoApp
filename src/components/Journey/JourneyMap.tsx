@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react/no-unstable-nested-components */
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -47,6 +47,7 @@ const JourneyMap = ({
   const [unitTitle, setUnitTitle] = useState(''); // new state for unit title
   const API_URL = Config.API_URL;
   const theme = useTheme();
+  const pressTimer = useRef<NodeJS.Timeout | null>(null);
 
   const navigation = useNavigation();
 
@@ -262,9 +263,18 @@ const JourneyMap = ({
                 backgroundProgress={c[0]}
                 backgroundDarker={c[1]}
                 disabled={!isUnlocked}
-                onPress={() => {
-                  if (isUnlocked) {
-                    handlePressTask(task);
+                onPressIn={() => {
+                  // start a timer when the button is pressed
+                  pressTimer.current = setTimeout(() => {
+                    if (isUnlocked) {
+                      handlePressTask(task);
+                    }
+                  }, 200); // 200ms delay
+                }}
+                onPressOut={() => {
+                  // clear the timer if the button is released before 200ms
+                  if (pressTimer.current) {
+                    clearTimeout(pressTimer.current);
                   }
                 }}>
                 {renderTaskIcon(

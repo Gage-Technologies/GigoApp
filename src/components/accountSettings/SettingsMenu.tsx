@@ -43,18 +43,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => setSelectedTab('WorkspaceSettings')}
-        style={styles.tabButton}>
-        <View style={styles.buttonContent}>
-          <View style={styles.leftContent}>
-            <Icon name="cogs" size={16} color="white" />
-            <Text style={styles.tabText}>Workspace Settings</Text>
-          </View>
-          <Icon name="chevron-right" size={16} color="white" />
-        </View>
-      </TouchableOpacity>
-
-      <TouchableOpacity
         onPress={() => setSelectedTab('Membership')}
         style={styles.tabButton}>
         <View style={styles.buttonContent}>

@@ -9,7 +9,6 @@ import Config from 'react-native-config';
 import {initialAuthStateUpdate, initialState, selectAuthState, updateAuthState} from '../reducers/auth';
 import SettingsMenu from '../components/accountSettings/SettingsMenu';
 import UserTab from '../components/accountSettings/UserTab';
-import WorkspaceTab from '../components/accountSettings/WorkspaceTab';
 import MembershipTab from '../components/accountSettings/MembershipTab';
 import ReportIssueTab from '../components/accountSettings/ReportIssueTab';
 
@@ -32,13 +31,6 @@ const AccountSettings = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [deleteAccount, setDeleteAccount] = useState(false);
   const [confirmDeletionContent, setConfirmDeletionContent] = useState('');
-  const [workspaceRunStart, setWorkspaceRunStart] = useState(false);
-  const [workspaceLogging, setWorkspaceLogging] = useState(false);
-  const [workspaceSilent, setWorkspaceSilent] = useState(false);
-  const [workspaceUpdateInterval, setWorkspaceUpdateInterval] = useState('');
-  const [workspaceCommitMessage, setWorkspaceCommitMessage] = useState('');
-  const [workspaceLocale, setWorkspaceLocale] = useState('');
-  const [workspaceTimeZone, setWorkspaceTimeZone] = useState('');
   const [holidayPref, setHolidayPref] = useState(false);
   const [membership, setMembership] = useState(0);
   const [membershipString, setMembershipString] = useState('');
@@ -64,72 +56,6 @@ const AccountSettings = () => {
         BackHandler.removeEventListener('hardwareBackPress', onBackPress);
     }, [selectedTab]),
   );
-
-  const editWorkspace = async () => {
-    console.log('in edit workspace');
-
-    if (workspaceCommitMessage === '') {
-      Alert.alert('Please enter a commit message.');
-      return;
-    }
-
-    const updateInterval = parseInt(workspaceUpdateInterval, 10);
-
-    if (isNaN(updateInterval)) {
-      Alert.alert('Invalid Input', 'Update interval must be a valid number.');
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/api/user/updateWorkspace`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          workspace_settings: {
-            auto_git: {
-              runOnStart: workspaceRunStart,
-              updateInterval: updateInterval,
-              logging: workspaceLogging,
-              silent: workspaceSilent,
-              commitMessage: workspaceCommitMessage,
-              locale: workspaceLocale,
-              timeZone: workspaceTimeZone,
-            },
-          },
-        }),
-      });
-
-      const res = await response.json();
-      console.log('workspace response: ', res);
-
-      if ('message' in res) {
-        const message = res.message;
-        if (message === 'workspace settings edited successfully') {
-          Alert.alert(
-            'Success',
-            'Your workspace settings were edited successfully.',
-          );
-        } else {
-          Alert.alert(
-            'Server Error',
-            'An error occurred editing your workspace settings.',
-          );
-        }
-      } else {
-        Alert.alert(
-          'Server Error',
-          'An error occurred editing your workspace settings.',
-        );
-      }
-    } catch (error) {
-      Alert.alert(
-        'Network Error',
-        'An error occurred editing your workspace settings. Please try again later.',
-      );
-    }
-  };
 
   useEffect(() => {
     const loadSessionData = async () => {
@@ -217,21 +143,6 @@ const AccountSettings = () => {
         setNewUsername(response.user.user_name);
         setNewEmail(response.user.email);
         setNewPhone(response.user.phone);
-        setWorkspaceRunStart(
-          response.user.workspace_settings.auto_git.runOnStart,
-        );
-        setWorkspaceUpdateInterval(
-          response.user.workspace_settings.auto_git.updateInterval.toString(),
-        );
-        setWorkspaceLogging(response.user.workspace_settings.auto_git.logging);
-        setWorkspaceSilent(response.user.workspace_settings.auto_git.silent);
-        setWorkspaceCommitMessage(
-          response.user.workspace_settings.auto_git.commitMessage,
-        );
-        setWorkspaceLocale(response.user.workspace_settings.auto_git.locale);
-        setWorkspaceTimeZone(
-          response.user.workspace_settings.auto_git.timeZone,
-        );
       }
     } catch (error) {
       console.error('Error in apiLoad:', error);
@@ -446,10 +357,6 @@ const AccountSettings = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    await editWorkspace();
-  };
-
   const handleLogout = async () => {
     setLogoutLoading(true);
     try {
@@ -498,28 +405,6 @@ const AccountSettings = () => {
             setConfirmDeletionContent={setConfirmDeletionContent}
             editUser={editUser}
             deleteUserAccount={deleteUserAccount}
-          />
-        );
-      case 'WorkspaceSettings':
-        return (
-          <WorkspaceTab
-            workspaceRunStart={workspaceRunStart}
-            setWorkspaceRunStart={setWorkspaceRunStart}
-            workspaceLogging={workspaceLogging}
-            setWorkspaceLogging={setWorkspaceLogging}
-            workspaceSilent={workspaceSilent}
-            setWorkspaceSilent={setWorkspaceSilent}
-            workspaceUpdateInterval={workspaceUpdateInterval}
-            setWorkspaceUpdateInterval={setWorkspaceUpdateInterval}
-            workspaceCommitMessage={workspaceCommitMessage}
-            setWorkspaceCommitMessage={setWorkspaceCommitMessage}
-            workspaceLocale={workspaceLocale}
-            setWorkspaceLocale={setWorkspaceLocale}
-            workspaceTimeZone={workspaceTimeZone}
-            setWorkspaceTimeZone={setWorkspaceTimeZone}
-            holidayPref={holidayPref}
-            setHolidayPref={setHolidayPref}
-            handleSubmit={handleSubmit}
           />
         );
       case 'Membership':

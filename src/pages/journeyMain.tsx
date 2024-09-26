@@ -379,13 +379,6 @@ const JourneyMain = () => {
             </View>
           </View>
         )}
-        {isLastIndex && !isPendingAcceptance && (
-          <TouchableOpacity
-            onPress={() => setOpenDetourPop(true)}
-            style={styles.fab}>
-            <Text>Add Unit</Text>
-          </TouchableOpacity>
-        )}
         {isLastIndex && <View style={styles.bottomSpacer} />}
         <RNModal
           animationType="slide"

@@ -119,50 +119,50 @@ const TopBar = () => {
           borderBottomWidth: 2,
         },
       ]}>
-      <View style={styles.leftSection}>
-        <Menu
-          visible={visible}
-          onDismiss={closeMenu}
-          contentStyle={{backgroundColor: theme.colors.surface}}
-          anchor={
-            <TouchableOpacity style={styles.languageSelector} onPress={openMenu}>
-              {renderLogo(
-                programmingLanguages.find(lang => lang.name === selectedLanguage)
-                  ?.icon,
-              )}
-              <Icon
-                name="chevron-down"
-                size={24}
-                color={theme.colors.onSurface}
-              />
-            </TouchableOpacity>
-          }
-          style={{marginTop: 40}} // Adjust this value as needed
-        >
-          {programmingLanguages.map(lang => (
-            <Menu.Item
-              key={lang.name}
-              onPress={() => {
-                setSelectedLanguage(lang.name);
-                closeMenu();
-                console.log('Setting new language:', lang.name);
-              }}
-              title={
-                <View style={styles.menuItemContent}>
-                  {renderLogo(lang.icon)}
-                  <Text
-                    style={[
-                      styles.menuItemText,
-                      {color: theme.colors.onSurface},
-                    ]}>
-                    {lang.name}
-                  </Text>
-                </View>
-              }
-            />
-          ))}
-        </Menu>
-      </View>
+      {/*<View style={styles.leftSection}>*/}
+      {/*  <Menu*/}
+      {/*    visible={visible}*/}
+      {/*    onDismiss={closeMenu}*/}
+      {/*    contentStyle={{backgroundColor: theme.colors.surface}}*/}
+      {/*    anchor={*/}
+      {/*      <TouchableOpacity style={styles.languageSelector} onPress={openMenu}>*/}
+      {/*        {renderLogo(*/}
+      {/*          programmingLanguages.find(lang => lang.name === selectedLanguage)*/}
+      {/*            ?.icon,*/}
+      {/*        )}*/}
+      {/*        <Icon*/}
+      {/*          name="chevron-down"*/}
+      {/*          size={24}*/}
+      {/*          color={theme.colors.onSurface}*/}
+      {/*        />*/}
+      {/*      </TouchableOpacity>*/}
+      {/*    }*/}
+      {/*    style={{marginTop: 40}} // Adjust this value as needed*/}
+      {/*  >*/}
+      {/*    {programmingLanguages.map(lang => (*/}
+      {/*      <Menu.Item*/}
+      {/*        key={lang.name}*/}
+      {/*        onPress={() => {*/}
+      {/*          setSelectedLanguage(lang.name);*/}
+      {/*          closeMenu();*/}
+      {/*          console.log('Setting new language:', lang.name);*/}
+      {/*        }}*/}
+      {/*        title={*/}
+      {/*          <View style={styles.menuItemContent}>*/}
+      {/*            {renderLogo(lang.icon)}*/}
+      {/*            <Text*/}
+      {/*              style={[*/}
+      {/*                styles.menuItemText,*/}
+      {/*                {color: theme.colors.onSurface},*/}
+      {/*              ]}>*/}
+      {/*              {lang.name}*/}
+      {/*            </Text>*/}
+      {/*          </View>*/}
+      {/*        }*/}
+      {/*      />*/}
+      {/*    ))}*/}
+      {/*  </Menu>*/}
+      {/*</View>*/}
 
       <View style={styles.centerSection}>
         <TouchableOpacity

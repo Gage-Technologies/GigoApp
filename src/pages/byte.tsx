@@ -1,11 +1,13 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState} from 'react';
-import {View} from 'react-native';
+import React, {useState, useRef} from 'react';
+import {View, KeyboardAvoidingView, Platform} from 'react-native';
 import {WebView} from 'react-native-webview';
 import {useSelector} from 'react-redux';
 import {selectAuthState} from '../reducers/auth';
 import {useNavigation} from '@react-navigation/native';
 import XpPopup from '../components/XpPopup';
+import ByteKeyboard from '../components/ByteKeyboard/ByteKeyboard';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 // component to display a byte or journey in a webview
 const Byte: React.FC<{
@@ -26,6 +28,8 @@ const Byte: React.FC<{
     gainedXP: 0,
     renown: 0,
   });
+
+  const webViewRef = useRef<WebView>(null);
 
   console.log('authState', authState);
 
@@ -98,24 +102,99 @@ const Byte: React.FC<{
     return true;
   };
 
+  /**
+   * handles key presses from the custom keyboard
+   * injects appropriate key events into the webview to simulate typing
+   * handles special keys like tab and arrow keys separately
+   */
+  function handleKeyPress(key: string) {
+    // log the key pressed
+    console.log('key pressed', key);
+
+    // handle tab key
+    if (key === 'Tab') {
+      webViewRef.current?.injectJavaScript(`
+        (function() {
+          var event = new KeyboardEvent('keydown', {
+            key: 'Tab',
+            keyCode: 9,
+            which: 9,
+            bubbles: true
+          });
+          document.activeElement.dispatchEvent(event);
+        })();
+      `);
+      return;
+    }
+
+    // handle arrow keys
+    if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(key)) {
+      // inject a keydown event for the arrow key into the webview
+      webViewRef.current?.injectJavaScript(`
+        (function() {
+          var event = new KeyboardEvent('keydown', {
+            key: '${key}',
+            keyCode: 0,
+            which: 0,
+            bubbles: true
+          });
+          document.activeElement.dispatchEvent(event);
+        })();
+      `);
+      return;
+    }
+
+    // properly escape the key to handle special characters
+    const escapedKey = JSON.stringify(key);
+
+    // inject the key press into the webview
+    webViewRef.current?.injectJavaScript(`
+      (function() {
+        var el = document.activeElement;
+        var key = ${escapedKey};
+        if (el && ('value' in el)) {
+          // determine cursor positions
+          var start = el.selectionStart;
+          var end = el.selectionEnd;
+          // insert the key at the cursor position
+          el.value = el.value.slice(0, start) + key + el.value.slice(end);
+          // update the cursor position
+          el.selectionStart = el.selectionEnd = start + key.length;
+          // dispatch input event to notify any listeners
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+        } else {
+          // for elements without value property, use execCommand as a fallback
+          document.execCommand('insertText', false, key);
+        }
+      })();
+    `);
+  }
+
   return (
-    <View
-      style={{
-        width: '100%',
-        height: '100%',
-      }}>
-      <WebView
-        source={{
-          uri: `https://www.gigo.dev/byte/${byteId}?embed=true&viewport=mobile&appToken=${
-            authState.token
-          }${isJourney ? '&journey=true' : ''}`,
-        }}
-        onNavigationStateChange={handleNavigationStateChange}
-      />
-      {showXpPopup && (
-        <XpPopup {...xpData} popupClose={handleCloseXpPopup} homePage={false} />
-      )}
-    </View>
+    <KeyboardAvoidingView
+      style={{flex: 1}}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <KeyboardAwareScrollView
+        style={{flex: 1}}
+        contentContainerStyle={{flexGrow: 1}}
+        keyboardShouldPersistTaps="handled">
+        <View style={{flex: 1}}>
+          <WebView
+            ref={webViewRef}
+            source={{
+              uri: `https://www.gigo.dev/byte/${byteId}?embed=true&viewport=mobile&appToken=${
+                authState.token
+              }${isJourney ? '&journey=true' : ''}`,
+            }}
+            onNavigationStateChange={handleNavigationStateChange}
+          />
+          {showXpPopup && (
+            <XpPopup {...xpData} popupClose={handleCloseXpPopup} homePage={false} />
+          )}
+        </View>
+      </KeyboardAwareScrollView>
+      <ByteKeyboard onKeyPress={handleKeyPress} />
+    </KeyboardAvoidingView>
   );
 };
 

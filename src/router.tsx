@@ -135,9 +135,9 @@ const ConditionalBottomBar = ({
     return null;
   }
 
-  // use speeddial for byte page
+  // do not show bottom bar on byte page
   if (currentRouteName === 'Byte') {
-    return <SpeedDial />;
+    return null;
   }
 
   // use bottom bar for all other pages

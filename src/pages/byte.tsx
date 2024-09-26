@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useCallback} from 'react';
 import {View, KeyboardAvoidingView, Platform} from 'react-native';
 import {WebView} from 'react-native-webview';
 import {useSelector} from 'react-redux';
@@ -8,6 +8,7 @@ import {useNavigation} from '@react-navigation/native';
 import XpPopup from '../components/XpPopup';
 import ByteKeyboard from '../components/ByteKeyboard/ByteKeyboard';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {debounce} from 'lodash'; // make sure to install lodash if not already present
 
 // component to display a byte or journey in a webview
 const Byte: React.FC<{
@@ -170,6 +171,52 @@ const Byte: React.FC<{
     `);
   }
 
+  /**
+   * debounced function to handle cursor movement from the joystick
+   * injects appropriate key events into the webview to simulate cursor movement
+   * @param dx horizontal movement (-1 to 1)
+   * @param dy vertical movement (-1 to 1)
+   */
+  const debouncedHandleCursorMove = useCallback(
+    debounce((dx: number, dy: number) => {
+      console.log('debounced cursor moved', dx, dy);
+      // determine which arrow key to simulate based on the strongest direction
+      let key = '';
+      if (Math.abs(dx) > Math.abs(dy)) {
+        key = dx > 0 ? 'ArrowRight' : 'ArrowLeft';
+      } else {
+        key = dy > 0 ? 'ArrowDown' : 'ArrowUp';
+      }
+
+      // only trigger movement if there's significant joystick displacement
+      if (key) {
+        webViewRef.current?.injectJavaScript(`
+          (function() {
+            var event = new KeyboardEvent('keydown', {
+              key: '${key}',
+              keyCode: 0,
+              which: 0,
+              bubbles: true
+            });
+            document.activeElement.dispatchEvent(event);
+          })();
+        `);
+      }
+    }, 10), // 100ms debounce time, adjust as needed
+    [webViewRef]
+  );
+
+  /**
+   * handles cursor movement from the joystick
+   * calls the debounced function to handle the actual movement
+   * @param dx horizontal movement (-1 to 1)
+   * @param dy vertical movement (-1 to 1)
+   */
+  function handleCursorMove(dx: number, dy: number) {
+    console.log('cursor moved', dx, dy);
+    debouncedHandleCursorMove(dx, dy);
+  }
+
   return (
     <KeyboardAvoidingView
       style={{flex: 1}}
@@ -193,7 +240,7 @@ const Byte: React.FC<{
           )}
         </View>
       </KeyboardAwareScrollView>
-      <ByteKeyboard onKeyPress={handleKeyPress} />
+      <ByteKeyboard onKeyPress={handleKeyPress} onCursorMove={handleCursorMove} />
     </KeyboardAvoidingView>
   );
 };

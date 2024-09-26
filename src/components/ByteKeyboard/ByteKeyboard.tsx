@@ -9,7 +9,7 @@ import {
   useColorScheme,
   Dimensions,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import CursorJoystick from './CursorJoystick';
 
 /**
  * compact custom keyboard component for programming on mobile
@@ -18,9 +18,10 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
  * automatically adjusts colors to match the os theme
  * includes arrow keys for navigation
  */
-const ByteKeyboard: React.FC<{onKeyPress: (key: string) => void}> = ({
-  onKeyPress,
-}) => {
+const ByteKeyboard: React.FC<{
+  onKeyPress: (key: string) => void;
+  onCursorMove: (dx: number, dy: number) => void;
+}> = ({onKeyPress, onCursorMove}) => {
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
   const colorScheme = useColorScheme();
 
@@ -68,26 +69,6 @@ const ByteKeyboard: React.FC<{onKeyPress: (key: string) => void}> = ({
     return <Text style={[styles.keyText, {color: colors.text}]}>{key}</Text>;
   };
 
-  // helper function to render arrow key
-  const renderArrowKey = (direction: string) => {
-    const arrowKey =
-      direction === 'back'
-        ? 'ArrowLeft'
-        : direction === 'forward'
-        ? 'ArrowRight'
-        : direction === 'upward'
-        ? 'ArrowUp'
-        : 'ArrowDown';
-
-    return (
-      <TouchableOpacity
-        style={[styles.arrowKey, {backgroundColor: colors.key}]}
-        onPress={() => onKeyPress(arrowKey)}>
-        <Icon name={`arrow-${direction}`} size={18} color={colors.text} />
-      </TouchableOpacity>
-    );
-  };
-
   return (
     <View style={[styles.container, {backgroundColor: colors.background}]}>
       <View style={styles.keyboardContent}>
@@ -105,13 +86,12 @@ const ByteKeyboard: React.FC<{onKeyPress: (key: string) => void}> = ({
             </View>
           ))}
         </View>
-        <View style={styles.arrowKeysContainer}>
-          {renderArrowKey('upward')}
-          <View style={styles.arrowMiddleContainer}>
-            {renderArrowKey('back')}
-            {renderArrowKey('forward')}
-          </View>
-          {renderArrowKey('downward')}
+        <View style={styles.joystickContainer}>
+          <CursorJoystick
+            onMove={onCursorMove}
+            color={colors.key}
+            textColor={colors.text}
+          />
         </View>
       </View>
     </View>
@@ -119,11 +99,10 @@ const ByteKeyboard: React.FC<{onKeyPress: (key: string) => void}> = ({
 };
 
 const {width} = Dimensions.get('window');
-const arrowKeySize = width * 0.06;
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 58,
+    paddingBottom: 8,
     paddingTop: 8,
   },
   keyboardContent: {
@@ -151,28 +130,10 @@ const styles = StyleSheet.create({
   keyText: {
     fontSize: 14,
   },
-  arrowKeysContainer: {
+  joystickContainer: {
     flex: 0.2,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  arrowMiddleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: arrowKeySize * 2 + 16,
-    marginVertical: 2,
-  },
-  arrowKey: {
-    width: arrowKeySize,
-    height: arrowKeySize,
-    borderRadius: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 1,
-    elevation: 1,
   },
 });
 

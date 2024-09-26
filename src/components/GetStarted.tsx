@@ -85,22 +85,22 @@ const GetStarted = ({getTasks}) => {
       favorite: false,
       icon: <RustLogo style={styles.logo} width={50} height={50} />,
     },
-    csharp: {
-      title: 'C#',
-      description:
-        'C# is powerful for building a variety of applications, especially for Windows platforms, making it a go-to for desktop software, games, and mobile apps.',
-      id: 'example_id_csharp',
-      favorite: false,
-      icon: <CSharpLogo style={styles.logo} width={50} height={50} />,
-    },
-    cpp: {
-      title: 'C++',
-      description:
-        'C++ is highly efficient and versatile, favored for applications where speed and resource control are critical, such as video games or real-time systems.',
-      id: 'example_id_cpp',
-      favorite: false,
-      icon: <CppLogo style={styles.logo} width={50} height={50} />,
-    },
+    // csharp: {
+    //   title: 'C#',
+    //   description:
+    //     'C# is powerful for building a variety of applications, especially for Windows platforms, making it a go-to for desktop software, games, and mobile apps.',
+    //   id: 'example_id_csharp',
+    //   favorite: false,
+    //   icon: <CSharpLogo style={styles.logo} width={50} height={50} />,
+    // },
+    // cpp: {
+    //   title: 'C++',
+    //   description:
+    //     'C++ is highly efficient and versatile, favored for applications where speed and resource control are critical, such as video games or real-time systems.',
+    //   id: 'example_id_cpp',
+    //   favorite: false,
+    //   icon: <CppLogo style={styles.logo} width={50} height={50} />,
+    // },
   };
 
   const selectJourney = (journeyKey, id) => {

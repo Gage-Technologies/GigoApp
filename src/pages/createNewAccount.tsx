@@ -109,37 +109,6 @@ const CreateNewAccount = () => {
     Dimensions.get('window').width,
   );
 
-  // useEffect(() => {
-  //   const updateDimensions = () => {
-  //     setWindowHeight(Dimensions.get('window').height);
-  //     setWindowWidth(Dimensions.get('window').width);
-  //   };
-  //
-  //   const handleOpenURL = (event: { url: string }) => {
-  //     console.log('Received deep link:', event.url);
-  //     // Handle the deep link logic here
-  //   };
-  //
-  //   // Set up the deep link listener
-  //   const linkingSubscription = Linking.addEventListener('url', handleOpenURL);
-  //
-  //   // Handle the case when the app is opened from a deep link
-  //   Linking.getInitialURL().then((url) => {
-  //     if (url) {
-  //       handleOpenURL({ url });
-  //     }
-  //   });
-  //
-  //   // Set up the dimensions listener
-  //   const dimensionsSubscription = Dimensions.addEventListener('change', updateDimensions);
-  //
-  //   // Cleanup function to remove event listeners
-  //   return () => {
-  //     linkingSubscription.remove(); // Properly remove the deep link listener
-  //     dimensionsSubscription.remove(); // Properly remove the dimensions listener
-  //   };
-  // }, []);
-
   const styles = StyleSheet.create({
     keyboardContainer: {
       flex: 1,
@@ -320,10 +289,6 @@ const CreateNewAccount = () => {
       marginTop: 20,
       color: 'white',
     },
-    // button: {
-    //   borderRadius: 25, // Rounded edges
-    //   backgroundColor: '#4b9288', // Unique background color
-    // },
     buttonContent: {
       height: 50, // Optional: Adjust height
     },
@@ -360,8 +325,6 @@ const CreateNewAccount = () => {
 
     setExternalToken(gh.code);
     setExternalLogin('Github');
-    // setLoading(true);
-    // console.log("here 3")
   };
 
   const testProfilePic = `<svg width="264px" height="280px" viewBox="0 0 264 280" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="width: 150px; height: 150px; position: relative; top: 35px;"><desc>Created with getavataaars.com</desc><defs><circle id="react-path-1" cx="120" cy="120" r="120"></circle><path d="M12,160 C12,226.27417 65.72583,280 132,280 C198.27417,280 252,226.27417 252,160 L264,160 L264,-1.42108547e-14 L-3.19744231e-14,-1.42108547e-14 L-3.19744231e-14,160 L12,160 Z" id="react-path-2"></path><path d="M124,144.610951 L124,163 L128,163 L128,163 C167.764502,163 200,195.235498 200,235 L200,244 L0,244 L0,235 C-4.86974701e-15,195.235498 32.235498,163 72,163 L72,163 L76,163 L76,144.610951 C58.7626345,136.422372 46.3722246,119.687011 44.3051388,99.8812385 C38.4803105,99.0577866 34,94.0521096 34,88 L34,74 C34,68.0540074 38.3245733,63.1180731 44,62.1659169 L44,56 L44,56 C44,25.072054 69.072054,5.68137151e-15 100,0 L100,0 L100,0 C130.927946,-5.68137151e-15 156,25.072054 156,56 L156,62.1659169 C161.675427,63.1180731 166,68.0540074 166,74 L166,88 C166,94.0521096 161.51969,99.0577866 155.694861,99.8812385 C153.627775,119.687011 141.237365,136.422372 124,144.610951 Z" id="react-path-3"></path></defs><g id="Avataaar" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-825.000000, -1100.000000)" id="Avataaar/Circle"><g transform="translate(825.000000, 1100.000000)">
@@ -534,138 +497,13 @@ const CreateNewAccount = () => {
     }
   };
 
-  // const githubCreate = async () => {
-  //   // //this is for github and cannot be finished until app is semi launched
-  //   // if (!ghConfirm) {
-  //   //   Alert.alert('Error', 'BAD');
-  //   //   setLoading(false);
-  //   //   return;
-  //   // }
-  //
-  //   setLoading(true);
-  //
-  //   let token = await getFcmToken();
-  //   console.log("token is: ", token)
-  //
-  //   const svgString = profilePic;
-  //
-  //   console.log("here i am")
-  //   try {
-  //     //@ts-ignore
-  //     const svgBlob = await svgToBlob(svgString);
-  //
-  //     let params = {
-  //       external_auth: externalToken,
-  //       password: password,
-  //       start_user_info: {
-  //         usage: 'I want to learn how to code by doing really cool projects.',
-  //         proficiency: 'Beginner',
-  //         tags: 'python,javascript,golang,web development,game development,machine learning,artificial intelligence',
-  //         preferred_language: 'Python, Javascript, Golang, Typescript',
-  //       },
-  //       timezone: timezone ? timezone.value : 'America/Chicago',
-  //       avatar_settings: {
-  //         topType: Attributes.topType,
-  //         accessoriesType: Attributes.accessoriesType,
-  //         hairColor: Attributes.hairColor,
-  //         facialHairType: Attributes.facialHairType,
-  //         clotheType: Attributes.clotheType,
-  //         clotheColor: Attributes.clotheColor,
-  //         eyeType: Attributes.eyeType,
-  //         eyebrowType: Attributes.eyebrowType,
-  //         mouthType: Attributes.mouthType,
-  //         avatarStyle: Attributes.avatarStyle,
-  //         skinColor: Attributes.skinColor,
-  //       },
-  //       fcm_token: token,
-  //     };
-  //     let create = await fetchWithUpload(
-  //       `${API_URL}/api/user/createNewGithubUser`,
-  //       svgBlob,
-  //       {
-  //         method: 'POST',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //         body: JSON.stringify(params),
-  //         credentials: 'include',
-  //       },
-  //       (res: any) => {
-  //         console.log("res is: ", res)
-  //         if (res.message !== 'Github User Added.') {
-  //           Alert.alert('Something went wrong here...', res.message);
-  //         }
-  //
-  //         if (res === undefined) {
-  //           Alert.alert('Network Error', 'Unable to connect to the server.');
-  //         }
-  //
-  //         if (res.message === 'Github User Added.') {
-  //           authorizeGithub(password).then(auth => {
-  //             console.log("auth is: ", auth)
-  //             // @ts-ignore
-  //             if (auth.user !== undefined) {
-  //               let authState = Object.assign({}, initialAuthStateUpdate);
-  //               authState.authenticated = true;
-  //               // @ts-ignore
-  //               authState.expiration = auth.exp;
-  //               // @ts-ignore
-  //               authState.id = auth.user;
-  //               // @ts-ignore
-  //               authState.role = auth.user_status;
-  //               // @ts-ignore
-  //               authState.email = auth.email;
-  //               // @ts-ignore
-  //               authState.phone = auth.phone;
-  //               // @ts-ignore
-  //               authState.userName = auth.user_name;
-  //               // @ts-ignore
-  //               authState.thumbnail = auth.thumbnail;
-  //               //@ts-ignore
-  //               authState.exclusiveContent = auth.exclusive_account;
-  //               //@ts-ignore
-  //               authState.exclusiveAgreement = auth.exclusive_agreement;
-  //               dispatch(updateAuthState(authState));
-  //
-  //               // this makes sure the dispatch occurs
-  //               sleep(1000).then(() => {
-  //                 navigation.navigate(
-  //                   //@ts-ignore
-  //                   'JourneyMain',
-  //                 );
-  //               });
-  //             } else {
-  //               Alert.alert(
-  //                 'Sorry, we failed to log you in, please try again on login page.',
-  //               );
-  //             }
-  //           });
-  //         }
-  //       },
-  //     );
-  //     Alert.alert('Login Error', 'An error occurred during the login process.');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const onFailureGithub = () => {
     Alert.alert('Login Failed', 'GitHub login failed. Please try again.');
   };
 
-  //     const googleSignUp = async () => {
-  //         console.log("hello in signup")
-  //     }
-
   const googleSignUp = async () => {
     setLoading(true);
     try {
-      //             await GoogleSignin.configure({
-      //                       androidClientId: GOOGLE_ANDROID_CLIENT_ID,
-      //                       webClientId: GOOGLE_WEB_CLIENT_ID,
-      //             });
-      //             const {idToken} = await GoogleSignin.signIn();
-      //             console.log("id token: ", idToken)
       const userInfo = await GoogleSignin.signIn();
       const idToken = userInfo.idToken;
 
@@ -853,8 +691,7 @@ const CreateNewAccount = () => {
         }
       }
     } catch (error) {
-      console.log('error: ', error); // Log the error
-      Alert.alert('Network Error', 'Unable to connect to the server.', [
+      Alert.alert('Network Error', 'Unable to validate email', [
         {text: 'OK', style: 'cancel'},
       ]);
       return false;
@@ -968,63 +805,15 @@ const CreateNewAccount = () => {
         return res.message === 'User Cleared.';
       }
     } catch (error) {
-      Alert.alert('Network Error', 'Unable to connect to the server.');
+      Alert.alert('User Error', 'There is already an account with that email.');
     }
 
     setLoading(false);
     return false;
   };
-  //todo add later
-  //     let {name} = useParams();
-
-  // const handleCreateAccount = async () => {
-  //   const isValid = await validateUser();
-  //   if (isValid) {
-  //     // Implement account creation logic
-  //     console.log('Account creation initiated');
-  //   }
-  // };
-
-  //     const fileToBlob = async (uri) => {
-  //         try {
-  //             console.log("1: ", uri);
-  //
-  //             let path = uri;
-  //             if (uri.startsWith('file://')){
-  //                 path = uri.replace('file://', '')
-  //             }
-  //
-  //             // Read the file as base64
-  //             const response = await RNFetchBlob.fs.readFile(path, 'base64');
-  //             console.log("2");
-  //
-  //             // Convert base64 string to byte array
-  //             const byteCharacters = atob(response);
-  //             const byteNumbers = new Array(byteCharacters.length);
-  //             for (let i = 0; i < byteCharacters.length; i++) {
-  //                 byteNumbers[i] = byteCharacters.charCodeAt(i);
-  //             }
-  //             const byteArray = new Uint8Array(byteNumbers);
-  //
-  //             // Create Blob from byte array
-  //             const blob = new Blob([byteArray], { type: 'application/octet-stream' });
-  //             console.log("3");
-  //
-  //             return blob;
-  //         } catch (error) {
-  //             console.error('Error converting file to Blob:', error);
-  //             throw error;
-  //         }
-  //     };
 
   const svgToBlob = async (svgString: string | Blob) => {
     try {
-      //             const byteCharacters = atob(svgString);
-      //             const byteNumbers = new Array(byteCharacters.length);
-      //             for (let i = 0; i < byteCharacters.length; i++){
-      //                 byteNumbers[i] = byteCharacters.charCodeAt(i)
-      //             }
-      //             const byteArray = new Uint8Array(byteNumbers);
       // @ts-ignore
       const blob = new Blob([svgString], {type: 'image/svg+xml'});
       return blob;
@@ -1037,8 +826,6 @@ const CreateNewAccount = () => {
   const getFcmToken = async () => {
     const fcmToken = await messaging().getToken();
     if (fcmToken) {
-      // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
-      // Save the token to your backend if needed
       return fcmToken;
     } else {
       console.log('Failed to get FCM token');
@@ -1048,21 +835,6 @@ const CreateNewAccount = () => {
   const accountCreation = async () => {
     setLoading(true);
     let token = await getFcmToken();
-
-    // const svgString = profilePic;
-
-    //         const formData = new FormData();
-    //         formData.append('image', {
-    //             uri: profilePic,
-    //             type: 'image/jpeg', // or the appropriate type based on your image
-    //             name: 'image.jpg', // or the name of your image file
-    //         });
-    //         formData.append('avatar', {
-    //             uri: svgUri, // You need to generate this URI from your SVG component
-    //             type: 'image/svg+xml',
-    //             name: 'avatar.svg'
-    //         });
-    //
 
     if (password !== confirmPass) {
       Alert.alert('Error', 'Passwords do not match');
@@ -1153,25 +925,9 @@ const CreateNewAccount = () => {
           }
 
           if (res.message === 'User Created.') {
-            //                         payload = {
-            //                             host: window.location.host,
-            //                             event: WebTrackingEvent.Signup,
-            //                             timespent: 0,
-            //                             path: location.pathname,
-            //                             latitude: null,
-            //                             longitude: null,
-            //                             metadata: {
-            //                                 mobile: isMobile,
-            //                                 width: window.innerWidth,
-            //                                 height: window.innerHeight,
-            //                                 user_agent: navigator.userAgent,
-            //                                 referrer: document.referrer,
-            //                             },
-            //                         }
-            //                         trackEvent(payload);
             createLogin();
 
-            setCreateLoading(false)
+            setCreateLoading(false);
 
             // @ts-ignore
             navigation.navigate('JourneyMain');
@@ -1366,10 +1122,9 @@ const CreateNewAccount = () => {
           />
           <TouchableOpacity
             onPress={async () => {
-              setCreateLoading(true)
+              setCreateLoading(true);
               let ok = await validateUser();
               if (ok) {
-                console.log('content');
                 debouncedAccountCreation();
               }
             }}

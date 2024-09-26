@@ -41,6 +41,7 @@ const JourneyMain = () => {
   const [showXpPopup, setShowXpPopup] = useState(false);
   const [showEmptyJourney, setShowEmptyJourney] = useState(false);
   const [filteredUnits, setFilteredUnits] = useState<Unit[]>([]);
+  const [nextUnit, setNextUnit] = useState<Unit>()
   const [xpData, setXpData] = useState({
     oldXP: 0,
     newXP: 0,
@@ -217,6 +218,21 @@ const JourneyMain = () => {
         }),
       );
 
+      // Set nextUnit if fetchedUnits has more than 1 unit
+      if (fetchedUnits.length > 1) {
+        const nextUnit = fetchedUnits[fetchedUnits.length - 1];
+        setNextUnit(nextUnit);
+        // Slice off the last unit from the fetched units, as in the original logic
+        const slicedUnits = fetchedUnits.slice(0, -1);
+        setUnits(prevUnits =>
+          loadMore ? [...slicedUnits, ...prevUnits] : slicedUnits,
+        );
+      } else {
+        setUnits(prevUnits =>
+          loadMore ? [...fetchedUnits, ...prevUnits] : fetchedUnits,
+        );
+      }
+
       if (fetchedUnits.length < 5) {
         setHasMore(false);
       }
@@ -259,6 +275,39 @@ const JourneyMain = () => {
       activeJourney && selectedLanguage !== 'All' && filteredUnits.length === 0,
     );
   }, [activeJourney, selectedLanguage, filteredUnits]);
+
+  const handleAddUnitToMap = async () => {
+    if (!nextUnit) {
+      return;
+    }
+
+    setLoading(true);
+
+    const response = await fetch(`${API_URL}/api/journey/addUnitToMap`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        unit_id: nextUnit._id,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch tasks in unit');
+    }
+
+    const res = await response.json();
+
+    if (res && res.success) {
+      getTasks().then(() => {
+        setLoading(false);
+      });
+    } else {
+      console.error('Failed to add unit to map');
+      return;
+    }
+  };
 
   const handleMap = (unit: Unit, index: number) => {
     const isLastIndex = index === filteredUnits.length - 1;
@@ -323,7 +372,7 @@ const JourneyMain = () => {
                 textColor={theme.colors.primaryVariant}
                 onPress={() => {
                   // handle adding unit to journey
-                  console.log('Add Unit To Journey');
+                  handleAddUnitToMap();
                 }}>
                 Add Unit To Journey
               </AwesomeButton>

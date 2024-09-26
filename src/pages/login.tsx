@@ -206,16 +206,6 @@ const Login = () => {
   );
 
   const startGoogle = async () => {
-    //     const payload = {
-    //       host: 'mobile_device', // Modify as needed
-    //       event: 'LoginStart',
-    //       timespent: 0,
-    //       path: 'Google Login',
-    //       latitude: null,
-    //       longitude: null,
-    //       metadata: { "auth_provider": "google" },
-    //     };
-    //     trackEvent(payload);
     const userInfo = await GoogleSignin.signIn();
     setExternal(true);
     // @ts-ignore
@@ -279,17 +269,6 @@ const Login = () => {
   );
 
   const onSuccessGithub = async (gh: {code: string}) => {
-    //         trackEvent({
-    //             host: 'mobile_app', // Since there's no window.location in RN
-    //             event: 'LoginStart',
-    //             timespent: 0,
-    //             path: 'GitHub Login',
-    //             latitude: null,
-    //             longitude: null,
-    //             metadata: { "auth_provider": "github" },
-    //         });
-
-    // You can now check which page is currently active
 
     if (currentRouteName === 'SignUp') {
       return;
@@ -361,7 +340,7 @@ const Login = () => {
       // Authorize GitHub and get the response
       const resAuth = await authorizeGithub(password);
 
-      const xpValue = res["xp"] !== undefined ? res["xp"] : 0;
+      const xpValue = res.xp !== undefined ? res.xp : 0;
       await AsyncStorage.setItem('loginXP', JSON.stringify(xpValue));
 
       // If resAuth is not a standard response object, handle it differently
@@ -410,104 +389,34 @@ const Login = () => {
     }
   };
 
-  // const githubConfirm = async () => {
-  //   console.log("in github confirm: ", ghConfirm)
-  //   if (!ghConfirm) {
-  //     Alert.alert('Error', 'BAD');
-  //     setLoading(false);
-  //     return;
-  //   }
-  //   console.log("here we go")
-  //
-  //   setLoading(true);
-  //   try {
-  //     //not done because its not up to test github
-  //     let res = await fetch(`${API_URL}/api/auth/confirmLoginWithGithub`, {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({password: password}),
-  //     });
-  //     console.log("new res is: ", res)
-  //     // await AsyncStorage.setItem(
-  //     //   'loginXP',
-  //     //   JSON.stringify(
-  //     //     //@ts-ignore
-  //     //     res.xp,
-  //     //   ),
-  //     // );
-  //
-  //     console.log("jsut set item")
-  //
-  //     res = await authorizeGithub(password);
-  //     console.log("just authroized")
-  //     //@ts-ignore
-  //     let auth = res.data;
-  //     //@ts-ignore
-  //     let token = res.token;
-  //
-  //     console.log("auth here is: ", res.data)
-  //     console.log("token is: ", res.token)
-  //
-  //     if (auth.user) {
-  //       let authState = {
-  //         ...initialAuthStateUpdate,
-  //         authenticated: true,
-  //         token: token,
-  //         ...auth,
-  //       };
-  //       dispatch(updateAuthState(authState));
-  //
-  //       setTimeout(() => {
-  //         // @ts-ignore
-  //         navigation.navigate('JourneyMain');
-  //       }, 1000);
-  //     } else {
-  //       Alert.alert(
-  //         'Login Failed',
-  //         'The provided username or password is incorrect.',
-  //       );
-  //     }
-  //   } catch (error) {
-  //     console.log("error is: ", error)
-  //     Alert.alert('Login Error', 'An error occurred during the login process.');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
   const onFailureGithub = () => {
     Alert.alert('Login Failed', 'GitHub login failed. Please try again.');
   };
 
-  // const getFcmToken = async () => {
-  //   const fcmToken = await messaging().getToken();
-  //   if (fcmToken) {
-  //     console.log('FCM Token:', fcmToken);
-  //     // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
-  //     // Save the token to your backend if needed
-  //     return fcmToken;
-  //   } else {
-  //     console.log('Failed to get FCM token');
-  //   }
-  // };
-
   const loginFunction = async () => {
     setLoading(true);
-    // let token = getFcmToken();
-    // console.log("token is: ", token)
-
-    //         const payload = {
-    //             event: 'LoginStart',
-    //             metadata: {},
-    //         };
-    //         trackEvent(payload);
 
     try {
       let res = await authorize(username, password);
       let auth = res.data;
       let token = res.token;
+
+      console.log('res is: ', res);
+
+      if (res !== undefined && res.includes('attempts left')) {
+        let attemptsRemaining = res[0]; // Assuming auth[0] contains the attempts count
+        Alert.alert(
+          'Login Failed',
+          `The provided username and password did not match. You have ${attemptsRemaining} attempts remaining.`,
+        );
+        setLoading(false);
+      } else if (
+        res !== undefined &&
+        res.includes('Too many failed attempts')
+      ) {
+        Alert.alert('Login failed.', auth);
+        setLoading(false);
+      }
 
       if (auth.user !== undefined) {
         let authState = {
@@ -537,12 +446,6 @@ const Login = () => {
 
         dispatch(updateAuthState(authState));
 
-        //                 const payload = {
-        //                     event: 'Login',
-        //                     metadata: {},
-        //                 };
-        //                 trackEvent(payload);
-
         setLoading(false);
         // @ts-ignore
         navigation.navigate('JourneyMain');
@@ -558,19 +461,14 @@ const Login = () => {
         setLoading(false);
       }
     } catch (error) {
+      console.log('here i am: ', error);
       Alert.alert(
         'Login Error',
-        'An unexpected error occurred: ' + (error.message || error.toString()),
+        'unable to correct to server',
       );
       setLoading(false);
     }
   };
-
-  // const onSuccessGoogle = async (usr: any) => {
-  //   setExternal(true);
-  //   setExternalToken(usr.access_token);
-  //   setExternalLogin('Google');
-  // };
 
   const renderExternal = () => {
     // @ts-ignore

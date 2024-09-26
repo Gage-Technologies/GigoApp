@@ -75,7 +75,6 @@ const CreateNewAccount = () => {
   const [missingPassword, setMissingPassword] = React.useState<boolean>(false);
   const [missingConfirm, setMissingConfirm] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState(false);
-  const [createLoading, setCreateLoading] = React.useState(false);
   const [timezone, setTimezone] = React.useState<TimezoneOption | null>(
     formatTz(moment.tz.guess()),
   );
@@ -694,7 +693,7 @@ const CreateNewAccount = () => {
       Alert.alert('Network Error', 'Unable to validate email', [
         {text: 'OK', style: 'cancel'},
       ]);
-      setCreateLoading(false)
+      setLoading(false)
       return false;
     }
   };
@@ -807,7 +806,7 @@ const CreateNewAccount = () => {
       }
     } catch (error) {
       Alert.alert('User Error', 'There is already an account with that email.');
-      setCreateLoading(false)
+      setLoading(false)
     }
 
     setLoading(false);
@@ -837,6 +836,7 @@ const CreateNewAccount = () => {
   const accountCreation = async () => {
     setLoading(true);
     let token = await getFcmToken();
+    console.log("in account creation")
 
     if (password !== confirmPass) {
       Alert.alert('Error', 'Passwords do not match');
@@ -929,7 +929,7 @@ const CreateNewAccount = () => {
           if (res.message === 'User Created.') {
             createLogin();
 
-            setCreateLoading(false);
+            setLoading(false);
 
             // @ts-ignore
             navigation.navigate('JourneyMain');
@@ -1124,10 +1124,12 @@ const CreateNewAccount = () => {
           />
           <TouchableOpacity
             onPress={async () => {
-              setCreateLoading(true);
+              setLoading(true);
               let ok = await validateUser();
               if (ok) {
                 debouncedAccountCreation();
+              } else {
+                Alert.alert("Not a valid user", "Please use a valid email address")
               }
             }}
             style={styles.buttonExtraCreation}
@@ -1142,10 +1144,10 @@ const CreateNewAccount = () => {
               password === '' ||
               confirmPass === '' ||
               password !== confirmPass ||
-              createLoading
+              loading
             }>
             <Text style={styles.buttonText}>
-              {createLoading ? 'Loading...' : 'Create Account'}
+              {loading ? 'Loading...' : 'Create Account'}
             </Text>
           </TouchableOpacity>
           <View style={styles.socialLogin}>

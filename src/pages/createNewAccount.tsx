@@ -694,6 +694,7 @@ const CreateNewAccount = () => {
       Alert.alert('Network Error', 'Unable to validate email', [
         {text: 'OK', style: 'cancel'},
       ]);
+      setCreateLoading(false)
       return false;
     }
   };
@@ -806,6 +807,7 @@ const CreateNewAccount = () => {
       }
     } catch (error) {
       Alert.alert('User Error', 'There is already an account with that email.');
+      setCreateLoading(false)
     }
 
     setLoading(false);

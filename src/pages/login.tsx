@@ -241,7 +241,7 @@ const Login = () => {
         };
         dispatch(updateAuthState(authState));
         // @ts-ignore
-        navigation.navigate('home');
+        navigation.navigate('JourneyMain');
       } else {
         Alert.alert('Login Failed', 'The provided credentials did not match.');
       }
@@ -269,7 +269,6 @@ const Login = () => {
   );
 
   const onSuccessGithub = async (gh: {code: string}) => {
-
     if (currentRouteName === 'SignUp') {
       return;
     }
@@ -401,24 +400,7 @@ const Login = () => {
       let auth = res.data;
       let token = res.token;
 
-      console.log('res is: ', res);
-
-      if (res !== undefined && res.includes('attempts left')) {
-        let attemptsRemaining = res[0]; // Assuming auth[0] contains the attempts count
-        Alert.alert(
-          'Login Failed',
-          `The provided username and password did not match. You have ${attemptsRemaining} attempts remaining.`,
-        );
-        setLoading(false);
-      } else if (
-        res !== undefined &&
-        res.includes('Too many failed attempts')
-      ) {
-        Alert.alert('Login failed.', auth);
-        setLoading(false);
-      }
-
-      if (auth.user !== undefined) {
+      if (auth !== undefined && auth.user !== undefined) {
         let authState = {
           ...initialAuthStateUpdate,
           token: token,
@@ -449,11 +431,14 @@ const Login = () => {
         setLoading(false);
         // @ts-ignore
         navigation.navigate('JourneyMain');
-      } else if (auth.includes('Too many failed attempts')) {
-        Alert.alert('Login failed.', auth);
+        return;
+      }
+
+      if (res.includes('Too many failed attempts')) {
+        Alert.alert('Login failed.', res);
         setLoading(false);
       } else {
-        let attemptsRemaining = auth[0]; // Assuming auth[0] contains the attempts count
+        let attemptsRemaining = res[0]; // Assuming auth[0] contains the attempts count
         Alert.alert(
           'Login Failed',
           `The provided username and password did not match. You have ${attemptsRemaining} attempts remaining.`,
@@ -461,11 +446,7 @@ const Login = () => {
         setLoading(false);
       }
     } catch (error) {
-      console.log('here i am: ', error);
-      Alert.alert(
-        'Login Error',
-        'unable to correct to server',
-      );
+      Alert.alert('Login Error', 'unable to connect to server');
       setLoading(false);
     }
   };

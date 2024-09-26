@@ -75,6 +75,7 @@ const CreateNewAccount = () => {
   const [missingPassword, setMissingPassword] = React.useState<boolean>(false);
   const [missingConfirm, setMissingConfirm] = React.useState<boolean>(false);
   const [loading, setLoading] = React.useState(false);
+  const [createLoading, setCreateLoading] = React.useState(false);
   const [timezone, setTimezone] = React.useState<TimezoneOption | null>(
     formatTz(moment.tz.guess()),
   );
@@ -1170,6 +1171,8 @@ const CreateNewAccount = () => {
             //                         trackEvent(payload);
             createLogin();
 
+            setCreateLoading(false)
+
             // @ts-ignore
             navigation.navigate('JourneyMain');
           }
@@ -1363,6 +1366,7 @@ const CreateNewAccount = () => {
           />
           <TouchableOpacity
             onPress={async () => {
+              setCreateLoading(true)
               let ok = await validateUser();
               if (ok) {
                 console.log('content');
@@ -1380,9 +1384,12 @@ const CreateNewAccount = () => {
               email === '' ||
               password === '' ||
               confirmPass === '' ||
-              password !== confirmPass
+              password !== confirmPass ||
+              createLoading
             }>
-            <Text style={styles.buttonText}>Create Account</Text>
+            <Text style={styles.buttonText}>
+              {createLoading ? 'Loading...' : 'Create Account'}
+            </Text>
           </TouchableOpacity>
           <View style={styles.socialLogin}>
             <View style={{flexDirection: 'column'}}>

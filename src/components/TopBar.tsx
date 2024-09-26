@@ -21,6 +21,7 @@ import {
   updateAuthState,
 } from '../reducers/auth.ts'; // Import the new SVG
 import { refreshToken } from '../utils/refreshToken.ts';
+import { useNavigation } from "@react-navigation/native";
 
 // define the available programming languages with their icons
 const programmingLanguages = [
@@ -63,6 +64,7 @@ const TopBar = () => {
   );
   const [membership, setMembership] = React.useState(authState.role);
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
@@ -185,12 +187,12 @@ const TopBar = () => {
       <View style={styles.rightSection}>
         <View style={styles.statsContainer}>
           {streakData && (
-            <View style={styles.streakContainer}>
+            <TouchableOpacity style={styles.streakContainer} onPress={() => navigation.navigate('Stats')}>
               <Icon name="fire" size={24} color={FIRE_ORANGE} />
               <Text style={[styles.statsText, {color: theme.colors.onSurface}]}>
                 {streakData.current_streak}
               </Text>
-            </View>
+            </TouchableOpacity>
           )}
           {membership === 0 && <HeartTracker />}
         </View>

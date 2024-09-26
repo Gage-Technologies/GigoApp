@@ -1,6 +1,11 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useRef, useCallback} from 'react';
-import {View, KeyboardAvoidingView, Platform} from 'react-native';
+import React, {useState, useRef, useCallback, useEffect} from 'react';
+import {
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  ActivityIndicator,
+} from 'react-native';
 import {WebView} from 'react-native-webview';
 import {useSelector} from 'react-redux';
 import {selectAuthState} from '../reducers/auth';
@@ -8,7 +13,7 @@ import {useNavigation} from '@react-navigation/native';
 import XpPopup from '../components/XpPopup';
 import ByteKeyboard from '../components/ByteKeyboard/ByteKeyboard';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {debounce} from 'lodash'; // make sure to install lodash if not already present
+import {debounce} from 'lodash';
 
 // component to display a byte or journey in a webview
 const Byte: React.FC<{
@@ -17,7 +22,6 @@ const Byte: React.FC<{
   let {byteId, isJourney} = route.params;
 
   const authState = useSelector(selectAuthState);
-
   const navigation = useNavigation();
   const [showXpPopup, setShowXpPopup] = useState(false);
   const [xpData, setXpData] = useState({
@@ -29,8 +33,23 @@ const Byte: React.FC<{
     gainedXP: 0,
     renown: 0,
   });
-
   const webViewRef = useRef<WebView>(null);
+  const [key, setKey] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // force re-render of webview on mount
+  useEffect(() => {
+    setKey(prevKey => prevKey + 1);
+  }, []);
+
+  const getWebViewSource = useCallback(
+    () => ({
+      uri: `https://www.gigo.dev/byte/${byteId}?embed=true&viewport=mobile&appToken=${
+        authState.token
+      }${isJourney ? '&journey=true' : ''}`,
+    }),
+    [byteId, isJourney, authState.token],
+  );
 
   console.log('authState', authState);
 
@@ -203,7 +222,7 @@ const Byte: React.FC<{
         `);
       }
     }, 10), // 100ms debounce time, adjust as needed
-    [webViewRef]
+    [webViewRef],
   );
 
   /**
@@ -226,21 +245,41 @@ const Byte: React.FC<{
         contentContainerStyle={{flexGrow: 1}}
         keyboardShouldPersistTaps="handled">
         <View style={{flex: 1}}>
+          {isLoading && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <ActivityIndicator size="large" color="#0000ff" />
+            </View>
+          )}
           <WebView
+            key={key}
             ref={webViewRef}
-            source={{
-              uri: `https://www.gigo.dev/byte/${byteId}?embed=true&viewport=mobile&appToken=${
-                authState.token
-              }${isJourney ? '&journey=true' : ''}`,
-            }}
+            source={getWebViewSource()}
             onNavigationStateChange={handleNavigationStateChange}
+            onLoadStart={() => setIsLoading(true)}
+            onLoadEnd={() => setIsLoading(false)}
           />
           {showXpPopup && (
-            <XpPopup {...xpData} popupClose={handleCloseXpPopup} homePage={false} />
+            <XpPopup
+              {...xpData}
+              popupClose={handleCloseXpPopup}
+              homePage={false}
+            />
           )}
         </View>
       </KeyboardAwareScrollView>
-      <ByteKeyboard onKeyPress={handleKeyPress} onCursorMove={handleCursorMove} />
+      <ByteKeyboard
+        onKeyPress={handleKeyPress}
+        onCursorMove={handleCursorMove}
+      />
     </KeyboardAvoidingView>
   );
 };

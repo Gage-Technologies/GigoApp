@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,13 +8,14 @@ import {
   Alert,
   ScrollView,
 } from 'react-native';
-import {useTheme, IconButton, Button} from 'react-native-paper';
+import { useTheme, IconButton } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Config from 'react-native-config';
-import {debounce} from 'lodash';
+import { debounce } from 'lodash';
 import DetourCard from '../components/DetourCard';
 import JourneyDetourPopup from '../components/JourneyDetourPopup';
-import {Unit} from '../models/Journey';
-import {useRoute} from '@react-navigation/native';
+import { Unit } from '../models/Journey';
+import { useRoute } from '@react-navigation/native';
 
 interface JourneyGroups {
   [key: string]: Unit[];
@@ -27,7 +28,7 @@ const Detour = () => {
   const [searchPending, setSearchPending] = useState(false);
   const [journeyGroups, setJourneyGroups] = useState<JourneyGroups>({});
   const [loading, setLoading] = useState(false);
-  const [groupStates, setGroupStates] = useState<{[key: string]: any}>({});
+  const [groupStates, setGroupStates] = useState<{ [key: string]: any }>({});
 
   // state to manage popup visibility and selected unit
   const [isPopupVisible, setPopupVisible] = useState(false);
@@ -87,7 +88,7 @@ const Detour = () => {
 
   const handleSearchTextChange = (text: string) => {
     setSearchText(text);
-    if (text.length > 2) {
+    if (text.length > 0) {
       searchJourneyUnitsDebounced(text);
     } else {
       setSearchUnits([]);
@@ -131,7 +132,7 @@ const Detour = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({group_id: unitId}),
+          body: JSON.stringify({ group_id: unitId }),
         },
       );
 
@@ -201,13 +202,10 @@ const Detour = () => {
               <View style={styles.categoryHeader}>
                 <Text style={styles.categoryTitle}>{category}</Text>
                 {Units.length === 4 && (
-                  <Button onPress={() => handleShowAllToggle(GroupID)}>
-                    <Text>
-                      {groupStates[GroupID]?.showAll
-                        ? 'Show Less'
-                        : 'Show More'}
-                    </Text>
-                  </Button>
+                  <IconButton
+                    icon={groupStates[GroupID]?.showAll ? 'chevron-up' : 'chevron-down'}
+                    onPress={() => handleShowAllToggle(GroupID)}
+                  />
                 )}
               </View>
               <View style={styles.unitsContainer}>
@@ -277,47 +275,50 @@ const Detour = () => {
       flex: 1,
       backgroundColor: theme.colors.background,
     },
-    titleText: {
-      fontSize: 24,
-      color: theme.colors.text,
-      fontWeight: 'bold',
-      ...theme.fonts.medium,
-      marginVertical: 20,
-      textAlign: 'center',
+    header: {
+      paddingTop: 10,
+      paddingBottom: 10,
+      paddingHorizontal: 20,
+      backgroundColor: theme.colors.primary,
     },
-    headerLine: {
-      height: 1,
-      backgroundColor: '#ccc',
-      width: '100%',
-      marginVertical: 10,
+    titleText: {
+      fontSize: 32,
+      color: theme.colors.surface,
+      fontWeight: '700',
+      ...theme.fonts.medium,
+    },
+    subtitleText: {
+      fontSize: 16,
+      color: theme.colors.surfaceVariant,
+      ...theme.fonts.regular,
+      marginTop: 4,
     },
     searchBarContainer: {
-      width: '90%',
-      marginTop: 10,
-      marginBottom: 20,
+      marginTop: 20,
+      marginBottom: 10,
+      marginHorizontal: 20,
       borderRadius: 25,
       backgroundColor: theme.colors.surface,
       flexDirection: 'row',
       alignItems: 'center',
       paddingHorizontal: 15,
-      shadowColor: '#000',
-      shadowOffset: {width: 0, height: 2},
-      shadowOpacity: 0.25,
-      shadowRadius: 3.84,
       elevation: 5,
-      alignSelf: 'center',
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
     },
     searchBar: {
       flex: 1,
-      height: 40,
+      height: 50,
       fontSize: 16,
       color: theme.colors.text,
       ...theme.fonts.regular,
     },
     content: {
       flexGrow: 1,
-      alignItems: 'center',
-      paddingHorizontal: '5%',
+      paddingTop: 10,
+      paddingHorizontal: 20,
       paddingBottom: 70,
     },
     journeyGroupsContainer: {
@@ -357,22 +358,24 @@ const Detour = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titleText}>Take A Detour</Text>
-      <View style={styles.headerLine} />
-      <View style={styles.searchBarContainer}>
-        <IconButton
-          icon="magnify"
-          size={25}
-          //@ts-ignore
-          color={theme.colors.surface}
-        />
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search Detours..."
-          placeholderTextColor={theme.colors.placeholder}
-          value={searchText}
-          onChangeText={handleSearchTextChange}
-        />
+      <View style={styles.header}>
+        <Text style={styles.titleText}>Detour</Text>
+        <Text style={styles.subtitleText}>Discover new journeys</Text>
+        <View style={styles.searchBarContainer}>
+          <TextInput
+            style={styles.searchBar}
+            placeholder="Search journeys..."
+            placeholderTextColor={theme.colors.placeholder}
+            value={searchText}
+            onChangeText={handleSearchTextChange}
+          />
+          <IconButton
+            icon="magnify"
+            color={theme.colors.primary}
+            size={24}
+            onPress={() => searchJourneyUnits(searchText)}
+          />
+        </View>
       </View>
       <ScrollView contentContainerStyle={styles.content}>
         {renderContent()}

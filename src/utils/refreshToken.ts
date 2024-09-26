@@ -14,7 +14,15 @@ export const refreshToken = async (dispatch: any) => {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to refresh token');
+      let errorMessage = '';
+      try {
+        errorMessage = await response.json();
+      } catch (error) {
+        errorMessage = response.statusText;
+      }
+      throw new Error(
+        `Failed to refresh token: ${response.status} : ${errorMessage}`,
+      );
     }
 
     const data = await response.json();

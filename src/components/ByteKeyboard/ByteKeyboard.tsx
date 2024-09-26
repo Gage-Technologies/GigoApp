@@ -104,6 +104,7 @@ const styles = StyleSheet.create({
   container: {
     paddingBottom: 8,
     paddingTop: 8,
+    marginBottom: 48,
   },
   keyboardContent: {
     flexDirection: 'row',

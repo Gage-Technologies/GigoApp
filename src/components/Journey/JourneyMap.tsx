@@ -60,7 +60,7 @@ const JourneyMap = ({
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({unit_id: unitId, user_id: 1684239109222039552}),
+          body: JSON.stringify({unit_id: unitId}),
         });
 
         const result = await response.json();
@@ -216,7 +216,7 @@ const JourneyMap = ({
           (offsetBase / 2);
       }
 
-      console.log(index, scalingFactor);
+      // console.log(index, scalingFactor);
 
       // calculate offset to create a zigzag pattern
       offset = inverse ? maxOffset : -maxOffset;

@@ -99,7 +99,7 @@ const Byte: React.FC<{
     if (pathParts[1] === 'journey') {
       // navigate to the journey page
       // @ts-ignore
-      navigation.navigate('JourneyMain');
+      navigation.navigate('JourneyMain', {reload: true});
       // return false to prevent default navigation
       return false;
     }

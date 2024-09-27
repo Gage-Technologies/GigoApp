@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useState, useEffect, useRef, useCallback} from 'react';
 import {
   ScrollView,
   View,
@@ -18,7 +18,7 @@ import HandoutOverlay from '../components/Journey/HandoutOverlay';
 import {getTextColor} from '../services/utils';
 import AwesomeButton from 'react-native-really-awesome-button';
 import {BlurView} from '@react-native-community/blur';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import XpPopup from '../components/XpPopup';
 import {useLanguage} from '../LanguageContext';
@@ -41,7 +41,7 @@ const JourneyMain = () => {
   const [showXpPopup, setShowXpPopup] = useState(false);
   const [showEmptyJourney, setShowEmptyJourney] = useState(false);
   const [filteredUnits, setFilteredUnits] = useState<Unit[]>([]);
-  const [nextUnit, setNextUnit] = useState<Unit>()
+  const [nextUnit, setNextUnit] = useState<Unit>();
   const [xpData, setXpData] = useState({
     oldXP: 0,
     newXP: 0,
@@ -55,6 +55,7 @@ const JourneyMain = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
+  const [renderKey, setRenderKey] = useState(0)
 
   const API_URL = Config.API_URL;
   const theme = useTheme();
@@ -63,6 +64,10 @@ const JourneyMain = () => {
   const navigation = useNavigation();
 
   const dispatch = useDispatch();
+
+  const forceRerender = () => {
+    setRenderKey(prevKey => prevKey + 1); // Change the key to force re-render
+  };
 
   useEffect(() => {
     const fetchSessionData = async () => {
@@ -74,7 +79,6 @@ const JourneyMain = () => {
 
         if (xpLogin && xpLogin !== 'undefined' && xpLogin !== '0') {
           setShowXpPopup(true);
-          console.log('xpLogin: ', xpLogin);
           setXpData(JSON.parse(xpLogin));
         }
       } catch (error) {
@@ -104,7 +108,6 @@ const JourneyMain = () => {
       );
 
       if (!followResponse.ok) {
-        console.log('follow response is: ', followResponse.ok);
         throw new Error('Network response was not ok');
       }
 
@@ -113,10 +116,8 @@ const JourneyMain = () => {
       let authState = Object.assign({}, initialAuthStateUpdate);
       // @ts-ignore
       authState.role = res.current_subscription;
-      console.log('res auth role here: ', res.current_subscription);
       dispatch(updateAuthState(authState));
       // dispatch(updateAuthState(authState));
-      console.log('res is: ', res);
     } catch (error) {
       console.log('error getting user membership level');
     }
@@ -138,8 +139,6 @@ const JourneyMain = () => {
         body: JSON.stringify({}),
       });
 
-      console.log('response is: ', response);
-
       if (!response.ok) {
         throw new Error(
           `Failed to fetch start of journey, status ${response.status}`,
@@ -147,10 +146,10 @@ const JourneyMain = () => {
       }
 
       let map = await response.json();
-      console.log('Map response:', map);
       if (!map.started_journey) {
         setActiveJourney(false);
         setLoading(false);
+        setInitialized(true);
         return;
       }
 
@@ -175,6 +174,7 @@ const JourneyMain = () => {
       if (!res.success) {
         setActiveJourney(false);
         setLoading(false);
+        setInitialized(true);
         return;
       }
 
@@ -241,23 +241,34 @@ const JourneyMain = () => {
         loadMore ? [...fetchedUnits, ...prevUnits] : fetchedUnits,
       );
       setActiveJourney(true);
-      setLoading(false);
-      setIsLoadingMore(false);
+      // setLoading(false);
+      // setIsLoadingMore(false);
     } catch (error: any) {
       Alert.alert(
         'Error',
         error.message ||
           'Failed to fetch tasks. Please check your network connection.',
       );
+      // setLoading(false);
+      // setIsLoadingMore(false);
+    } finally {
       setLoading(false);
       setIsLoadingMore(false);
+      setInitialized(true);
     }
   };
 
   useEffect(() => {
     console.log('Fetching tasks...');
-    getTasks().then(() => setInitialized(true));
+    getTasks();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      getTasks();
+      forceRerender();
+    }, []),
+  );
 
   useEffect(() => {
     if (selectedLanguage === 'All') {
@@ -343,7 +354,7 @@ const JourneyMain = () => {
             />
           </View>
         </TouchableOpacity>
-        <View style={styles.unitContent}>
+        <View style={styles.unitContent} key={renderKey}>
           <JourneyMap
             unitId={unit._id}
             unitIndex={index}
@@ -436,7 +447,6 @@ const JourneyMain = () => {
       const res = await response.json();
 
       if (res && res.success) {
-        console.log('Introductory unit added successfully!');
         await getTasks();
       } else {
         console.error('Failed to add introductory unit to map');

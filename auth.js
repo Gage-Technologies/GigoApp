@@ -18,17 +18,6 @@ function createBasicAuthHeader(username, password) {
   return `Basic ${base64Credentials}`;
 }
 
-// const getFcmToken = async () => {
-//   const fcmToken = await messaging().getToken();
-//   if (fcmToken) {
-//     console.log('FCM Token:', fcmToken);
-//     // Alert.alert('FCM Token', fcmToken); // Display the token for testing purposes
-//     // Save the token to your backend if needed
-//     return fcmToken;
-//   } else {
-//     console.log('Failed to get FCM token');
-//   }
-// };
 async function getFcmToken() {
   const fcmToken = await messaging().getToken();
   if (fcmToken) {
@@ -96,7 +85,12 @@ export async function authorize(username, password) {
   console.log('auth res: ', res);
 
   if (res.message && res.message.includes('Too many failed attempts')) {
-    Alert.alert('Too many failed login attempts', 'Please try again later.');
+    // Alert.alert('Too many failed login attempts', 'Please try again later.');
+    return res.message;
+  }
+
+  if (res.message && res.message.includes('attempts left')) {
+    // Alert.alert("Wrong login credentials", res.message)
     return res.message;
   }
 

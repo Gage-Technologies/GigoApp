@@ -21,6 +21,7 @@ import TopBar from './components/TopBar'; // new import
 import {selectAuthState} from './reducers/auth.ts';
 import {handleDeepLink} from './deepLinking.tsx';
 import {useSelector} from 'react-redux';
+import {selectBottomBarVisible} from './reducers/appSettings.ts';
 
 const Stack = createNativeStackNavigator();
 
@@ -134,16 +135,15 @@ const ConditionalBottomBar = ({
 }: {
   currentRouteName: string;
 }) => {
+  const bottomBarVisible = useSelector(selectBottomBarVisible);
+
   if (
     currentRouteName === 'Login' ||
     currentRouteName === 'SignUp' ||
-    currentRouteName === 'ForgotPassword'
+    currentRouteName === 'ForgotPassword' ||
+    currentRouteName === 'Byte' ||
+    !bottomBarVisible
   ) {
-    return null;
-  }
-
-  // do not show bottom bar on byte page
-  if (currentRouteName === 'Byte') {
     return null;
   }
 

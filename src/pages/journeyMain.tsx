@@ -31,6 +31,7 @@ import {
   updateAuthState,
 } from '../reducers/auth';
 import {useDispatch, useSelector} from 'react-redux';
+import { setBottomBarVisible } from '../reducers/appSettings';
 
 const JourneyMain = () => {
   const [initialized, setInitialized] = useState(false);
@@ -333,6 +334,14 @@ const JourneyMain = () => {
     }
   };
 
+  const triggerHandout = (index: number) => {
+    if (index === null || index === undefined) {
+      return;
+    }
+    dispatch(setBottomBarVisible(false));
+    setShowHandout(index);
+  };
+
   const handleMap = (unit: Unit, index: number) => {
     const isLastIndex = index === filteredUnits.length - 1;
     const allCompleted = unit.tasks.every(task => task.completed);
@@ -355,7 +364,7 @@ const JourneyMain = () => {
         key={unit._id}>
         <HapticTouchableOpacity
           style={[styles.unitHeader, {backgroundColor: unit.color}]}
-          onPress={() => setShowHandout(showHandout === index ? null : index)}>
+          onPress={() => triggerHandout(index)}>
           <Text style={[styles.unitTitle, {color: getTextColor(unit.color)}]}>
             {unit.name}
           </Text>
@@ -477,6 +486,11 @@ const JourneyMain = () => {
     }
   };
 
+  const removeHandout = () => {
+    setShowHandout(null);
+    dispatch(setBottomBarVisible(true));
+  };
+
   return (
     <>
       <ScrollView
@@ -529,11 +543,6 @@ const JourneyMain = () => {
             <ActivityIndicator size="large" color={theme.colors.primary} />
           </View>
         )}
-        <HandoutOverlay
-          isVisible={showHandout !== null}
-          onClose={() => setShowHandout(null)}
-          unit={filteredUnits[showHandout ?? 0]}
-        />
       </ScrollView>
       {/* {activeJourney && !showEmptyJourney && filteredUnits.length > 0 && (
         <HapticTouchableOpacity
@@ -549,6 +558,11 @@ const JourneyMain = () => {
       {showXpPopup && (
         <XpPopup {...xpData} popupClose={handleCloseXpPopup} homePage={false} />
       )}
+      <HandoutOverlay
+        isVisible={showHandout !== null}
+        onClose={removeHandout}
+        unit={showHandout !== null ? filteredUnits[showHandout] : null}
+      />
     </>
   );
 };

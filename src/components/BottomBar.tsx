@@ -143,6 +143,7 @@ const styles = StyleSheet.create({
     bottom: 20,
     left: 20,
     right: 20,
+    zIndex: 100,
   },
   content: {
     flexDirection: 'row',

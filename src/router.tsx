@@ -12,6 +12,7 @@ import AccountSettings from './pages/accountSettings';
 import JourneyMain from './pages/journeyMain';
 import Byte from './pages/byte';
 import Detour from './pages/detour.tsx';
+import QuizPage from './pages/quiz';
 import Stats from './pages/stats.tsx';
 import AboutJourney from './pages/aboutJourney.tsx';
 import SpeedDial from './components/SpeedDial';
@@ -99,6 +100,12 @@ const AppRouter = () => {
           <Stack.Screen
             name="ForgotPassword"
             component={ForgotPassword}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Quiz"
+            // @ts-ignore
+            component={QuizPage}
             options={{headerShown: false}}
           />
         </Stack.Navigator>

@@ -17,10 +17,12 @@ const baseColors = {
   onSurface: '#FFFFFF', // White on surface
   onError: '#FFFFFF', // White on error
   text: '#FFFFFF', // White text
+  textSecondary: '#9B9B9B', // Grey text
   disabled: '#9B9B9B', // Grey
   placeholder: '#9B9B9B', // Grey
   backdrop: '#1c1c1a', // Same as background
   notification: '#FFFCAB', // Yellowish
+  paper: '#3a3a38',
 };
 
 // Define typography based on the Poppins font, mirroring the styles used in your web app

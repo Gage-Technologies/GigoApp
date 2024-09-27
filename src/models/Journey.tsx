@@ -8,6 +8,7 @@ export interface Task {
   node_below: string | null;
   completed: boolean;
   code_source_id: string | null;
+  code_source_type: number;
   inProgress: boolean;
 }
 

@@ -91,8 +91,19 @@ const JourneyMap = ({
   const handlePressTask = (task: Task) => {
     // navigate to the byte page
     console.log(JSON.stringify(task));
-    // @ts-ignore
-    navigation.navigate('Byte', {byteId: task.code_source_id, isJourney: true});
+    if (task.code_source_type === 4) {
+      // @ts-ignore
+      navigation.navigate('Quiz', {
+        quizId: task.code_source_id,
+        isJourney: true,
+      });
+    } else {
+      // @ts-ignore
+      navigation.navigate('Byte', {
+        byteId: task.code_source_id,
+        isJourney: true,
+      });
+    }
   };
 
   const toggleHandout = () => {

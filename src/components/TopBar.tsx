@@ -1,6 +1,7 @@
 /* eslint-disable react-native/no-inline-styles */
 import React, {useState, useEffect} from 'react';
-import { View, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import {View, StyleSheet, Alert} from 'react-native';
+import HapticTouchableOpacity from './Buttons/HapticTouchableOpacity';
 import {Text, useTheme, Menu} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import CppLogo from '../img/Cpp_Logo.svg';
@@ -125,7 +126,7 @@ const TopBar = () => {
       {/*    onDismiss={closeMenu}*/}
       {/*    contentStyle={{backgroundColor: theme.colors.surface}}*/}
       {/*    anchor={*/}
-      {/*      <TouchableOpacity style={styles.languageSelector} onPress={openMenu}>*/}
+      {/*      <HapticTouchableOpacity style={styles.languageSelector} onPress={openMenu}>*/}
       {/*        {renderLogo(*/}
       {/*          programmingLanguages.find(lang => lang.name === selectedLanguage)*/}
       {/*            ?.icon,*/}
@@ -135,7 +136,7 @@ const TopBar = () => {
       {/*          size={24}*/}
       {/*          color={theme.colors.onSurface}*/}
       {/*        />*/}
-      {/*      </TouchableOpacity>*/}
+      {/*      </HapticTouchableOpacity>*/}
       {/*    }*/}
       {/*    style={{marginTop: 40}} // Adjust this value as needed*/}
       {/*  >*/}
@@ -165,7 +166,7 @@ const TopBar = () => {
       {/*</View>*/}
 
       <View style={styles.centerSection}>
-        <TouchableOpacity
+        <HapticTouchableOpacity
           style={[
             styles.membershipContainer,
             {backgroundColor: theme.colors.primary + '20'},
@@ -181,18 +182,18 @@ const TopBar = () => {
               Go Pro
             </Text>
           )}
-        </TouchableOpacity>
+        </HapticTouchableOpacity>
       </View>
 
       <View style={styles.rightSection}>
         <View style={styles.statsContainer}>
           {streakData && (
-            <TouchableOpacity style={styles.streakContainer} onPress={() => navigation.navigate('Stats')}>
+            <HapticTouchableOpacity style={styles.streakContainer} onPress={() => navigation.navigate('Stats')}>
               <Icon name="fire" size={24} color={FIRE_ORANGE} />
               <Text style={[styles.statsText, {color: theme.colors.onSurface}]}>
                 {streakData.current_streak}
               </Text>
-            </TouchableOpacity>
+            </HapticTouchableOpacity>
           )}
           {membership === 0 && <HeartTracker />}
         </View>

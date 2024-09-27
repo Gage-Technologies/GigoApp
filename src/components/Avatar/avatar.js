@@ -8,14 +8,13 @@ import {DownloadIcon} from './svg';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   Dimensions,
 } from 'react-native';
 import {Svg, Path} from 'react-native-svg';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Canvas from 'react-native-canvas';
-
+import HapticTouchableOpacity from '../Buttons/HapticTouchableOpacity';
 const Avataaar = props => {
   const canvasRef = useRef(null);
   const avatarRef = useRef(null);
@@ -92,9 +91,9 @@ const Avataaar = props => {
 
   return (
     <View>
-      <TouchableOpacity onPress={randomizeAvatar}>
+      <HapticTouchableOpacity onPress={randomizeAvatar}>
         <Icon name="shuffle" size={30} color="#000" />
-      </TouchableOpacity>
+      </HapticTouchableOpacity>
       <View
         style={{
           display: 'flex',
@@ -129,11 +128,11 @@ const Avataaar = props => {
         </View>
         <View>
           {options.map(option => (
-            <TouchableOpacity
+            <HapticTouchableOpacity
               onPress={() => setSelectedTab(option.type)}
               key={option.type}>
               <Text>{option.label}</Text>
-            </TouchableOpacity>
+            </HapticTouchableOpacity>
           ))}
         </View>
       </View>
@@ -161,7 +160,7 @@ const Avataaar = props => {
                 {option.type !== 'avatarStyle' &&
                 option.type !== 'skin' &&
                 option.type !== 'skinColor' ? (
-                  <TouchableOpacity
+                  <HapticTouchableOpacity
                     onPress={() => scrollPieces(type, 'prev')}
                     disabled={!canScrollLeft}
                     style={[
@@ -169,7 +168,7 @@ const Avataaar = props => {
                       {opacity: canScrollLeft ? 1 : 0.3}, // Adjust opacity based on whether the button is disabled
                     ]}>
                     <Icon name="arrow-back-ios" size={24} color={'white'} />
-                  </TouchableOpacity>
+                  </HapticTouchableOpacity>
                 ) : null}
 
                 {option.values.slice(startIndex, endIndex).map(val => {
@@ -200,7 +199,7 @@ const Avataaar = props => {
                 {option.type !== 'avatarStyle' &&
                 option.type !== 'skin' &&
                 option.type !== 'skinColor' ? (
-                  <TouchableOpacity
+                  <HapticTouchableOpacity
                     onPress={() => scrollPieces(type, 'next')}
                     disabled={!canScrollRight}
                     style={[
@@ -208,7 +207,7 @@ const Avataaar = props => {
                       {opacity: canScrollRight ? 1 : 0.3}, // Adjust opacity based on whether the button is disabled
                     ]}>
                     <Icon name="arrow-forward-ios" size={24} color={'white'} />
-                  </TouchableOpacity>
+                  </HapticTouchableOpacity>
                 ) : null}
                 {/*{this is the color selector for things like shirt or skin tone, that's why its only for a few'}*/}
                 <ColorContainer>

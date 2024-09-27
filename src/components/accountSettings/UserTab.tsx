@@ -3,10 +3,10 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   StyleSheet,
   Dimensions,
 } from 'react-native';
+import HapticTouchableOpacity from '../Buttons/HapticTouchableOpacity';
 import {Dialog, Portal, Button} from 'react-native-paper';
 
 interface UserTabProps {
@@ -114,33 +114,33 @@ const UserTab: React.FC<UserTabProps> = ({
               onChangeText={setConfirmPassword}
             />
             <View style={styles.buttonRow}>
-              <TouchableOpacity
+              <HapticTouchableOpacity
                 onPress={() => setEdit(false)}
                 style={styles.cancelEditUser}>
                 <Text style={styles.buttonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
+              </HapticTouchableOpacity>
+              <HapticTouchableOpacity
                 onPress={editUser}
                 style={styles.submitEditUser}>
                 <Text style={styles.buttonText}>Submit</Text>
-              </TouchableOpacity>
+              </HapticTouchableOpacity>
             </View>
           </>
         )}
         {!edit && (
-          <TouchableOpacity
+          <HapticTouchableOpacity
             onPress={() => setEdit(true)}
             style={styles.actionButton}>
             <Text style={styles.buttonText}>Edit User Details</Text>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
         )}
       </View>
       <View style={styles.deleteAccountContainer}>
-        <TouchableOpacity
+        <HapticTouchableOpacity
           onPress={() => setDeleteAccount(true)}
           style={[styles.actionButton, styles.deleteUserButton]}>
           <Text style={styles.buttonText}>Delete Account</Text>
-        </TouchableOpacity>
+        </HapticTouchableOpacity>
       </View>
       <Portal>
         <Dialog

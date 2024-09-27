@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, CSSProperties } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import HapticTouchableOpacity from './Buttons/HapticTouchableOpacity';
 import { useTheme } from 'react-native-paper';
 import { MaterialIcons } from 'react-native-vector-icons';
 
@@ -130,9 +131,9 @@ const ByteTerminal = (
 
     return (
         <View style={styles.terminal}>
-            <TouchableOpacity onPress={isRunning ? onStop : onClose} style={styles.closeButton}>
+            <HapticTouchableOpacity onPress={isRunning ? onStop : onClose} style={styles.closeButton}>
                 <MaterialIcons name={isRunning ? 'stop' : 'highlight-off'} size={24} color="red" />
-            </TouchableOpacity>
+            </HapticTouchableOpacity>
             <View style={styles.terminalContent}>
                 {terminalContent}
                 {isRunning && lastLineRequiresInput ? inputField : null}

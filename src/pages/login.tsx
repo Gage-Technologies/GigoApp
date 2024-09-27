@@ -5,12 +5,12 @@ import {
   Text,
   Image,
   StyleSheet,
-  TouchableOpacity,
   Dimensions,
   Alert,
   KeyboardAvoidingView, // Add this import
   Platform, // Add this import
 } from 'react-native';
+import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 // @ts-ignore
 import googleLogo from '../components/Icons/login/google_g.png';
 import {SvgXml} from 'react-native-svg';
@@ -487,13 +487,13 @@ const Login = () => {
             <Text style={styles.externalButtonText}>Login</Text>
           </View>
         ) : (
-          <TouchableOpacity
+          <HapticTouchableOpacity
             style={styles.externalButton}
             onPress={() => {
               externalLogin === 'Google' ? googleSignIn() : githubConfirm();
             }}>
             <Text style={styles.externalButtonText}>Login</Text>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
         )}
         <Text style={styles.externalSubText}>
           Haven't linked your account yet?
@@ -565,7 +565,7 @@ const Login = () => {
             />
           }
         />
-        <TouchableOpacity
+        <HapticTouchableOpacity
           onPress={loginFunction}
           disabled={loading}
           style={[styles.buttonExtra, loading ? styles.disabledButton : null]}
@@ -573,9 +573,9 @@ const Login = () => {
           <Text style={styles.buttonText}>
             {loading ? 'Loading...' : 'Login'}
           </Text>
-        </TouchableOpacity>
+        </HapticTouchableOpacity>
         <View style={styles.accountText}>
-          <TouchableOpacity
+          <HapticTouchableOpacity
             onPress={() =>
               navigation.navigate(
                 //@ts-ignore
@@ -583,9 +583,9 @@ const Login = () => {
               )
             }>
             <Text style={styles.buttonTextExtra}>Forgot Password</Text>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
 
-          <TouchableOpacity
+          <HapticTouchableOpacity
             onPress={() =>
               navigation.navigate(
                 //@ts-ignore
@@ -593,11 +593,11 @@ const Login = () => {
               )
             }>
             <Text style={styles.buttonTextExtra}>No Account? Register</Text>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
         </View>
         <Text style={styles.signInWith}>or sign in with linked account:</Text>
         <View style={styles.loginContainer}>
-          <TouchableOpacity onPress={startGoogle} style={styles.button}>
+          <HapticTouchableOpacity onPress={startGoogle} style={styles.button}>
             <View style={styles.innerContainer}>
               <Image
                 //@ts-ignore
@@ -605,7 +605,7 @@ const Login = () => {
                 source={googleLogo}
               />
             </View>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
           <LoginGithub
             //@ts-ignore
             color={'primary'}

@@ -2,10 +2,10 @@ import React from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
 } from 'react-native';
+import HapticTouchableOpacity from '../Buttons/HapticTouchableOpacity';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 interface SettingsMenuProps {
@@ -30,7 +30,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
         <Text style={styles.sectionHeaderText}>General</Text>
       </View>
 
-      <TouchableOpacity
+      <HapticTouchableOpacity
         onPress={() => setSelectedTab('User')}
         style={styles.tabButton}>
         <View style={styles.buttonContent}>
@@ -40,9 +40,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
           </View>
           <Icon name="chevron-right" size={16} color="white" />
         </View>
-      </TouchableOpacity>
+      </HapticTouchableOpacity>
 
-      <TouchableOpacity
+      <HapticTouchableOpacity
         onPress={() => setSelectedTab('Membership')}
         style={styles.tabButton}>
         <View style={styles.buttonContent}>
@@ -52,13 +52,13 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
           </View>
           <Icon name="chevron-right" size={16} color="white" />
         </View>
-      </TouchableOpacity>
+      </HapticTouchableOpacity>
 
       <View style={styles.supportHeader}>
         <Text style={styles.supportHeaderText}>Support</Text>
       </View>
 
-      <TouchableOpacity
+      <HapticTouchableOpacity
         onPress={() => setSelectedTab('ReportIssue')}
         style={styles.tabButton}>
         <View style={styles.buttonContent}>
@@ -68,10 +68,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
           </View>
           <Icon name="chevron-right" size={16} color="white" />
         </View>
-      </TouchableOpacity>
+      </HapticTouchableOpacity>
 
       <View style={styles.logoutContainer}>
-        <TouchableOpacity
+        <HapticTouchableOpacity
           onPress={handleLogout}
           style={[styles.logoutButton, logoutLoading && styles.disabledButton]}
           disabled={logoutLoading}>
@@ -80,7 +80,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({
           ) : (
             <Text style={styles.logoutText}>Logout</Text>
           )}
-        </TouchableOpacity>
+        </HapticTouchableOpacity>
       </View>
     </View>
   );

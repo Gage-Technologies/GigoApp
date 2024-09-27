@@ -1,22 +1,23 @@
-import React, { Component } from 'react';
-import { View, TouchableOpacity, Text, Linking, StyleSheet } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { toQuery } from './utils';
+import React, {Component} from 'react';
+import {View, Text, Linking, StyleSheet} from 'react-native';
+import HapticTouchableOpacity from '../../Buttons/HapticTouchableOpacity';
+import {WebView} from 'react-native-webview';
+import {toQuery} from './utils';
 
 interface CreateGithubProps {
   buttonText?: string;
   children?: React.ReactNode;
   clientId: string;
   onRequest?: () => void;
-  onSuccess?: (gh: { code: string }) => void;
+  onSuccess?: (gh: {code: string}) => void;
   onFailure?: (error: Error) => void;
   redirectUri: string;
   scope?: string;
   disabled?: boolean;
   containerHeight: number; // Height when expanded
-  containerWidth: number;  // Width when expanded
-  initialHeight: number;   // Initial height before expanding
-  initialWidth: number;    // Initial width before expanding
+  containerWidth: number; // Width when expanded
+  initialHeight: number; // Initial height before expanding
+  initialWidth: number; // Initial width before expanding
 }
 
 interface CreateGithubState {
@@ -46,24 +47,27 @@ class CreateGithub extends Component<CreateGithubProps, CreateGithubState> {
   }
 
   componentDidMount() {
-    console.log("in mount")
-    this.linkingSubscription = Linking.addEventListener('url', this.handleDeepLink);
-    Linking.getInitialURL().then((url) => {
+    console.log('in mount');
+    this.linkingSubscription = Linking.addEventListener(
+      'url',
+      this.handleDeepLink,
+    );
+    Linking.getInitialURL().then(url => {
       if (url) {
-        this.handleDeepLink({ url });
+        this.handleDeepLink({url});
       }
     });
   }
 
   componentWillUnmount() {
-    console.log("in unmount")
+    console.log('in unmount');
     if (this.linkingSubscription) {
       this.linkingSubscription.remove();
     }
   }
 
-  handleDeepLink = (event: { url: string }) => {
-    const { url } = event;
+  handleDeepLink = (event: {url: string}) => {
+    const {url} = event;
     const getQueryParams = (query: string) => {
       return query
         .substring(1)
@@ -81,20 +85,24 @@ class CreateGithub extends Component<CreateGithubProps, CreateGithubState> {
       const code = queryParams['ode'];
 
       if (code) {
-        this.setState({ showWebView: false, isExpanded: false });
-        this.props.onSuccess?.({ code });
+        this.setState({showWebView: false, isExpanded: false});
+        this.props.onSuccess?.({code});
       } else {
-        this.setState({ showWebView: false, isExpanded: false });
-        this.props.onFailure?.(new Error('No authorization code found in the redirect URL'));
+        this.setState({showWebView: false, isExpanded: false});
+        this.props.onFailure?.(
+          new Error('No authorization code found in the redirect URL'),
+        );
       }
     } else {
-      this.setState({ showWebView: false, isExpanded: false });
-      this.props.onFailure?.(new Error('No query string found in the redirect URL'));
+      this.setState({showWebView: false, isExpanded: false});
+      this.props.onFailure?.(
+        new Error('No query string found in the redirect URL'),
+      );
     }
   };
 
   onBtnClick = async () => {
-    const { clientId, scope, redirectUri } = this.props;
+    const {clientId, scope, redirectUri} = this.props;
     const query = toQuery({
       client_id: clientId,
       scope,
@@ -111,41 +119,50 @@ class CreateGithub extends Component<CreateGithubProps, CreateGithubState> {
   };
 
   render() {
-    const { buttonText, children, initialHeight, initialWidth, containerHeight, containerWidth } = this.props;
-    const { showWebView, url, isExpanded } = this.state;
+    const {
+      buttonText,
+      children,
+      initialHeight,
+      initialWidth,
+      containerHeight,
+      containerWidth,
+    } = this.props;
+    const {showWebView, url, isExpanded} = this.state;
 
     const containerStyle = isExpanded
-      ? [styles.container, { height: containerHeight, width: containerWidth }]
-      : [styles.container, { height: initialHeight, width: initialWidth }];
+      ? [styles.container, {height: containerHeight, width: containerWidth}]
+      : [styles.container, {height: initialHeight, width: initialWidth}];
 
     return (
       <View style={containerStyle}>
         {showWebView ? (
           <WebView
-            source={{ uri: url }}
+            source={{uri: url}}
             style={styles.webView}
             onNavigationStateChange={this.handleNavigationStateChange}
             javaScriptEnabled={true}
             domStorageEnabled={true}
           />
         ) : (
-          <TouchableOpacity onPress={this.onBtnClick} style={styles.button}>
+          <HapticTouchableOpacity onPress={this.onBtnClick} style={styles.button}>
             {children || <Text style={styles.buttonText}>{buttonText}</Text>}
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
         )}
       </View>
     );
   }
 
   handleNavigationStateChange = (newNavState: any): boolean => {
-    const { url } = newNavState;
+    const {url} = newNavState;
     if (url.includes(this.props.redirectUri)) {
       const code = new URL(url).searchParams.get('code');
       if (code) {
-        this.setState({ showWebView: false, isExpanded: false });
-        this.props.onSuccess?.({ code });
+        this.setState({showWebView: false, isExpanded: false});
+        this.props.onSuccess?.({code});
       } else {
-        this.props.onFailure?.(new Error('No authorization code found in the redirect URL'));
+        this.props.onFailure?.(
+          new Error('No authorization code found in the redirect URL'),
+        );
       }
     }
     return true;

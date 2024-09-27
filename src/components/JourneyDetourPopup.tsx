@@ -3,11 +3,11 @@ import {
   Modal,
   View,
   Text,
-  TouchableOpacity,
   ScrollView,
   StyleSheet,
   Alert,
 } from 'react-native';
+import HapticTouchableOpacity from './Buttons/HapticTouchableOpacity';
 import {IconButton, useTheme, Button} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FastImage from 'react-native-fast-image';
@@ -159,11 +159,11 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
         {displayedDescription}
       </Text>
       {unit.description.length > 150 && (
-        <TouchableOpacity onPress={toggleDescription}>
+        <HapticTouchableOpacity onPress={toggleDescription}>
           <Text style={[styles.readMore, {color: theme.colors.primary}]}>
             {showFullDescription ? 'Read Less' : 'Read More'}
           </Text>
-        </TouchableOpacity>
+        </HapticTouchableOpacity>
       )}
       <Button
         mode="contained"
@@ -204,12 +204,12 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
               of the Journey.
             </Text>
           </View>
-          <TouchableOpacity
+          <HapticTouchableOpacity
             onPress={() => setShowFullExplanation(!showFullExplanation)}>
             <Text style={[styles.readMore, {color: theme.colors.primary}]}>
               {showFullExplanation ? 'Read Less' : 'Read More'}
             </Text>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
         </View>
         <View style={styles.unitMapContainer}>
           <Text style={[styles.subtitle, {color: theme.colors.text}]}>
@@ -290,11 +290,11 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
             : `${selectedUnit.description.substring(0, 150)}...`}
         </Text>
         {selectedUnit.description.length > 150 && (
-          <TouchableOpacity onPress={toggleDescription}>
+          <HapticTouchableOpacity onPress={toggleDescription}>
             <Text style={[styles.readMore, {color: theme.colors.primary}]}>
               {showFullDescription ? 'Read Less' : 'Read More'}
             </Text>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
         )}
         <Button
           mode="contained"

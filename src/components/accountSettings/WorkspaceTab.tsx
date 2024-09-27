@@ -4,12 +4,11 @@ import {
   Text,
   TextInput,
   Switch,
-  TouchableOpacity,
   StyleSheet,
   Dimensions,
   Alert,
 } from 'react-native';
-import {Button} from 'react-native-paper';
+import HapticTouchableOpacity from '../Buttons/HapticTouchableOpacity';
 
 interface WorkspaceTabProps {
   workspaceRunStart: boolean;
@@ -115,9 +114,9 @@ const WorkspaceTab: React.FC<WorkspaceTabProps> = ({
         <Switch value={holidayPref} onValueChange={setHolidayPref} />
       </View>
 
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+      <HapticTouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
         <Text style={styles.submitButtonText}>Save Settings</Text>
-      </TouchableOpacity>
+      </HapticTouchableOpacity>
     </View>
   );
 };

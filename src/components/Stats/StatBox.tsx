@@ -1,6 +1,7 @@
 import React from 'react';
-import {View, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {useTheme, Text, Card} from 'react-native-paper';
+import HapticTouchableOpacity from '../Buttons/HapticTouchableOpacity';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface StatBoxProps {
@@ -59,7 +60,7 @@ const StatBox: React.FC<StatBoxProps> = ({
   const formattedValue = formatValue(title, value);
 
   return (
-    <TouchableOpacity onPress={onPress}>
+    <HapticTouchableOpacity onPress={onPress}>
       <Card
         style={[
           styles.container,
@@ -87,7 +88,7 @@ const StatBox: React.FC<StatBoxProps> = ({
           </View>
         </Card.Content>
       </Card>
-    </TouchableOpacity>
+    </HapticTouchableOpacity>
   );
 };
 

@@ -14,6 +14,7 @@ import XpPopup from '../components/XpPopup';
 import ByteKeyboard from '../components/ByteKeyboard/ByteKeyboard';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
+import {selectHapticStrength} from '../reducers/appSettings';
 
 // component to display a byte or journey in a webview
 const Byte: React.FC<{
@@ -22,6 +23,7 @@ const Byte: React.FC<{
   let {byteId, isJourney} = route.params;
 
   const authState = useSelector(selectAuthState);
+  const hapticStrength = useSelector(selectHapticStrength);
   const navigation = useNavigation();
   const [showXpPopup, setShowXpPopup] = useState(false);
   const [xpData, setXpData] = useState({
@@ -223,7 +225,7 @@ const Byte: React.FC<{
         `);
 
         // trigger haptic feedback
-        ReactNativeHapticFeedback.trigger('impactLight', {
+        ReactNativeHapticFeedback.trigger(hapticStrength, {
           enableVibrateFallback: true,
           ignoreAndroidSystemSettings: false,
         });

@@ -1,7 +1,7 @@
 import React from 'react';
-import {View, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, StyleSheet} from 'react-native';
 import {useTheme, Text, Card} from 'react-native-paper';
-
+import HapticTouchableOpacity from '../Buttons/HapticTouchableOpacity';
 interface ProgressionBoxProps {
   title: string;
   value: number;
@@ -43,7 +43,7 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({
   };
 
   return (
-    <TouchableOpacity onPress={onPress}>
+    <HapticTouchableOpacity onPress={onPress}>
       <Card
         style={[
           styles.container,
@@ -79,7 +79,7 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({
           </Text>
         </Card.Content>
       </Card>
-    </TouchableOpacity>
+    </HapticTouchableOpacity>
   );
 };
 

@@ -4,12 +4,12 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 import {useTheme} from 'react-native-paper';
 import Config from 'react-native-config';
-import AwesomeButton from 'react-native-really-awesome-button';
+import HapticAwesomeButton from '../components/Buttons/HapticAwesomeButton';
 import MarkdownRenderer from '../components/Markdown/MarkdownRenderer';
 import MatchingQuestion from '../components/Quiz/MatchingQuestion';
 import {theme} from '../theme';
@@ -254,7 +254,7 @@ const QuizPage: React.FC<{
             </View>
             <View style={styles.optionsContainer}>
               {currentQuestion.options.map((answer, index) => (
-                <TouchableOpacity
+                <HapticTouchableOpacity
                   key={index}
                   style={[
                     styles.optionCard,
@@ -269,7 +269,7 @@ const QuizPage: React.FC<{
                   ]}
                   onPress={() => handleAnswerClick(index)}>
                   <Text style={styles.optionText}>{answer}</Text>
-                </TouchableOpacity>
+                </HapticTouchableOpacity>
               ))}
             </View>
           </View>
@@ -296,7 +296,7 @@ const QuizPage: React.FC<{
             </View>
             <View style={styles.optionsContainer}>
               {currentQuestion.options.map((answer, index) => (
-                <TouchableOpacity
+                <HapticTouchableOpacity
                   key={index}
                   style={[
                     styles.optionCard,
@@ -311,14 +311,14 @@ const QuizPage: React.FC<{
                   ]}
                   onPress={() => handleAnswerClick(index)}>
                   <Text style={styles.optionText}>{answer}</Text>
-                </TouchableOpacity>
+                </HapticTouchableOpacity>
               ))}
             </View>
           </View>
         )}
 
         <View style={styles.buttonContainer}>
-          <AwesomeButton
+          <HapticAwesomeButton
             width={140}
             height={50}
             borderRadius={25}
@@ -331,9 +331,9 @@ const QuizPage: React.FC<{
             disabled={currentQuestionIndex === 0}
             raiseLevel={4}>
             Previous
-          </AwesomeButton>
+          </HapticAwesomeButton>
           {!isLastQuestion ? (
-            <AwesomeButton
+            <HapticAwesomeButton
               width={140}
               height={50}
               borderRadius={25}
@@ -350,9 +350,9 @@ const QuizPage: React.FC<{
               }
               raiseLevel={4}>
               Next
-            </AwesomeButton>
+            </HapticAwesomeButton>
           ) : (
-            <AwesomeButton
+            <HapticAwesomeButton
               width={140}
               height={50}
               borderRadius={25}
@@ -364,7 +364,7 @@ const QuizPage: React.FC<{
               onPress={handleSubmit}
               raiseLevel={4}>
               Submit
-            </AwesomeButton>
+            </HapticAwesomeButton>
           )}
         </View>
         {isWrongAnswer && isLastQuestion && (
@@ -396,7 +396,7 @@ const QuizPage: React.FC<{
           </Animatable.View>
           <Text style={styles.congratsText}>Congratulations!</Text>
           <Text style={styles.completionText}>You've completed the quiz!</Text>
-          <AwesomeButton
+          <HapticAwesomeButton
             width={200}
             height={50}
             borderRadius={25}
@@ -408,7 +408,7 @@ const QuizPage: React.FC<{
             onPress={handleContinue}
             raiseLevel={4}>
             Continue
-          </AwesomeButton>
+          </HapticAwesomeButton>
         </View>
       </Modal>
     </ScrollView>

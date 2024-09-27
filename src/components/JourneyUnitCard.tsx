@@ -1,5 +1,6 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Animated} from 'react-native';
+import {View, Text, StyleSheet, Animated} from 'react-native';
+import HapticTouchableOpacity from './Buttons/HapticTouchableOpacity';
 import {useTheme} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
 import Config from 'react-native-config';
@@ -95,7 +96,7 @@ const JourneyUnitCard: React.FC<JourneyUnitCardProps> = ({
           zIndex: isSelected ? 1 : 0,
         },
       ]}>
-      <TouchableOpacity
+      <HapticTouchableOpacity
         onPress={onPress}
         style={[
           styles.card,
@@ -131,7 +132,7 @@ const JourneyUnitCard: React.FC<JourneyUnitCardProps> = ({
             {unitNumber}
           </Text>
         </View>
-      </TouchableOpacity>
+      </HapticTouchableOpacity>
     </Animated.View>
   );
 };

@@ -1,11 +1,11 @@
 import React, {useState, useRef} from 'react';
 import {
   View,
-  TouchableOpacity,
   PanResponder,
   Animated,
   StyleSheet,
 } from 'react-native';
+import HapticTouchableOpacity from './Buttons/HapticTouchableOpacity';
 import {useTheme} from 'react-native-paper';
 
 interface UnitSelectorProps {
@@ -59,7 +59,7 @@ const UnitSelector: React.FC<UnitSelectorProps> = ({
         ]}
       />
       {Array.from({length: unitCount}).map((_, index) => (
-        <TouchableOpacity
+        <HapticTouchableOpacity
           key={index}
           style={[
             styles.circle,

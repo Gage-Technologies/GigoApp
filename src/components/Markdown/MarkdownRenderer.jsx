@@ -8,7 +8,8 @@ import SyntaxHighlighter from 'react-native-syntax-highlighter';
 import { darkSyntaxTheme } from './SyntaxHighlights';
 import merge from 'deepmerge';
 import { visit } from 'unist-util-visit';
-import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, Dimensions } from 'react-native';
+import HapticTouchableOpacity from '../Buttons/HapticTouchableOpacity';
 import { useTheme } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Clipboard from '@react-native-clipboard/clipboard';
@@ -272,12 +273,12 @@ const MarkdownRenderer = ({
                 const endLine = goToLinkMatch[3] ? parseInt(goToLinkMatch[3], 10) : startLine + 1; // use startLine if endLine is not specified
 
                 goToLink = (
-                  <TouchableOpacity
+                  <HapticTouchableOpacity
                     onPress={() => goToCallback(filePath, parseInt(startLine, 10), parseInt(endLine, 10))}
                     style={styles.iconButton}
                   >
                     <Icon name="launch" size={12} color={theme.colors.secondary} />
-                  </TouchableOpacity>
+                  </HapticTouchableOpacity>
                 );
               }
             }
@@ -292,7 +293,7 @@ const MarkdownRenderer = ({
                   {match[1] !== "" && match[1] !== "_" ? match[1] : "plaintext"}
                 </Text>
                 <View style={styles.codeActions}>
-                  <TouchableOpacity
+                  <HapticTouchableOpacity
                     onPress={() => copyToClipboard(t)}
                     style={styles.iconButton}
                   >
@@ -301,7 +302,7 @@ const MarkdownRenderer = ({
                       size={14}
                       color={copied === t ? theme.colors.success : theme.colors.primary}
                     />
-                  </TouchableOpacity>
+                  </HapticTouchableOpacity>
                   {goToLink}
                 </View>
                 <SyntaxHighlighter
@@ -319,11 +320,11 @@ const MarkdownRenderer = ({
 
           // return inline code
           return (
-            <TouchableOpacity onPress={() => copyToClipboard(t)}>
+            <HapticTouchableOpacity onPress={() => copyToClipboard(t)}>
               <Text style={styles.inlineCode} {...props}>
                 {children}
               </Text>
-            </TouchableOpacity>
+            </HapticTouchableOpacity>
           );
         },
       }}

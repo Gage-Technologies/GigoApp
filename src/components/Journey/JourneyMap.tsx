@@ -4,7 +4,6 @@ import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   Modal,
   ScrollView,
   ActivityIndicator,
@@ -18,7 +17,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // For mode
 import Config from 'react-native-config';
 import {useNavigation} from '@react-navigation/native';
 import {Task} from '../../models/Journey';
-import AwesomeButton from 'react-native-really-awesome-button';
+import HapticAwesomeButton from '../Buttons/HapticAwesomeButton';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -262,7 +261,7 @@ const JourneyMap = ({
                 },
               ]}>
               <StartSign visible={showStartSign} />
-              <AwesomeButton
+              <HapticAwesomeButton
                 borderRadius={100}
                 height={100}
                 width={100}
@@ -293,7 +292,7 @@ const JourneyMap = ({
                   index,
                   index > 0 ? tasks[index - 1] : null,
                 )}
-              </AwesomeButton>
+              </HapticAwesomeButton>
               {/* <Text style={styles.taskName}>{task.name}</Text> */}
             </View>
           );

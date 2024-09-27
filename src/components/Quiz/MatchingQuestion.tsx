@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
+import HapticTouchableOpacity from '../Buttons/HapticTouchableOpacity';
 import {shuffle} from 'lodash';
 import MarkdownRenderer from '../Markdown/MarkdownRenderer';
 
@@ -83,7 +84,7 @@ const MatchingQuestion: React.FC<MatchingQuestionProps> = ({
       <View style={styles.matchingGame}>
         <View style={styles.column}>
           {leftItems.map((item, index) => (
-            <TouchableOpacity
+            <HapticTouchableOpacity
               key={index}
               style={[
                 styles.item,
@@ -96,12 +97,12 @@ const MatchingQuestion: React.FC<MatchingQuestionProps> = ({
               onPress={() => handleLeftClick(item)}
               disabled={item in (matchedPairs[currentQuestionIndex] || {})}>
               <Text style={styles.itemText}>{item}</Text>
-            </TouchableOpacity>
+            </HapticTouchableOpacity>
           ))}
         </View>
         <View style={styles.column}>
           {rightItems.map((item, index) => (
-            <TouchableOpacity
+            <HapticTouchableOpacity
               key={index}
               style={[
                 styles.item,
@@ -116,7 +117,7 @@ const MatchingQuestion: React.FC<MatchingQuestionProps> = ({
                 matchedPairs[currentQuestionIndex] || {},
               ).includes(item)}>
               <Text style={styles.itemText}>{item}</Text>
-            </TouchableOpacity>
+            </HapticTouchableOpacity>
           ))}
         </View>
       </View>

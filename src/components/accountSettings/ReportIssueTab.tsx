@@ -3,11 +3,11 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
   StyleSheet,
   Dimensions,
   Alert,
 } from 'react-native';
+import HapticTouchableOpacity from '../Buttons/HapticTouchableOpacity';
 import {Button} from 'react-native-paper';
 import Config from 'react-native-config';
 
@@ -69,7 +69,7 @@ const ReportIssueTab: React.FC<ReportIssueTabProps> = ({
         textAlignVertical="top"
       />
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
+        <HapticTouchableOpacity
           onPress={handleClearIssue}
           style={[
             styles.button,
@@ -80,12 +80,12 @@ const ReportIssueTab: React.FC<ReportIssueTabProps> = ({
           // disable the button when there's no text
           disabled={issueText.trim().length === 0}>
           <Text style={styles.buttonText}>Clear</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        </HapticTouchableOpacity>
+        <HapticTouchableOpacity
           onPress={handleSubmitIssue}
           style={[styles.button, styles.submitButton]}>
           <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
+        </HapticTouchableOpacity>
       </View>
     </View>
   );

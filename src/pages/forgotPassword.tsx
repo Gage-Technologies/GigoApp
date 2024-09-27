@@ -4,7 +4,6 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   Dimensions,
   Alert,
   Image,
@@ -12,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-
+import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 const screenWidth = Dimensions.get('window').width;
 const imageWidth = screenWidth * 0.1; // 15% of the screen width
 const {width} = Dimensions.get('window');
@@ -310,13 +309,13 @@ const ForgotPassword = () => {
         <Text style={styles.helperText}>
           Please enter the email associated with your account
         </Text>
-        <TouchableOpacity
+        <HapticTouchableOpacity
           onPress={sendResetValidation}
           style={styles.buttonExtra}
           disabled={!isEmailValid}
           activeOpacity={0.7}>
           <Text style={styles.buttonText}>Submit</Text>
-        </TouchableOpacity>
+        </HapticTouchableOpacity>
         <View
           style={{
             flexDirection: 'row',
@@ -324,7 +323,7 @@ const ForgotPassword = () => {
             justifyContent: 'space-evenly',
             width: screenWidth * 0.65,
           }}>
-          <TouchableOpacity
+          <HapticTouchableOpacity
             onPress={() =>
               navigation.navigate(
                 //@ts-ignore
@@ -340,8 +339,8 @@ const ForgotPassword = () => {
               }}>
               Login
             </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </HapticTouchableOpacity>
+          <HapticTouchableOpacity
             onPress={() =>
               navigation.navigate(
                 //@ts-ignore
@@ -357,7 +356,7 @@ const ForgotPassword = () => {
               }}>
               Signup
             </Text>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
         </View>
       </View>
     </KeyboardAvoidingView>

@@ -6,10 +6,10 @@ import {
   StyleSheet,
   Dimensions,
   ActivityIndicator,
-  TouchableOpacity,
   Animated,
   Easing,
 } from 'react-native';
+import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 import {useTheme, Text, Button} from 'react-native-paper';
 import Config from 'react-native-config';
 import StatBox from '../components/Stats/StatBox';
@@ -291,14 +291,14 @@ const Stats = () => {
           <Text style={[styles.callToActionText, {color: theme.colors.text}]}>
             Start your first journey and watch your stats grow as you progress!
           </Text>
-          <TouchableOpacity
+          <HapticTouchableOpacity
             style={[styles.button, {backgroundColor: theme.colors.primary}]}
             onPress={handleJourneyLink}
             activeOpacity={0.8}
             accessibilityLabel="Go to Journeys"
             accessibilityHint="Navigates to the Journeys section to start your first journey">
             <Text style={styles.buttonText}>Go to Journeys</Text>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
         </Animated.View>
       </ScrollView>
     );

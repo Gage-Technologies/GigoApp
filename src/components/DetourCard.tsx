@@ -1,5 +1,6 @@
 import React from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, Text, StyleSheet} from 'react-native';
+import HapticTouchableOpacity from './Buttons/HapticTouchableOpacity';
 import {Card} from 'react-native-paper';
 import {useTheme} from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
@@ -70,7 +71,7 @@ const DetourCard: React.FC<DetourCardProps> = ({data, onPress}) => {
   };
 
   return (
-    <TouchableOpacity onPress={onPress}>
+    <HapticTouchableOpacity onPress={onPress}>
       <Card style={[styles.card, {backgroundColor: theme.colors.surface}]}>
         <View style={styles.content}>
           <View style={styles.header}>
@@ -101,7 +102,7 @@ const DetourCard: React.FC<DetourCardProps> = ({data, onPress}) => {
           <View style={styles.logoContainer}>{renderLogo(data.langs)}</View>
         </View>
       </Card>
-    </TouchableOpacity>
+    </HapticTouchableOpacity>
   );
 };
 

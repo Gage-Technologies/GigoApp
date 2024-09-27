@@ -3,9 +3,9 @@ import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
 } from 'react-native';
+import HapticTouchableOpacity from './Buttons/HapticTouchableOpacity';
 import {Button} from 'react-native-paper';
 import {useNavigation} from '@react-navigation/native';
 import Config from 'react-native-config';
@@ -118,7 +118,7 @@ const GetStarted = ({getTasks}) => {
       </Text>
       <View style={styles.journeysContainer}>
         {Object.entries(journeys).map(([key, value]) => (
-          <TouchableOpacity
+          <HapticTouchableOpacity
             key={key}
             style={styles.journeyButton}
             onPress={() => selectJourney(key, value.id)}>
@@ -127,7 +127,7 @@ const GetStarted = ({getTasks}) => {
             {value.favorite && (
               <Text style={styles.favorite}>Most Popular</Text>
             )}
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
         ))}
       </View>
       {selectedJourney && (

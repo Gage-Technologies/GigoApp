@@ -1,11 +1,11 @@
 import React, {useState, useEffect} from 'react';
 import {
   View,
-  TouchableOpacity,
   StyleSheet,
   Platform,
   Keyboard,
 } from 'react-native';
+import HapticTouchableOpacity from './Buttons/HapticTouchableOpacity';
 import {useNavigation} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {Text, useTheme} from 'react-native-paper';
@@ -89,7 +89,7 @@ const BottomBar = () => {
     }));
 
     return (
-      <TouchableOpacity
+      <HapticTouchableOpacity
         style={styles.tabItem}
         onPress={() => navigateTo(tab.screen, index)}>
         <Animated.View style={[styles.iconContainer, animatedStyle]}>
@@ -104,7 +104,7 @@ const BottomBar = () => {
             {tab.label}
           </Text>
         )}
-      </TouchableOpacity>
+      </HapticTouchableOpacity>
     );
   };
 

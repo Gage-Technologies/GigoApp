@@ -5,9 +5,9 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  TouchableOpacity,
   Modal as RNModal,
 } from 'react-native';
+import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 import {Text, Button, useTheme} from 'react-native-paper';
 import Config from 'react-native-config';
 import JourneyMap from '../components/Journey/JourneyMap';
@@ -16,7 +16,7 @@ import GetStarted from '../components/GetStarted';
 import {Unit} from '../models/Journey';
 import HandoutOverlay from '../components/Journey/HandoutOverlay';
 import {getTextColor} from '../services/utils';
-import AwesomeButton from 'react-native-really-awesome-button';
+import HapticAwesomeButton from '../components/Buttons/HapticAwesomeButton';
 import {BlurView} from '@react-native-community/blur';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -340,7 +340,7 @@ const JourneyMain = () => {
             : styles.unitContainer
         }
         key={unit._id}>
-        <TouchableOpacity
+        <HapticTouchableOpacity
           style={[styles.unitHeader, {backgroundColor: unit.color}]}
           onPress={() => setShowHandout(showHandout === index ? null : index)}>
           <Text style={[styles.unitTitle, {color: getTextColor(unit.color)}]}>
@@ -353,7 +353,7 @@ const JourneyMain = () => {
               color={getTextColor(unit.color)}
             />
           </View>
-        </TouchableOpacity>
+        </HapticTouchableOpacity>
         <View style={styles.unitContent} key={renderKey}>
           <JourneyMap
             unitId={unit._id}
@@ -371,7 +371,7 @@ const JourneyMain = () => {
               reducedTransparencyFallbackColor={theme.colors.background}
             />
             <View style={styles.buttonWrapper}>
-              <AwesomeButton
+              <HapticAwesomeButton
                 width={300}
                 height={80}
                 borderRadius={20}
@@ -386,7 +386,7 @@ const JourneyMain = () => {
                   handleAddUnitToMap();
                 }}>
                 Add Unit To Journey
-              </AwesomeButton>
+              </HapticAwesomeButton>
             </View>
           </View>
         )}
@@ -512,7 +512,7 @@ const JourneyMain = () => {
         />
       </ScrollView>
       {/* {activeJourney && !showEmptyJourney && filteredUnits.length > 0 && (
-        <TouchableOpacity
+        <HapticTouchableOpacity
           style={styles.detourButton}
           onPress={handleDetourNavigation}>
           <MaterialCommunityIcons
@@ -520,7 +520,7 @@ const JourneyMain = () => {
             size={30}
             color="white"
           />
-        </TouchableOpacity>
+        </HapticTouchableOpacity>
       )} */}
       {showXpPopup && (
         <XpPopup {...xpData} popupClose={handleCloseXpPopup} homePage={false} />

@@ -1,7 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {
   View,
-  TouchableOpacity,
   Text,
   StyleSheet,
   Keyboard,
@@ -9,6 +8,7 @@ import {
   useColorScheme,
   Dimensions,
 } from 'react-native';
+import HapticTouchableOpacity from '../Buttons/HapticTouchableOpacity';
 import CursorJoystick from './CursorJoystick';
 
 /**
@@ -76,12 +76,12 @@ const ByteKeyboard: React.FC<{
           {keys.map((row, rowIndex) => (
             <View key={`row-${rowIndex}`} style={styles.row}>
               {row.map(key => (
-                <TouchableOpacity
+                <HapticTouchableOpacity
                   key={key}
                   style={[styles.key, {backgroundColor: colors.key}]}
                   onPress={() => onKeyPress(key)}>
                   {renderKeyContent(key)}
-                </TouchableOpacity>
+                </HapticTouchableOpacity>
               ))}
             </View>
           ))}

@@ -5,7 +5,6 @@ import {
   Text,
   Image,
   StyleSheet,
-  TouchableOpacity,
   Dimensions,
   Alert,
   ScrollView,
@@ -13,6 +12,7 @@ import {
   Platform,
   Linking,
 } from 'react-native';
+import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 // @ts-ignore
 import googleLogo from '../components/Icons/login/google_g.png';
 import {SvgXml} from 'react-native-svg';
@@ -1056,12 +1056,12 @@ const CreateNewAccount = () => {
       </View>
     ) : (
       <View style={styles.creationBox}>
-        <TouchableOpacity
+        <HapticTouchableOpacity
           onPress={() => setCreationStep(0)}
           style={styles.goBackContainer}>
           <Icon name="arrow-left" size={20} color="white" style={styles.icon} />
           <Text style={styles.goBack}>Go Back</Text>
-        </TouchableOpacity>
+        </HapticTouchableOpacity>
         <ScrollView contentContainerStyle={styles.container}>
           <Text style={styles.header}>Create Account</Text>
           <TextInput
@@ -1122,7 +1122,7 @@ const CreateNewAccount = () => {
               },
             }}
           />
-          <TouchableOpacity
+          <HapticTouchableOpacity
             onPress={async () => {
               setLoading(true);
               let ok = await validateUser();
@@ -1149,16 +1149,16 @@ const CreateNewAccount = () => {
             <Text style={styles.buttonText}>
               {loading ? 'Loading...' : 'Create Account'}
             </Text>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
           <View style={styles.socialLogin}>
             <View style={{flexDirection: 'column'}}>
               <Text style={styles.signInWith}>Or Register With:</Text>
               <View style={styles.loginContainer}>
-                <TouchableOpacity onPress={() => googleSignUp()}>
+                <HapticTouchableOpacity onPress={() => googleSignUp()}>
                   <View style={styles.innerContainer}>
                     <Image style={styles.logo} source={googleLogo} />
                   </View>
-                </TouchableOpacity>
+                </HapticTouchableOpacity>
                 <CreateGithub
                   //@ts-ignore
                   color={'primary'}
@@ -1194,7 +1194,7 @@ const CreateNewAccount = () => {
             <Text style={{color: 'white', fontSize: 16, lineHeight: 18}}>
               Already have an account?
             </Text>
-            <TouchableOpacity
+            <HapticTouchableOpacity
               onPress={() =>
                 //@ts-ignore
                 navigation.navigate('Login')
@@ -1208,7 +1208,7 @@ const CreateNewAccount = () => {
                 }}>
                 Login
               </Text>
-            </TouchableOpacity>
+            </HapticTouchableOpacity>
           </View>
         </ScrollView>
       </View>

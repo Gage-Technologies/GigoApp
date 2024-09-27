@@ -5,8 +5,8 @@ import {
   StyleSheet,
   Dimensions,
   Animated,
-  TouchableOpacity,
 } from 'react-native';
+import HapticTouchableOpacity from './Buttons/HapticTouchableOpacity';
 import {useTheme, Button, IconButton} from 'react-native-paper';
 import Config from 'react-native-config';
 import {useSelector} from 'react-redux';
@@ -145,12 +145,12 @@ const XpPopup: React.FC<XpPopupProps> = props => {
               </Button>
             </View>
           </View>
-          <TouchableOpacity
+          <HapticTouchableOpacity
             onPress={() => {
               /* Navigate to premium info page */
             }}>
             <Text style={styles.learnMoreText}>Learn More About Pro</Text>
-          </TouchableOpacity>
+          </HapticTouchableOpacity>
         </View>
       );
     } else {

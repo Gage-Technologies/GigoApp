@@ -11,7 +11,6 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
-import {Svg, Path} from 'react-native-svg';
 import {Button, useTheme} from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // For modern icons
 import Config from 'react-native-config';
@@ -25,17 +24,43 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import {ButtonTypes} from 'react-native-really-awesome-button/lib/typescript/src/Button';
+
+const ScrollAwareButton = ({
+  onPress,
+  isScrolling,
+  children,
+  ...props
+}: ButtonTypes & {
+  onPress: () => void;
+  isScrolling: boolean;
+  children: React.ReactNode;
+}) => {
+  const handlePress = () => {
+    if (!isScrolling) {
+      onPress();
+    }
+  };
+
+  return (
+    <HapticAwesomeButton {...props} onPress={handlePress}>
+      {children}
+    </HapticAwesomeButton>
+  );
+};
 
 const JourneyMap = ({
   unitId,
   unitIndex,
   taskOffset,
-  isUnitStarted, // Add this prop
+  isUnitStarted,
+  isScrolling,
 }: {
   unitId: string;
   unitIndex: number;
   taskOffset: number;
-  isUnitStarted: boolean; // Add this prop
+  isUnitStarted: boolean;
+  isScrolling: boolean;
 }) => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(false);
@@ -173,7 +198,9 @@ const JourneyMap = ({
       };
     });
 
-    if (!visible) return null;
+    if (!visible) {
+      return null;
+    }
 
     return (
       <Animated.View style={[styles.startSign, animatedStyle]}>
@@ -261,7 +288,7 @@ const JourneyMap = ({
                 },
               ]}>
               <StartSign visible={showStartSign} />
-              <HapticAwesomeButton
+              <ScrollAwareButton
                 borderRadius={100}
                 height={100}
                 width={100}
@@ -273,26 +300,18 @@ const JourneyMap = ({
                 backgroundProgress={c[0]}
                 backgroundDarker={c[1]}
                 disabled={!isUnlocked}
-                onPressIn={() => {
-                  // start a timer when the button is pressed
-                  pressTimer.current = setTimeout(() => {
-                    if (isUnlocked) {
-                      handlePressTask(task);
-                    }
-                  }, 200); // 200ms delay
-                }}
-                onPressOut={() => {
-                  // clear the timer if the button is released before 200ms
-                  if (pressTimer.current) {
-                    clearTimeout(pressTimer.current);
+                onPress={() => {
+                  if (isUnlocked) {
+                    handlePressTask(task);
                   }
-                }}>
+                }}
+                isScrolling={isScrolling}>
                 {renderTaskIcon(
                   task,
                   index,
                   index > 0 ? tasks[index - 1] : null,
                 )}
-              </HapticAwesomeButton>
+              </ScrollAwareButton>
               {/* <Text style={styles.taskName}>{task.name}</Text> */}
             </View>
           );

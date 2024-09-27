@@ -6,6 +6,8 @@ import {
   ActivityIndicator,
   Alert,
   Modal as RNModal,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
 import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 import {Text, Button, useTheme} from 'react-native-paper';
@@ -19,7 +21,6 @@ import {getTextColor} from '../services/utils';
 import HapticAwesomeButton from '../components/Buttons/HapticAwesomeButton';
 import {BlurView} from '@react-native-community/blur';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import XpPopup from '../components/XpPopup';
 import {useLanguage} from '../LanguageContext';
 import EmptyJourney from '../components/Journey/EmptyJourney';
@@ -55,7 +56,11 @@ const JourneyMain = () => {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const scrollViewRef = useRef<ScrollView>(null);
-  const [renderKey, setRenderKey] = useState(0)
+  const [renderKey, setRenderKey] = useState(0);
+
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollStartY = useRef(0);
+  const scrollThreshold = 10;
 
   const API_URL = Config.API_URL;
   const theme = useTheme();
@@ -164,12 +169,20 @@ const JourneyMain = () => {
         }),
       });
 
-      let res = await response.json();
       if (!response.ok) {
-        // throw new Error('Failed to fetch user map');
-        //todo fix backend later
-        console.log('Failed to fetch user map');
+        let res = response.statusText;
+        try {
+          res = await response.json();
+        } catch (e) {}
+        console.log(
+          `Failed to fetch user map: ${response.status} - ${JSON.stringify(
+            res,
+          )}`,
+        );
+        return;
       }
+
+      let res = await response.json();
 
       if (!res.success) {
         setActiveJourney(false);
@@ -360,6 +373,7 @@ const JourneyMain = () => {
             unitIndex={index}
             taskOffset={taskOffset}
             isUnitStarted={isUnitStarted}
+            isScrolling={isScrolling}
           />
         </View>
         {isPendingAcceptance && (
@@ -474,6 +488,16 @@ const JourneyMain = () => {
           if (nativeEvent.contentOffset.y <= 0 && !isLoadingMore) {
             handleLoadMore();
           }
+        }}
+        onScrollBeginDrag={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
+          scrollStartY.current = event.nativeEvent.contentOffset.y;
+          setIsScrolling(true);
+        }}
+        onScrollEndDrag={() => {
+          setIsScrolling(false);
+        }}
+        onMomentumScrollEnd={() => {
+          setIsScrolling(false);
         }}
         scrollEventThrottle={0}>
         {initialized ? (

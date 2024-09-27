@@ -1,4 +1,4 @@
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {View, StyleSheet, PanResponder, Animated, Text} from 'react-native';
 
 interface CursorJoystickProps {
@@ -14,6 +14,8 @@ const CursorJoystick: React.FC<CursorJoystickProps> = ({
 }) => {
   const [moving, setMoving] = useState(false);
   const pan = useRef(new Animated.ValueXY()).current;
+  const lastMovement = useRef({dx: 0, dy: 0});
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const panResponder = useRef(
     PanResponder.create({
@@ -25,6 +27,8 @@ const CursorJoystick: React.FC<CursorJoystickProps> = ({
           x: pan.x._value,
           y: pan.y._value,
         });
+        // start continuous movement
+        startContinuousMovement();
       },
       onPanResponderMove: (_, gestureState) => {
         // calculate the distance from the center
@@ -43,10 +47,8 @@ const CursorJoystick: React.FC<CursorJoystickProps> = ({
         // update the position
         pan.setValue({x: dx, y: dy});
 
-        // scale down the movement velocity
-        const scaleFactor = 1; // adjust this value to fine-tune the movement speed
-        // call the onMove callback with scaled down values
-        onMove(dx * scaleFactor, dy * scaleFactor);
+        // update last movement
+        lastMovement.current = {dx, dy};
       },
       onPanResponderRelease: () => {
         setMoving(false);
@@ -55,9 +57,34 @@ const CursorJoystick: React.FC<CursorJoystickProps> = ({
           toValue: {x: 0, y: 0},
           useNativeDriver: false,
         }).start();
+        // stop continuous movement
+        stopContinuousMovement();
       },
     }),
   ).current;
+
+  const startContinuousMovement = () => {
+    if (intervalRef.current) return;
+    intervalRef.current = setInterval(() => {
+      const {dx, dy} = lastMovement.current;
+      const scaleFactor = 0.1; // adjust this value to fine-tune the movement speed
+      onMove(dx * scaleFactor, dy * scaleFactor);
+    }, 150); // approximately 60fps
+  };
+
+  const stopContinuousMovement = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      // cleanup interval on component unmount
+      stopContinuousMovement();
+    };
+  }, []);
 
   return (
     <View style={[styles.container, {backgroundColor: color}]}>

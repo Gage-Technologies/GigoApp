@@ -13,7 +13,7 @@ import {useNavigation} from '@react-navigation/native';
 import XpPopup from '../components/XpPopup';
 import ByteKeyboard from '../components/ByteKeyboard/ByteKeyboard';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {debounce} from 'lodash';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 
 // component to display a byte or journey in a webview
 const Byte: React.FC<{
@@ -191,13 +191,14 @@ const Byte: React.FC<{
   }
 
   /**
-   * debounced function to handle cursor movement from the joystick
+   * function to handle cursor movement from the joystick
    * injects appropriate key events into the webview to simulate cursor movement
+   * and triggers haptic feedback
    * @param dx horizontal movement (-1 to 1)
    * @param dy vertical movement (-1 to 1)
    */
-  const debouncedHandleCursorMove = useCallback(
-    debounce((dx: number, dy: number) => {
+  const handleCursorMove = useCallback(
+    (dx: number, dy: number) => {
       console.log('debounced cursor moved', dx, dy);
       // determine which arrow key to simulate based on the strongest direction
       let key = '';
@@ -220,21 +221,16 @@ const Byte: React.FC<{
             document.activeElement.dispatchEvent(event);
           })();
         `);
+
+        // trigger haptic feedback
+        ReactNativeHapticFeedback.trigger('impactLight', {
+          enableVibrateFallback: true,
+          ignoreAndroidSystemSettings: false,
+        });
       }
-    }, 10), // 100ms debounce time, adjust as needed
+    },
     [webViewRef],
   );
-
-  /**
-   * handles cursor movement from the joystick
-   * calls the debounced function to handle the actual movement
-   * @param dx horizontal movement (-1 to 1)
-   * @param dy vertical movement (-1 to 1)
-   */
-  function handleCursorMove(dx: number, dy: number) {
-    console.log('cursor moved', dx, dy);
-    debouncedHandleCursorMove(dx, dy);
-  }
 
   return (
     <KeyboardAvoidingView

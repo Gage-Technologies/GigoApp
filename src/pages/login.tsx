@@ -8,8 +8,8 @@ import {
   Dimensions,
   Alert,
   KeyboardAvoidingView, // Add this import
-  Platform, // Add this import
-} from 'react-native';
+  Platform, PixelRatio // Add this import
+} from "react-native";
 import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 // @ts-ignore
 import googleLogo from '../components/Icons/login/google_g.png';
@@ -199,11 +199,16 @@ const Login = () => {
   const [showPass, setShowPass] = React.useState(false);
   const [ghConfirm, setGhConfirm] = React.useState(false);
   const [windowHeight, setWindowHeight] = useState(
-    Dimensions.get('window').height,
+    Dimensions.get('screen').height,
   );
+  console.log("dimension: ", Dimensions.get('screen').height)
   const [windowWidth, setWindowWidth] = useState(
     Dimensions.get('window').width,
   );
+
+  const windowHeightTest = Dimensions.get('screen').height; // Get screen height in DP
+  const pixelHeight = PixelRatio.getPixelSizeForLayoutSize(windowHeightTest); // Convert DP to pixels
+  console.log(pixelHeight);
 
   const startGoogle = async () => {
     const userInfo = await GoogleSignin.signIn();
@@ -618,7 +623,7 @@ const Login = () => {
             // this redirect URI is for production, testing on dev will not work
             redirectUri={'gigoapp://callback'}
             onSuccess={onSuccessGithub}
-            containerHeight={windowHeight} // Pass the height
+            containerHeight={windowHeight * 1.80} // Pass the height
             containerWidth={windowWidth} // Pass the width
             onFailure={onFailureGithub}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>

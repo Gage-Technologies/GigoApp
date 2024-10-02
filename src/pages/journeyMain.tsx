@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback, memo} from 'react';
+import React, {useState, useEffect, useRef, useCallback, memo, useMemo} from 'react';
 import {
   ScrollView,
   View,
@@ -6,6 +6,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  InteractionManager, // import InteractionManager
 } from 'react-native';
 import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 import {Text, useTheme} from 'react-native-paper';
@@ -30,10 +31,10 @@ import {
 } from '../reducers/auth';
 import {useDispatch, useSelector} from 'react-redux';
 import {setBottomBarVisible} from '../reducers/appSettings';
+import debounce from 'lodash/debounce';
 
 const JourneyMain = () => {
   const [initialized, setInitialized] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
   const [activeJourney, setActiveJourney] = useState<boolean | null>(null);
   const [showHandout, setShowHandout] = useState<number | null>(null);
@@ -77,9 +78,6 @@ const JourneyMain = () => {
     const fetchSessionData = async () => {
       try {
         const xpLogin = await AsyncStorage.getItem('loginXP');
-        setLoading(true);
-
-        setLoading(false);
 
         if (xpLogin && xpLogin !== 'undefined' && xpLogin !== '0') {
           setShowXpPopup(true);
@@ -87,7 +85,6 @@ const JourneyMain = () => {
         }
       } catch (error) {
         console.error('Error loading data', error);
-        setLoading(false);
       }
     };
 
@@ -129,11 +126,7 @@ const JourneyMain = () => {
 
   const getTasks = async (loadMore = false) => {
     try {
-      if (!loadMore) {
-        setLoading(true);
-      } else {
-        setIsLoadingMore(true);
-      }
+      setIsLoadingMore(true);
 
       let response = await fetch(`${API_URL}/api/journey/determineStart`, {
         method: 'POST',
@@ -152,8 +145,8 @@ const JourneyMain = () => {
       let map = await response.json();
       if (!map.started_journey) {
         setActiveJourney(false);
-        setLoading(false);
         setInitialized(true);
+        setIsLoadingMore(false);
         return;
       }
 
@@ -183,17 +176,11 @@ const JourneyMain = () => {
             res,
           )}`,
         );
+        setIsLoadingMore(false);
         return;
       }
 
       let res = await response.json();
-
-      if (!res.success) {
-        setActiveJourney(false);
-        setLoading(false);
-        setInitialized(true);
-        return;
-      }
 
       const fetchedUnits = await Promise.all(
         res.user_map.units.map(async (unit: {_id: any}) => {
@@ -253,23 +240,16 @@ const JourneyMain = () => {
       if (fetchedUnits.length < 5) {
         setHasMore(false);
       }
-
-      setUnits(prevUnits =>
-        loadMore ? [...fetchedUnits, ...prevUnits] : fetchedUnits,
-      );
       setActiveJourney(true);
-      // setLoading(false);
-      // setIsLoadingMore(false);
+      setIsLoadingMore(false);
     } catch (error: any) {
       Alert.alert(
         'Error',
         error.message ||
           'Failed to fetch tasks. Please check your network connection.',
       );
-      // setLoading(false);
-      // setIsLoadingMore(false);
+      setIsLoadingMore(false);
     } finally {
-      setLoading(false);
       setIsLoadingMore(false);
       setInitialized(true);
     }
@@ -366,7 +346,7 @@ const JourneyMain = () => {
               ? [styles.unitContainer, {paddingTop: 20}]
               : styles.unitContainer
           }
-          key={unit._id}>
+          key={`journey-unit-${unit._id}-${index}`}>
           <HapticTouchableOpacity
             style={[styles.unitHeader, {backgroundColor: unit.color}]}
             onPress={() => triggerHandout(index)}>
@@ -445,7 +425,7 @@ const JourneyMain = () => {
   };
 
   const handleLoadMore = () => {
-    console.log('Loading more...');
+    console.log('loading more: ', hasMore, !isLoadingMore);
     if (hasMore && !isLoadingMore) {
       getTasks(true);
     }
@@ -476,8 +456,8 @@ const JourneyMain = () => {
               data={filteredUnits}
               renderItem={renderItem}
               keyExtractor={keyExtractor}
-              onStartReached={handleLoadMore}
-              onStartReachedThreshold={0.5}
+              // onStartReached={handleLoadMore}
+              // onStartReachedThreshold={0.1}
               ListHeaderComponent={
                 isLoadingMore ? (
                   <View style={styles.loadingMoreIndicator}>
@@ -490,6 +470,15 @@ const JourneyMain = () => {
               }
               contentContainerStyle={styles.scrollViewContent}
               scrollEventThrottle={16}
+              maintainVisibleContentPosition={{
+                minIndexForVisible: 0,
+              }} // maintain visible content position when prepending data
+              onScroll={({nativeEvent}) => {
+                // check if the user has scrolled to the top
+                if (nativeEvent.contentOffset.y <= 0 && !isLoadingMore) {
+                  handleLoadMore();
+                }
+              }}
             />
           )
         ) : (

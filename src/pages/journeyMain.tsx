@@ -1,16 +1,14 @@
-import React, {useState, useEffect, useRef, useCallback} from 'react';
+import React, {useState, useEffect, useRef, useCallback, memo} from 'react';
 import {
   ScrollView,
   View,
   StyleSheet,
   ActivityIndicator,
   Alert,
-  Modal as RNModal,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
+  FlatList,
 } from 'react-native';
 import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
-import {Text, Button, useTheme} from 'react-native-paper';
+import {Text, useTheme} from 'react-native-paper';
 import Config from 'react-native-config';
 import JourneyMap from '../components/Journey/JourneyMap';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -31,7 +29,7 @@ import {
   updateAuthState,
 } from '../reducers/auth';
 import {useDispatch, useSelector} from 'react-redux';
-import { setBottomBarVisible } from '../reducers/appSettings';
+import {setBottomBarVisible} from '../reducers/appSettings';
 
 const JourneyMain = () => {
   const [initialized, setInitialized] = useState(false);
@@ -171,6 +169,11 @@ const JourneyMain = () => {
       });
 
       if (!response.ok) {
+        // TODO: replace this after we fix the backend
+        if (response.status === 500) {
+          setHasMore(false);
+        }
+
         let res = response.statusText;
         try {
           res = await response.json();
@@ -342,141 +345,103 @@ const JourneyMain = () => {
     setShowHandout(index);
   };
 
-  const handleMap = (unit: Unit, index: number) => {
-    const isLastIndex = index === filteredUnits.length - 1;
-    const allCompleted = unit.tasks.every(task => task.completed);
-    const isPendingAcceptance = isLastIndex && !allCompleted;
+  // memoize the handleMap function
+  const memoizedHandleMap = useCallback(
+    (unit: Unit, index: number) => {
+      const isLastIndex = index === filteredUnits.length - 1;
+      const allCompleted = unit.tasks.every(task => task.completed);
+      const isPendingAcceptance = isLastIndex && !allCompleted;
 
-    // calculate task offset by summing the length of all previous units
-    const taskOffset = filteredUnits
-      .slice(0, index)
-      .reduce((acc, unit) => acc + unit.tasks.length, 0);
+      // calculate task offset by summing the length of all previous units
+      const taskOffset = filteredUnits
+        .slice(0, index)
+        .reduce((acc, unit) => acc + unit.tasks.length, 0);
 
-    const isUnitStarted = unit.tasks.some(task => task.completed);
+      const isUnitStarted = unit.tasks.some(task => task.completed);
 
-    return (
-      <View
-        style={
-          isPendingAcceptance
-            ? [styles.unitContainer, {paddingTop: 20}]
-            : styles.unitContainer
-        }
-        key={unit._id}>
-        <HapticTouchableOpacity
-          style={[styles.unitHeader, {backgroundColor: unit.color}]}
-          onPress={() => triggerHandout(index)}>
-          <Text style={[styles.unitTitle, {color: getTextColor(unit.color)}]}>
-            {unit.name}
-          </Text>
-          <View style={styles.clipboardIcon}>
-            <Ionicons
-              name="document-text-outline"
-              size={24}
-              color={getTextColor(unit.color)}
-            />
-          </View>
-        </HapticTouchableOpacity>
-        <View style={styles.unitContent} key={renderKey}>
-          <JourneyMap
-            unitId={unit._id}
-            unitIndex={index}
-            taskOffset={taskOffset}
-            isUnitStarted={isUnitStarted}
-            isScrolling={isScrolling}
-          />
-        </View>
-        {isPendingAcceptance && (
-          <View style={styles.blurOverlay}>
-            <BlurView
-              style={styles.blurView}
-              blurType="dark"
-              blurAmount={3}
-              reducedTransparencyFallbackColor={theme.colors.background}
-            />
-            <View style={styles.buttonWrapper}>
-              <HapticAwesomeButton
-                width={300}
-                height={80}
-                borderRadius={20}
-                textSize={28}
-                backgroundColor={theme.colors.primary}
-                // @ts-ignore
-                backgroundDarker={theme.colors.primaryVariant}
-                // @ts-ignore
-                textColor={theme.colors.primaryVariant}
-                onPress={() => {
-                  // handle adding unit to journey
-                  handleAddUnitToMap();
-                }}>
-                Add Unit To Journey
-              </HapticAwesomeButton>
+      return (
+        <View
+          style={
+            isPendingAcceptance
+              ? [styles.unitContainer, {paddingTop: 20}]
+              : styles.unitContainer
+          }
+          key={unit._id}>
+          <HapticTouchableOpacity
+            style={[styles.unitHeader, {backgroundColor: unit.color}]}
+            onPress={() => triggerHandout(index)}>
+            <Text style={[styles.unitTitle, {color: getTextColor(unit.color)}]}>
+              {unit.name}
+            </Text>
+            <View style={styles.clipboardIcon}>
+              <Ionicons
+                name="document-text-outline"
+                size={24}
+                color={getTextColor(unit.color)}
+              />
             </View>
+          </HapticTouchableOpacity>
+          <View style={styles.unitContent} key={renderKey}>
+            <JourneyMap
+              unitId={unit._id}
+              unitIndex={index}
+              taskOffset={taskOffset}
+              isUnitStarted={isUnitStarted}
+              isScrolling={isScrolling}
+            />
           </View>
-        )}
-        {isLastIndex && <View style={styles.bottomSpacer} />}
-        <RNModal
-          animationType="slide"
-          transparent={true}
-          visible={openDetourPop}
-          onRequestClose={() => setOpenDetourPop(false)}>
-          <View style={styles.modalView}>
-            <Text>Detour Selection Component</Text>
-            <Button onPress={() => setOpenDetourPop(false)}>Close</Button>
-          </View>
-        </RNModal>
-      </View>
-    );
-  };
+          {isPendingAcceptance && (
+            <View style={styles.blurOverlay}>
+              <BlurView
+                style={styles.blurView}
+                blurType="dark"
+                blurAmount={3}
+                reducedTransparencyFallbackColor={theme.colors.background}
+              />
+              <View style={styles.buttonWrapper}>
+                <HapticAwesomeButton
+                  width={300}
+                  height={80}
+                  borderRadius={20}
+                  textSize={28}
+                  backgroundColor={theme.colors.primary}
+                  // @ts-ignore
+                  backgroundDarker={theme.colors.primaryVariant}
+                  // @ts-ignore
+                  textColor={theme.colors.primaryVariant}
+                  onPress={() => {
+                    // handle adding unit to journey
+                    handleAddUnitToMap();
+                  }}>
+                  Add Unit To Journey
+                </HapticAwesomeButton>
+              </View>
+            </View>
+          )}
+          {isLastIndex && <View style={styles.bottomSpacer} />}
+        </View>
+      );
+    },
+    [filteredUnits, handleAddUnitToMap, triggerHandout, theme.colors],
+  );
+
+  // memoize the renderItem function for FlatList
+  const renderItem = useCallback(
+    ({item, index}: {item: Unit; index: number}) => {
+      return memoizedHandleMap(item, index);
+    },
+    [memoizedHandleMap],
+  );
+
+  // memoize the keyExtractor function for FlatList
+  const keyExtractor = useCallback((item: Unit) => item._id, []);
 
   const refetchJourneys = async () => {
     await getTasks();
   };
 
-  const handleDetourNavigation = () => {
-    // @ts-ignore
-    navigation.navigate('Detour');
-  };
-
   const handleCloseXpPopup = () => {
     setShowXpPopup(false);
-  };
-
-  const handleStartIntroductoryJourney = async () => {
-    const journeyMap = {
-      JavaScript: '1775630331836104704',
-      Python: '1769720326918242304',
-      Go: '1767257082752401408',
-      Rust: '1775923721366667264',
-      'C#': 'example_id_csharp',
-      'C++': 'example_id_cpp',
-    };
-
-    const unitId = journeyMap[selectedLanguage];
-
-    if (!unitId) {
-      console.error('No introductory journey found for', selectedLanguage);
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/api/journey/addUnitToMap`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({unit_id: unitId}),
-      });
-
-      const res = await response.json();
-
-      if (res && res.success) {
-        await getTasks();
-      } else {
-        console.error('Failed to add introductory unit to map');
-      }
-    } catch (error) {
-      console.error('Failed to add introductory unit to map', error);
-    }
   };
 
   const handleLoadMore = () => {
@@ -491,59 +456,50 @@ const JourneyMain = () => {
     dispatch(setBottomBarVisible(true));
   };
 
+  // optimize the main render function
   return (
     <>
-      <ScrollView
-        ref={scrollViewRef}
-        style={[styles.scrollView, {backgroundColor: theme.colors.background}]}
-        contentContainerStyle={styles.scrollViewContent}
-        onScroll={({nativeEvent}) => {
-          // check if the user has scrolled to the top
-          if (nativeEvent.contentOffset.y <= 0 && !isLoadingMore) {
-            handleLoadMore();
-          }
-        }}
-        onScrollBeginDrag={(event: NativeSyntheticEvent<NativeScrollEvent>) => {
-          scrollStartY.current = event.nativeEvent.contentOffset.y;
-          setIsScrolling(true);
-        }}
-        onScrollEndDrag={() => {
-          setIsScrolling(false);
-        }}
-        onMomentumScrollEnd={() => {
-          setIsScrolling(false);
-        }}
-        scrollEventThrottle={0}>
-        {initialized ? (
-          activeJourney ? (
-            showEmptyJourney ? (
-              <EmptyJourney
-                language={selectedLanguage}
-                onStartJourney={() => setShowEmptyJourney(false)}
-                refetchJourneys={refetchJourneys}
-              />
-            ) : (
-              <>
-                {isLoadingMore && (
+      {initialized ? (
+        activeJourney ? (
+          showEmptyJourney ? (
+            <EmptyJourney
+              language={selectedLanguage}
+              onStartJourney={() => setShowEmptyJourney(false)}
+              refetchJourneys={refetchJourneys}
+            />
+          ) : (
+            <FlatList
+              style={[
+                styles.scrollView,
+                {backgroundColor: theme.colors.background},
+              ]}
+              data={filteredUnits}
+              renderItem={renderItem}
+              keyExtractor={keyExtractor}
+              onStartReached={handleLoadMore}
+              onStartReachedThreshold={0.5}
+              ListHeaderComponent={
+                isLoadingMore ? (
                   <View style={styles.loadingMoreIndicator}>
                     <ActivityIndicator
                       size="large"
                       color={theme.colors.primary}
                     />
                   </View>
-                )}
-                {filteredUnits.map((unit, index) => handleMap(unit, index))}
-              </>
-            )
-          ) : (
-            <GetStarted getTasks={getTasks} />
+                ) : null
+              }
+              contentContainerStyle={styles.scrollViewContent}
+              scrollEventThrottle={16}
+            />
           )
         ) : (
-          <View style={styles.loadingIndicator}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-          </View>
-        )}
-      </ScrollView>
+          <GetStarted getTasks={getTasks} />
+        )
+      ) : (
+        <View style={styles.loadingIndicator}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      )}
       {/* {activeJourney && !showEmptyJourney && filteredUnits.length > 0 && (
         <HapticTouchableOpacity
           style={styles.detourButton}
@@ -634,6 +590,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 15,
     borderRadius: 20,
+    marginHorizontal: 8,
+    marginTop: 8,
   },
   unitContent: {
     padding: 15,
@@ -707,4 +665,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default JourneyMain;
+// memoize the JourneyMain component
+export default memo(JourneyMain);

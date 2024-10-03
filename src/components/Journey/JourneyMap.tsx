@@ -6,16 +6,13 @@ import {
   Text,
   Modal,
   ScrollView,
-  ActivityIndicator,
   StyleSheet,
-  Alert,
   Dimensions,
 } from 'react-native';
 import {Button, useTheme} from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons'; // For modern icons
-import Config from 'react-native-config';
 import {useNavigation} from '@react-navigation/native';
-import {Task} from '../../models/Journey';
+import {Task, Unit} from '../../models/Journey';
 import HapticAwesomeButton from '../Buttons/HapticAwesomeButton';
 import Animated, {
   useSharedValue,
@@ -52,65 +49,25 @@ const ScrollAwareButton = ({
 const JourneyMap = ({
   unitId,
   unitIndex,
+  unit,
   taskOffset,
   isUnitStarted,
   isScrolling,
 }: {
   unitId: string;
   unitIndex: number;
+  unit: Unit;
   taskOffset: number;
   isUnitStarted: boolean;
   isScrolling: boolean;
 }) => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [handoutVisible, setHandoutVisible] = useState(false);
-  const [handoutContent, setHandoutContent] = useState('');
-  const [unitTitle, setUnitTitle] = useState(''); // new state for unit title
-  const API_URL = Config.API_URL;
   const theme = useTheme();
   const pressTimer = useRef<NodeJS.Timeout | null>(null);
 
   const navigation = useNavigation();
-
-  useEffect(() => {
-    const fetchTasks = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`${API_URL}/api/journey/getTasksInUnit`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({unit_id: unitId}),
-        });
-
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          const fetchedTasks = result.data.tasks.sort((a: Task, b: Task) => {
-            // parse node_above to numbers, defaulting to 0 if null or undefined
-            const aNodeAbove = a.node_above ? parseInt(a.node_above, 10) : 0;
-            const bNodeAbove = b.node_above ? parseInt(b.node_above, 10) : 0;
-            return aNodeAbove - bNodeAbove;
-          });
-          setTasks(fetchedTasks);
-          setHandoutContent(result.data.handout);
-          setUnitTitle(result.data.unitTitle); // set the unit title
-        } else {
-          Alert.alert('error', 'failed to fetch tasks');
-        }
-      } catch (error: any) {
-        Alert.alert('error', error.message || 'failed to fetch tasks');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTasks();
-  }, [unitId]);
 
   const handlePressTask = (task: Task) => {
     // navigate to the byte page
@@ -257,7 +214,7 @@ const JourneyMap = ({
         return [theme.colors.tertiary, theme.colors.tertiaryVariant];
       }
 
-      if (index === 0 || (index > 0 && tasks[index - 1].completed)) {
+      if (index === 0 || (index > 0 && unit.tasks[index - 1].completed)) {
         // @ts-ignore
         return [theme.colors.primary, theme.colors.primaryVariant];
       }
@@ -267,10 +224,10 @@ const JourneyMap = ({
 
     return (
       <View style={styles.pathContainer}>
-        {tasks.map((task, index) => {
+        {unit.tasks.map((task, index) => {
           let c = getButtonStyles(task, index);
           const isUnlocked =
-            index === 0 || (index > 0 && tasks[index - 1].completed);
+            index === 0 || (index > 0 && unit.tasks[index - 1].completed);
           // show start sign on the first task of unstarted units or unlocked tasks of started units
           const showStartSign =
             (!isUnitStarted && index === 0) ||
@@ -309,7 +266,7 @@ const JourneyMap = ({
                 {renderTaskIcon(
                   task,
                   index,
-                  index > 0 ? tasks[index - 1] : null,
+                  index > 0 ? unit.tasks[index - 1] : null,
                 )}
               </ScrollAwareButton>
               {/* <Text style={styles.taskName}>{task.name}</Text> */}
@@ -322,24 +279,9 @@ const JourneyMap = ({
 
   return (
     <ScrollView contentContainerStyle={styles.scrollView}>
-      {loading ? (
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-      ) : (
-        <View style={styles.contentContainer}>
-          <View style={styles.unitHeader}>
-            <Text style={styles.unitTitle}>{unitTitle}</Text>
-          </View>
-          {handoutVisible ? (
-            <View style={styles.handoutContainer}>
-              <ScrollView>
-                <Text style={styles.handoutText}>{handoutContent}</Text>
-              </ScrollView>
-            </View>
-          ) : (
-            <JourneyStops />
-          )}
-        </View>
-      )}
+      <View style={styles.contentContainer}>
+        <JourneyStops />
+      </View>
       {selectedTask && <TaskModal />}
     </ScrollView>
   );

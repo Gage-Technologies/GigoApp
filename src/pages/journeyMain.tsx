@@ -365,6 +365,7 @@ const JourneyMain = () => {
             <JourneyMap
               unitId={unit._id}
               unitIndex={index}
+              unit={unit}
               taskOffset={taskOffset}
               isUnitStarted={isUnitStarted}
               isScrolling={isScrolling}

@@ -264,6 +264,10 @@ const Byte: React.FC<{
             onNavigationStateChange={handleNavigationStateChange}
             onLoadStart={() => setIsLoading(true)}
             onLoadEnd={() => setIsLoading(false)}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+            mixedContentMode="compatibility"
+            androidLayerType="hardware"
           />
           {showXpPopup && (
             <XpPopup

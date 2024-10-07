@@ -267,7 +267,7 @@ const Byte: React.FC<{
             javaScriptEnabled={true}
             domStorageEnabled={true}
             mixedContentMode="compatibility"
-            androidLayerType="hardware"
+            cacheEnabled={true}
           />
           {showXpPopup && (
             <XpPopup

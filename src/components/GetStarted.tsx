@@ -16,6 +16,7 @@ import JsLogo from '../img/logo-javascript.svg';
 import RustLogo from '../img/logo-rust.svg';
 import CppLogo from '../img/Cpp_Logo.svg';
 import CSharpLogo from '../img/Logo_C_sharp.svg';
+import { theme } from "../theme.ts";
 
 const GetStarted = ({getTasks}) => {
   const [selectedJourney, setSelectedJourney] = useState('');
@@ -155,17 +156,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'start',
     padding: 20,
+    backgroundColor: theme.colors.background,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: 'white',
+    color: theme.colors.text,
     marginBottom: 10,
   },
   description: {
     fontSize: 16,
     textAlign: 'center',
-    color: 'white',
+    color: theme.colors.text,
     marginBottom: 20,
   },
   journeysContainer: {

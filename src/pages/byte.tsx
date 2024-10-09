@@ -38,6 +38,7 @@ const Byte: React.FC<{
   const webViewRef = useRef<WebView>(null);
   const [key, setKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [layerType, setLayerType] = useState<'hardware' | 'software'>('hardware'); // Track layer type
 
   // force re-render of webview on mount
   useEffect(() => {
@@ -53,14 +54,14 @@ const Byte: React.FC<{
     [byteId, isJourney, authState.token],
   );
 
-  console.log('authState', authState);
-
-  console.log(
-    'target',
-    `https://www.gigo.dev/byte/${byteId}?embed=true&viewport=mobile&appToken=${
-      authState.token
-    }${isJourney ? '&journey=true' : ''}`,
-  );
+  // console.log('authState', authState);
+  //
+  // console.log(
+  //   'target',
+  //   `https://www.gigo.dev/byte/${byteId}?embed=true&viewport=mobile&appToken=${
+  //     authState.token
+  //   }${isJourney ? '&journey=true' : ''}`,
+  // );
 
   const handleXpGain = (gainedXp: number) => {
     // TODO: Figure out how to handle all of this xp data
@@ -122,6 +123,89 @@ const Byte: React.FC<{
     }
 
     return true;
+  };
+
+  const injectPageTrackingScript = () => {
+    if (!webViewRef.current) {
+      console.error("WebView reference is null or undefined.");
+      return;
+    }
+
+    webViewRef.current.injectJavaScript(`
+    (function() {
+      console.log("Tracking all events and mutations on the page");
+
+      let mouseMoveCount = 0;
+      let clickCount = 0;
+      let isSoftwareMode = false; // Tracks current rendering mode
+
+      // Function to log events and detect plugin interaction
+      function logEvent(event) {
+        if (event.type === 'mousemove') {
+          mouseMoveCount++;
+        } else if (event.type === 'click') {
+          clickCount++;
+
+          // Detect if a sidebar plugin is opened or clicked immediately
+          const sidebarElement = document.querySelector('#editor-sidebar');
+          if (sidebarElement && sidebarElement.contains(event.target)) {
+            console.log('Sidebar interaction detected');
+            if (!isSoftwareMode) {
+              console.log('Switching to software rendering due to sidebar interaction');
+              window.ReactNativeWebView.postMessage('switchToSoftware');
+              isSoftwareMode = true;
+            }
+          }
+        }
+
+        console.log('Event detected:', event.type, event);
+        window.ReactNativeWebView.postMessage('Event: ' + event.type + ' detected');
+
+        if (mouseMoveCount >= 2 && clickCount >= 2) {
+          if (isSoftwareMode) {
+            console.log('Switching to hardware rendering');
+            window.ReactNativeWebView.postMessage('switchToHardware');
+          } else {
+            console.log('Switching to software rendering');
+            window.ReactNativeWebView.postMessage('switchToSoftware');
+          }
+
+          isSoftwareMode = !isSoftwareMode;  // Toggle mode
+          mouseMoveCount = 0;
+          clickCount = 0;
+        }
+      }
+
+      // Add event listeners for different events
+      document.addEventListener('click', logEvent);
+      document.addEventListener('mousemove', logEvent);
+
+      // MutationObserver to track all changes in the sidebar
+      const sidebarContainer = document.querySelector('#editor-sidebar');
+      if (sidebarContainer) {
+        console.log('Started tracking mutations in the sidebar.');
+
+        const observer = new MutationObserver(function(mutationsList) {
+          mutationsList.forEach(function(mutation) {
+            if (mutation.type === 'childList' || mutation.type === 'attributes') {
+              console.log('Sidebar mutation detected');
+              if (!isSoftwareMode) {
+                console.log('Switching to software rendering due to sidebar mutation');
+                window.ReactNativeWebView.postMessage('switchToSoftware');
+                isSoftwareMode = true;
+              }
+            }
+          });
+        });
+
+        observer.observe(sidebarContainer, {
+          attributes: true,  // Track attribute changes
+          childList: true,   // Track additions or removals of child nodes
+          subtree: true,     // Track changes within the entire subtree of the container
+        });
+      }
+    })();
+  `);
   };
 
   /**
@@ -234,6 +318,19 @@ const Byte: React.FC<{
     [webViewRef],
   );
 
+  // console.log("is loading rn: ", isLoading)
+
+  useEffect(() => {
+    console.log("in use effect")
+  }, []);
+
+  const forceReflow = () => {
+    webViewRef.current?.injectJavaScript(`
+    document.body.style.transform = 'translateZ(0)';
+    setTimeout(() => { document.body.style.transform = ''; }, 100);
+  `);
+  };
+
   return (
     <KeyboardAvoidingView
       style={{flex: 1}}
@@ -262,11 +359,31 @@ const Byte: React.FC<{
             ref={webViewRef}
             source={getWebViewSource()}
             onNavigationStateChange={handleNavigationStateChange}
+            // onMessage={(event) => {
+            //   const message = event.nativeEvent.data;
+            //   console.log("in message: ", message);
+            //
+            //   if (message === 'switchToSoftware') {
+            //     console.log("Switching to software rendering");
+            //     setLayerType('software');  // Switch to software rendering
+            //   } else if (message === 'switchToHardware') {
+            //     console.log("Switching to hardware rendering");
+            //     setLayerType('hardware');  // Switch back to hardware rendering
+            //   }
+            // }}
             onLoadStart={() => setIsLoading(true)}
-            onLoadEnd={() => setIsLoading(false)}
+            onLoadEnd={() => {
+              setIsLoading(false);
+              // injectPageTrackingScript();  // Inject the script after the WebView has loaded
+            }}
             javaScriptEnabled={true}
             domStorageEnabled={true}
             mixedContentMode="compatibility"
+            androidLayerType={"software"}
+            // onLoadEnd={() => {
+            //   setIsLoading(false);
+            //   forceReflow();  // Force a reflow after the page finishes loading
+            // }}
             cacheEnabled={true}
           />
           {showXpPopup && (

@@ -125,6 +125,12 @@ const Byte: React.FC<{
     return true;
   };
 
+  ////this function is used for tracking mouse movement and clicks on the page
+  ///the webview glitches on the ide page when android layer is not hardware
+  ///the handout and ct page glitches when android layer is hardware
+  ///this tracks a specific pattern in the event handler that is only triggered when those are opened
+  //this conditionally changes the layer type state variable in the webview to circumvent the issue above
+
   const injectPageTrackingScript = () => {
     if (!webViewRef.current) {
       console.error("WebView reference is null or undefined.");

@@ -379,7 +379,7 @@ const Byte: React.FC<{
             javaScriptEnabled={true}
             domStorageEnabled={true}
             mixedContentMode="compatibility"
-            androidLayerType={"software"}
+            androidLayerType={layerType}
             // onLoadEnd={() => {
             //   setIsLoading(false);
             //   forceReflow();  // Force a reflow after the page finishes loading

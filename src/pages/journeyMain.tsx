@@ -137,9 +137,8 @@ const JourneyMain = () => {
       });
 
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch start of journey, status ${response.status}`,
-        );
+        console.log("response was not ok: ", response)
+        return;
       }
 
       let map = await response.json();

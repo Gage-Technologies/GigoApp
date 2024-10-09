@@ -150,7 +150,7 @@ const CreateNewAccount = () => {
       alignItems: 'center',
       justifyContent: 'center',
       position: 'absolute',
-      bottom: -5,
+      bottom: -3,
     },
     header: {
       fontSize: 24,
@@ -368,13 +368,11 @@ const CreateNewAccount = () => {
 
       await sleep(1000);
 
-      setLoading(false);
     } else {
       if (AsyncStorage.getItem('alive') === null) {
         //@ts-ignore
         swal('Sorry, we failed to log you in, please try again on login page');
       }
-      setLoading(false);
     }
   };
 
@@ -470,18 +468,21 @@ const CreateNewAccount = () => {
                   //@ts-ignore
                   navigation.navigate('JourneyMain');
                 });
+                setLoading(false);
               } else {
                 Alert.alert(
                   'Login Failed',
                   'Sorry, we failed to log you in. Please try again on the login page.',
                 );
               }
+              setLoading(false);
             } catch (error) {
               //@ts-ignore
               Alert.alert(
                 'Login Error',
                 'An error occurred during the authorization process.',
               );
+              setLoading(false);
             }
           }
         },
@@ -491,7 +492,6 @@ const CreateNewAccount = () => {
         'Login Error',
         'An error occurred during the GitHub user creation process.',
       );
-    } finally {
       setLoading(false);
     }
   };
@@ -510,7 +510,6 @@ const CreateNewAccount = () => {
     } catch (error) {
       Alert.alert('Sign-Up Error', 'Failed to authenticate with Google.');
       console.error(error);
-    } finally {
       setLoading(false);
     }
   };
@@ -628,10 +627,12 @@ const CreateNewAccount = () => {
                     'JourneyMain',
                   );
                 });
+                setLoading(false);
               } else {
                 Alert.alert(
                   'Sorry, we failed to log you in, please try again on login page.',
                 );
+                setLoading(false)
               }
             });
           }
@@ -639,7 +640,6 @@ const CreateNewAccount = () => {
       );
     } catch (error) {
       Alert.alert('Error', 'Network request failed');
-    } finally {
       setLoading(false);
     }
   };
@@ -751,6 +751,7 @@ const CreateNewAccount = () => {
     if (email !== '') {
       const emailIsValid = await verifyEmail(email);
       if (!emailIsValid) {
+        Alert.alert('Sorry!', 'That is not a valid email');
         setLoading(false);
         return false;
       }
@@ -781,7 +782,6 @@ const CreateNewAccount = () => {
 
       // @ts-ignore
       if (res.message) {
-        setLoading(false);
         // @ts-ignore
         if (res.message.includes('required')) {
           // @ts-ignore
@@ -809,6 +809,7 @@ const CreateNewAccount = () => {
       setLoading(false)
     }
 
+    Alert.alert('User Error', 'Please input all valid data')
     setLoading(false);
     return false;
   };
@@ -834,9 +835,7 @@ const CreateNewAccount = () => {
   };
 
   const accountCreation = async () => {
-    setLoading(true);
     let token = await getFcmToken();
-    console.log("in account creation")
 
     if (password !== confirmPass) {
       Alert.alert('Error', 'Passwords do not match');
@@ -929,17 +928,16 @@ const CreateNewAccount = () => {
           if (res.message === 'User Created.') {
             createLogin();
 
-            setLoading(false);
-
             // @ts-ignore
             navigation.navigate('JourneyMain');
+
+            setLoading(false);
           }
         },
       );
     } catch (error) {
       Alert.alert('Network Error', 'Unable to connect to the server.');
-    } finally {
-      setLoading(false);
+      setLoading(false)
     }
   };
 
@@ -1190,6 +1188,7 @@ const CreateNewAccount = () => {
               flexDirection: 'row',
               alignItems: 'center',
               marginTop: 10,
+              marginBottom: 15,
             }}>
             <Text style={{color: 'white', fontSize: 16, lineHeight: 18}}>
               Already have an account?

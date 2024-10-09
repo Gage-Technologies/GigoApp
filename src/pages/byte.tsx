@@ -361,13 +361,10 @@ const Byte: React.FC<{
             onNavigationStateChange={handleNavigationStateChange}
             onMessage={(event) => {
               const message = event.nativeEvent.data;
-              console.log("in message: ", message);
 
               if (message === 'switchToSoftware') {
-                console.log("Switching to software rendering");
                 setLayerType('software');  // Switch to software rendering
               } else if (message === 'switchToHardware') {
-                console.log("Switching to hardware rendering");
                 setLayerType('hardware');  // Switch back to hardware rendering
               }
             }}

@@ -359,22 +359,22 @@ const Byte: React.FC<{
             ref={webViewRef}
             source={getWebViewSource()}
             onNavigationStateChange={handleNavigationStateChange}
-            // onMessage={(event) => {
-            //   const message = event.nativeEvent.data;
-            //   console.log("in message: ", message);
-            //
-            //   if (message === 'switchToSoftware') {
-            //     console.log("Switching to software rendering");
-            //     setLayerType('software');  // Switch to software rendering
-            //   } else if (message === 'switchToHardware') {
-            //     console.log("Switching to hardware rendering");
-            //     setLayerType('hardware');  // Switch back to hardware rendering
-            //   }
-            // }}
+            onMessage={(event) => {
+              const message = event.nativeEvent.data;
+              console.log("in message: ", message);
+
+              if (message === 'switchToSoftware') {
+                console.log("Switching to software rendering");
+                setLayerType('software');  // Switch to software rendering
+              } else if (message === 'switchToHardware') {
+                console.log("Switching to hardware rendering");
+                setLayerType('hardware');  // Switch back to hardware rendering
+              }
+            }}
             onLoadStart={() => setIsLoading(true)}
             onLoadEnd={() => {
               setIsLoading(false);
-              // injectPageTrackingScript();  // Inject the script after the WebView has loaded
+              injectPageTrackingScript();  // Inject the script after the WebView has loaded
             }}
             javaScriptEnabled={true}
             domStorageEnabled={true}

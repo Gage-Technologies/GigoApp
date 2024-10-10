@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Provider as PaperProvider} from 'react-native-paper';
 import {Provider as ReduxProvider} from 'react-redux';
 import store from './src/reducers/store';
@@ -14,13 +14,17 @@ import {Alert, PermissionsAndroid, Platform, Linking} from 'react-native';
 import messaging from '@react-native-firebase/messaging';
 import notifee, {AndroidImportance} from '@notifee/react-native';
 import AppLaunch from './src/components/AppLaunch';
+import BootSplash from 'react-native-bootsplash';
 
 import InAppPurchases from './src/services/InAppPurchase';
+import SplashScreen from './src/components/SplashScreen';
 
 const persistor = persistStore(store);
 
 const App = () => {
   PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+
+  const [splashScreenVisible, setSplashScreenVisible] = useState(true);
 
   useEffect(() => {
     // Create a notification channel
@@ -72,7 +76,13 @@ const App = () => {
           <PaperProvider theme={theme}>
             <LanguageProvider>
               <AppLaunch>
-                <AppRouter />
+                {splashScreenVisible ? (
+                  <SplashScreen
+                    onAnimationEnd={() => setSplashScreenVisible(false)}
+                  />
+                ) : (
+                  <AppRouter />
+                )}
               </AppLaunch>
             </LanguageProvider>
           </PaperProvider>

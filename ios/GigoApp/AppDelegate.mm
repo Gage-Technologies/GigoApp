@@ -28,4 +28,9 @@
 #endif
 }
 
+// for bootsplash
+- (void)customizeRootView:(RCTRootView *)rootView {
+  [RNBootSplash initWithStoryboard:@"BootSplash" rootView:rootView]; // ⬅️ initialize the splash screen
+}
+
 @end

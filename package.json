@@ -7,7 +7,8 @@
     "ios": "react-native run-ios --configuration Release",
     "lint": "eslint .",
     "start": "react-native start --experimental-debugger",
-    "test": "jest"
+    "test": "jest",
+    "generate:bootsplash": "yarn react-native generate-bootsplash src/assets/svgs/logo.svg --platforms=android,ios,web --background=1c1c1a --logo-width=150 --assets-output=assets/bootsplash --flavor=main --html=public/index.html --brand=src/assets/svgs/gigo-dev-white.svg --brand-width=100"
   },
   "dependencies": {
     "@expo/vector-icons": "^14.0.1",
@@ -38,6 +39,7 @@
     "react-native": "0.74.0",
     "react-native-animatable": "^1.4.0",
     "react-native-blob-util": "^0.19.9",
+    "react-native-bootsplash": "^6.1.4",
     "react-native-canvas": "^0.1.39",
     "react-native-config": "^1.5.1",
     "react-native-elements": "^3.4.3",
@@ -111,5 +113,8 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "resolutions": {
+    "sharp": "^0.33.5"
   }
 }

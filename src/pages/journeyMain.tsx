@@ -288,7 +288,7 @@ const JourneyMain = () => {
       return;
     }
 
-    setLoading(true);
+    setInitialized(true);
 
     const response = await fetch(`${API_URL}/api/journey/addUnitToMap`, {
       method: 'POST',
@@ -308,7 +308,7 @@ const JourneyMain = () => {
 
     if (res && res.success) {
       getTasks().then(() => {
-        setLoading(false);
+        setIsLoadingMore(false);
       });
     } else {
       console.error('Failed to add unit to map');

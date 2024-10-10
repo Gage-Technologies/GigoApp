@@ -314,7 +314,7 @@ const ProPopup: React.FC<ProPopupProps> = ({
               {plan !== 'Basic' && (
                 <Text
                   style={[styles.planNote, {color: theme.colors.onSurface}]}>
-                  Available only through gigo.dev
+                  Available only on browser at gigo.dev
                 </Text>
               )}
             </Card.Content>
@@ -560,6 +560,8 @@ const styles = StyleSheet.create({
   planTitle: {
     fontSize: 20,
     fontWeight: 'bold',
+    right: 20,
+    top: 5
   },
   planPrice: {
     fontSize: 24,

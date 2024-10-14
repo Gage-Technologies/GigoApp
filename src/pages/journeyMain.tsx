@@ -1,11 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  memo,
-  useMemo,
-} from 'react';
+import React, {useState, useEffect, useRef, useCallback, memo, useMemo} from 'react';
 import {
   ScrollView,
   View,
@@ -144,7 +137,7 @@ const JourneyMain = () => {
       });
 
       if (!response.ok) {
-        console.log('response was not ok: ', response);
+        console.log("response was not ok: ", response)
         return;
       }
 
@@ -400,7 +393,7 @@ const JourneyMain = () => {
                     // handle adding unit to journey
                     handleAddUnitToMap();
                   }}>
-                  {isLoadingMore ? 'Loading....' : 'Add Unit To Journey'}
+                  Add Unit To Journey
                 </HapticAwesomeButton>
               </View>
             </View>
@@ -446,7 +439,7 @@ const JourneyMain = () => {
   // optimize the main render function
   return (
     <>
-      {initialized && (
+      {initialized ? (
         activeJourney ? (
           showEmptyJourney ? (
             <EmptyJourney
@@ -491,12 +484,22 @@ const JourneyMain = () => {
         ) : (
           <GetStarted getTasks={getTasks} />
         )
-      )}
-      {isLoadingMore && (
-        <View style={styles.loadingOverlay}>
+      ) : (
+        <View style={styles.loadingIndicator}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
         </View>
       )}
+      {/* {activeJourney && !showEmptyJourney && filteredUnits.length > 0 && (
+        <HapticTouchableOpacity
+          style={styles.detourButton}
+          onPress={handleDetourNavigation}>
+          <MaterialCommunityIcons
+            name="sign-direction"
+            size={30}
+            color="white"
+          />
+        </HapticTouchableOpacity>
+      )} */}
       {showXpPopup && (
         <XpPopup {...xpData} popupClose={handleCloseXpPopup} homePage={false} />
       )}
@@ -648,17 +651,6 @@ const styles = StyleSheet.create({
     left: '50%',
     transform: [{translateX: -25}, {translateY: -25}], // assuming a 50x50 loading indicator
     zIndex: 1,
-  },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Transparent black to dim the background
-    zIndex: 10, // Make sure this stays above everything
   },
 });
 

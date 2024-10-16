@@ -432,7 +432,7 @@ const Login = () => {
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder="Password"
+              placeholder="GIGO Password"
               placeholderTextColor="#888888"
               secureTextEntry={!showPass}
               value={password}
@@ -592,7 +592,7 @@ const Login = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
       <ScrollView contentContainerStyle={{flexGrow: 1}}>
-        {external || true ? renderExternal() : renderLogin()}
+        {external ? renderExternal() : renderLogin()}
       </ScrollView>
     </KeyboardAvoidingView>
   );

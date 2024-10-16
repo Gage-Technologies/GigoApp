@@ -1066,7 +1066,7 @@ const CreateNewAccount = () => {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
       <ScrollView contentContainerStyle={{flexGrow: 1}}>
-        {external || true ? renderExternal() : renderCreateAccount()}
+        {external ? renderExternal() : renderCreateAccount()}
       </ScrollView>
     </KeyboardAvoidingView>
   );

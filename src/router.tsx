@@ -22,6 +22,7 @@ import {selectAuthState} from './reducers/auth.ts';
 import {handleDeepLink} from './deepLinking.tsx';
 import {useSelector} from 'react-redux';
 import {selectBottomBarVisible} from './reducers/appSettings.ts';
+import Intro from './pages/intro.tsx';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,14 +31,6 @@ const AppRouter = () => {
   const authState = useSelector(selectAuthState);
 
   useEffect(() => {
-    if (authState.authenticated) {
-      // navigate to journeymain if authenticated
-      navigationRef.current?.navigate('JourneyMain');
-    } else {
-      // navigate to login if not authenticated
-      navigationRef.current?.navigate('Login');
-    }
-
     handleDeepLink(navigationRef);
     getCurrentRouteName();
   }, []);
@@ -56,10 +49,21 @@ const AppRouter = () => {
       onStateChange={() => getCurrentRouteName()}>
       <View style={styles.container}>
         <ConditionalTopBar currentRouteName={currentRouteName} />
-        <Stack.Navigator>
+        <Stack.Navigator
+          initialRouteName={authState.authenticated ? 'JourneyMain' : 'Intro'}>
+          <Stack.Screen
+            name="Intro"
+            component={Intro}
+            options={{headerShown: false}}
+          />
           <Stack.Screen
             name="Login"
             component={Login}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="SignUp"
+            component={CreateNewAccount}
             options={{headerShown: false}}
           />
           <Stack.Screen
@@ -80,11 +84,6 @@ const AppRouter = () => {
           <Stack.Screen
             name="Stats"
             component={Stats}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="SignUp"
-            component={CreateNewAccount}
             options={{headerShown: false}}
           />
           <Stack.Screen
@@ -121,7 +120,8 @@ const ConditionalTopBar = ({currentRouteName}: {currentRouteName: string}) => {
     currentRouteName === 'Login' ||
     currentRouteName === 'SignUp' ||
     currentRouteName === 'ForgotPassword' ||
-    currentRouteName === 'Byte'
+    currentRouteName === 'Byte' ||
+    currentRouteName === 'Intro'
   ) {
     return null;
   }
@@ -142,6 +142,7 @@ const ConditionalBottomBar = ({
     currentRouteName === 'SignUp' ||
     currentRouteName === 'ForgotPassword' ||
     currentRouteName === 'Byte' ||
+    currentRouteName === 'Intro' ||
     !bottomBarVisible
   ) {
     return null;

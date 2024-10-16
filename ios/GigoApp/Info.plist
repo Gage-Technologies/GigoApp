@@ -56,5 +56,9 @@
 			<string>AppIcon60x60</string>
 		</array>
 	</dict>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+	<string>UIInterfaceOrientationPortrait</string>
+	</array>
 </dict>
 </plist>

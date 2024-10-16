@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {TextInput, Button} from 'react-native-paper';
 import {
   View,
@@ -8,8 +8,12 @@ import {
   Dimensions,
   Alert,
   KeyboardAvoidingView, // Add this import
-  Platform, PixelRatio // Add this import
-} from "react-native";
+  Platform,
+  PixelRatio, // Add this import
+  Keyboard,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 // @ts-ignore
 import googleLogo from '../components/Icons/login/google_g.png';
@@ -24,8 +28,11 @@ import {GoogleSignin} from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
 import Config from 'react-native-config';
+import {theme} from '../theme.ts';
+import GigoGorilla from '../img/logo-white.svg';
+import HapticAwesomeButton from '../components/Buttons/HapticAwesomeButton.tsx';
 
-const {width} = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
 const githubLogo = `
 <svg width="100%" height="100%" viewBox="0 0 98 96" xmlns="http://www.w3.org/2000/svg">
@@ -47,146 +54,100 @@ const Login = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
+      backgroundColor: '#111111', // Dark background
     },
-    box: {
-      backgroundColor: '#1c3f30',
-      borderRadius: 20,
-      width: width, // 90% of screen width
-      height: 460, // 25% of screen height
-      alignItems: 'center',
-      justifyContent: 'center',
+    content: {
+      flex: 1,
       padding: 20,
-      position: 'absolute',
-      bottom: -16,
+      justifyContent: 'space-between',
     },
     header: {
-      fontSize: 24,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
       marginBottom: 20,
-      color: 'white',
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: '#FFFFFF',
+    },
+    closeButton: {
+      padding: 10,
+    },
+    closeIcon: {
+      color: '#FFFFFF',
+      fontSize: 24,
+    },
+    inputContainer: {
+      marginBottom: 20,
     },
     input: {
-      width: '80%',
-      marginBottom: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      backgroundColor: '#333333',
       borderRadius: 10,
+      padding: 4,
+      marginBottom: 10,
+      color: '#FFFFFF',
     },
-    inputLabel: {
-      color: 'white',
-      backgroundColor: 'transparent', // match this with your box background color
-      paddingHorizontal: 4,
+    loginButton: {
+      backgroundColor: '#555555',
+      borderRadius: 10,
+      padding: 15,
+      alignItems: 'center',
+      marginBottom: 20,
     },
-    signInWith: {
-      marginVertical: 20,
+    loginButtonText: {
+      color: '#FFFFFF',
       fontSize: 16,
-      color: 'white',
+      fontWeight: 'bold',
     },
-    socialLogin: {
+    forgotPassword: {
+      alignSelf: 'center',
+      marginBottom: 20,
+    },
+    forgotPasswordText: {
+      color: '#888888',
+      fontSize: 16,
+    },
+    socialLoginContainer: {
+      marginTop: 20,
+    },
+    socialLoginTitle: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      textAlign: 'center',
+      marginBottom: 10,
+    },
+    socialButtons: {
       flexDirection: 'row',
       justifyContent: 'space-around',
       width: '100%',
     },
-    socialIcon: {
-      width: 50,
-      height: 50,
-    },
-    loginContainer: {
-      flexDirection: 'row', // Align items in a column
-      justifyContent: 'space-evenly',
-      width: screenWidth * 0.8,
-    },
-    button: {
-      alignItems: 'center', // Center content horizontally
-      justifyContent: 'center', // Center content vertically
-    },
-    innerContainer: {
-      flexDirection: 'row', // Align images horizontally
-      alignItems: 'center',
-    },
-    logo: {
-      width: imageWidth,
-      height: imageWidth, // This assumes the image is square. Adjust as needed.
-      resizeMode: 'contain',
-    },
-    buttonExtra: {
-      backgroundColor: '#4b9288', // A default blue color for button background
-      padding: 10,
-      borderRadius: 10, // Rounded corners
-      alignItems: 'center',
-      marginBottom: 10, // Space between buttons
-      width: '70%',
-    },
-    firstButton: {
-      paddingBottom: 50, // Extra padding at the bottom for the first button
-    },
-    buttonText: {
-      color: 'white', // Text color for buttons
-      fontSize: 16, // Font size for text
-    },
-    buttonTextExtra: {
-      color: '#4b9288',
-      fontSize: 16,
-    },
-    disabledButton: {
-      backgroundColor: '#CCCCCC', // Grey out the button when it's disabled
-    },
-    accountText: {
+    socialButton: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
-      width: screenWidth * 0.8,
-    },
-    externalContainer: {
-      flex: 1,
-      justifyContent: 'center',
       alignItems: 'center',
-    },
-    externalBox: {
-      backgroundColor: '#1c3f30',
-      borderRadius: 20,
-      width: width, // 90% of screen width
-      height: 300, // 25% of screen height
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: 20,
-      position: 'absolute',
-      bottom: -16,
-    },
-    externalHeader: {
-      fontSize: 24,
-      marginBottom: 20,
-      color: 'white',
-    },
-    externalInput: {
-      width: '80%',
-      height: 30,
-      marginBottom: 20,
+      backgroundColor: '#333333',
       borderRadius: 10,
-      borderWidth: 1,
-      padding: 10,
-      color: 'white',
-      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-      borderColor: 'gray',
+      padding: 15,
     },
-    externalButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 10,
-      borderRadius: 5,
-      justifyContent: 'center',
-      minHeight: 35,
-      width: '50%',
-      marginTop: 10,
-      backgroundColor: '#4b9288', // A default blue color for button background
+    socialButtonText: {
+      color: '#FFFFFF',
+      marginLeft: 10,
     },
-    externalButtonText: {
-      color: 'white', // Text color for buttons
-      fontSize: 16, // Font size for text
-    },
-    externalSubText: {
-      fontSize: 14,
+    termsText: {
+      color: '#888888',
+      fontSize: 12,
+      textAlign: 'center',
       marginTop: 20,
-      color: 'white',
+    },
+    loginText: {
+      color: '#FFFFFF',
+      fontSize: 14,
+      textAlign: 'center',
+      marginTop: 20,
+    },
+    loginLink: {
+      color: theme.colors.primary,
     },
   });
   // Assuming the use of hooks for state management
@@ -201,7 +162,7 @@ const Login = () => {
   const [windowHeight, setWindowHeight] = useState(
     Dimensions.get('screen').height,
   );
-  console.log("dimension: ", Dimensions.get('screen').height)
+  console.log('dimension: ', Dimensions.get('screen').height);
   const [windowWidth, setWindowWidth] = useState(
     Dimensions.get('window').width,
   );
@@ -457,66 +418,80 @@ const Login = () => {
   };
 
   const renderExternal = () => {
-    // @ts-ignore
     return (
-      <View style={styles.externalBox}>
-        <Text style={styles.externalHeader}>Enter Password</Text>
-        <TextInput
-          label={renderLabel('Password')}
-          onChangeText={setPassword}
-          value={password}
-          secureTextEntry={!showPass}
-          style={styles.input}
-          mode="flat"
-          underlineColor="transparent"
-          activeUnderlineColor="transparent"
-          textColor="white"
-          cursorColor="white"
-          placeholderTextColor="rgba(255, 255, 255, 0.5)"
-          theme={{
-            colors: {text: 'white', placeholder: 'rgba(255, 255, 255, 0.5)'},
-          }}
-          right={
-            <TextInput.Icon
-              icon={showPass ? 'eye-off' : 'eye'}
-              onPress={() => setShowPass(!showPass)}
-              color="white"
-            />
-          }
-          onSubmitEditing={() => {
-            externalLogin === 'Google' ? googleSignIn() : githubConfirm();
-          }}
-        />
-        {loading ? (
-          <View style={styles.externalButton}>
-            <Text style={styles.externalButtonText}>Login</Text>
+      <View style={styles.content}>
+        <View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Enter Encryption Password</Text>
+            <HapticTouchableOpacity
+              style={styles.closeButton}
+              onPress={() => navigation.navigate('Intro')}>
+              <Text style={styles.closeIcon}>✕</Text>
+            </HapticTouchableOpacity>
           </View>
-        ) : (
-          <HapticTouchableOpacity
-            style={styles.externalButton}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#888888"
+              secureTextEntry={!showPass}
+              value={password}
+              onChangeText={setPassword}
+              underlineColor="transparent"
+              activeUnderlineColor="transparent"
+              cursorColor={theme.colors.primary}
+              right={
+                <TextInput.Icon
+                  icon={showPass ? 'eye-off' : 'eye'}
+                  onPress={() => setShowPass(!showPass)}
+                  color="white"
+                  style={{paddingTop: 8}}
+                />
+              }
+            />
+          </View>
+          <HapticAwesomeButton
+            width={width * 0.9}
+            height={50}
+            backgroundColor={theme.colors.primary}
+            backgroundDarker={theme.colors.primaryVariant}
+            textColor={theme.colors.onPrimary}
+            borderRadius={12}
+            textFontFamily={theme.fonts.medium.fontFamily}
+            style={styles.loginButton}
             onPress={() => {
               externalLogin === 'Google' ? googleSignIn() : githubConfirm();
-            }}>
-            <Text style={styles.externalButtonText}>Login</Text>
-          </HapticTouchableOpacity>
-        )}
-        <Text style={styles.externalSubText}>
-          Haven't linked your account yet?
-        </Text>
-        <Button
-          onPress={() =>
-            navigation.navigate(
-              //@ts-ignore
-              'SignUp',
-              {
-                forward: encodeURIComponent(''),
-              },
-            )
-          }
-          //@ts-ignore
-          title="Sign Up">
-          <Text style={{color: '#4b9288'}}>Sign Up</Text>
-        </Button>
+            }}
+            disabled={loading}>
+            <Text style={styles.loginButtonText}>
+              {loading ? 'SIGNING IN...' : 'SIGN IN'}
+            </Text>
+          </HapticAwesomeButton>
+          <TouchableOpacity
+            style={styles.forgotPassword}
+            onPress={() => navigation.navigate('ForgotPassword')}>
+            <Text style={styles.forgotPasswordText}>FORGOT PASSWORD</Text>
+          </TouchableOpacity>
+          <Text style={styles.termsText}>
+            We use this additional password to decrypt your data so that only
+            you can unlock your data. This password was created on account
+            creation in addition to your external authentication.
+          </Text>
+        </View>
+
+        <View>
+          <Text style={styles.loginText}>
+            Haven't linked your account yet?{' '}
+            <Text
+              style={styles.loginLink}
+              onPress={() => navigation.navigate('SignUp')}>
+              Sign Up
+            </Text>
+          </Text>
+          <Text style={styles.termsText}>
+            By signing in to Gigo, you agree to our Terms and Privacy Policy.
+          </Text>
+        </View>
       </View>
     );
   };
@@ -525,122 +500,100 @@ const Login = () => {
     <Text style={styles.inputLabel}>{label}</Text>
   );
 
-  let renderLogin = () => {
-    // @ts-ignore
-    // @ts-ignore
-    // @ts-ignore
+  const renderLogin = () => {
     return (
-      <View style={styles.box}>
-        <Text style={styles.header}>Sign In</Text>
-        <TextInput
-          label={renderLabel('Username')}
-          value={username}
-          onChangeText={setUsername}
-          style={styles.input}
-          mode="flat"
-          underlineColor="transparent"
-          activeUnderlineColor="transparent"
-          textColor="white"
-          cursorColor="white"
-          placeholderTextColor="rgba(255, 255, 255, 0.5)"
-          theme={{
-            colors: {text: 'white', placeholder: 'rgba(255, 255, 255, 0.5)'},
-          }}
-        />
-        <TextInput
-          label={renderLabel('Password')}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry={!showPass}
-          style={styles.input}
-          mode="flat"
-          underlineColor="transparent"
-          activeUnderlineColor="transparent"
-          textColor="white"
-          cursorColor="white"
-          placeholderTextColor="rgba(255, 255, 255, 0.5)"
-          theme={{
-            colors: {text: 'white', placeholder: 'rgba(255, 255, 255, 0.5)'},
-          }}
-          right={
-            <TextInput.Icon
-              icon={showPass ? 'eye-off' : 'eye'}
-              onPress={() => setShowPass(!showPass)}
-              color="white"
+      <View style={styles.content}>
+        <View>
+          <View style={styles.header}>
+            <Text style={styles.title}>Enter your details</Text>
+            <HapticTouchableOpacity
+              style={styles.closeButton}
+              // @ts-ignore
+              onPress={() => navigation.navigate('Intro')}>
+              <Text style={styles.closeIcon}>✕</Text>
+            </HapticTouchableOpacity>
+          </View>
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Email, phone, or username"
+              placeholderTextColor="#888888"
+              value={username}
+              onChangeText={setUsername}
+              underlineColor="transparent"
+              activeUnderlineColor="transparent"
+              cursorColor={theme.colors.primary}
             />
-          }
-        />
-        <HapticTouchableOpacity
-          onPress={loginFunction}
-          disabled={loading}
-          style={[styles.buttonExtra, loading ? styles.disabledButton : null]}
-          activeOpacity={0.7}>
-          <Text style={styles.buttonText}>
-            {loading ? 'Loading...' : 'Login'}
-          </Text>
-        </HapticTouchableOpacity>
-        <View style={styles.accountText}>
-          <HapticTouchableOpacity
-            onPress={() =>
-              navigation.navigate(
-                //@ts-ignore
-                'ForgotPassword',
-              )
-            }>
-            <Text style={styles.buttonTextExtra}>Forgot Password</Text>
-          </HapticTouchableOpacity>
-
-          <HapticTouchableOpacity
-            onPress={() =>
-              navigation.navigate(
-                //@ts-ignore
-                'SignUp',
-              )
-            }>
-            <Text style={styles.buttonTextExtra}>No Account? Register</Text>
-          </HapticTouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor="#888888"
+              secureTextEntry={!showPass}
+              value={password}
+              onChangeText={setPassword}
+              underlineColor="transparent"
+              activeUnderlineColor="transparent"
+              cursorColor={theme.colors.primary}
+            />
+          </View>
+          <HapticAwesomeButton
+            width={width * 0.9}
+            height={50}
+            backgroundColor={theme.colors.primary}
+            // @ts-ignore
+            backgroundDarker={theme.colors.primaryVariant}
+            textColor={theme.colors.onPrimary}
+            borderRadius={12}
+            // @ts-ignore
+            textFontFamily={theme.fonts.medium.fontFamily}
+            style={styles.loginButton}
+            onPress={loginFunction}
+            disabled={loading}>
+            <Text style={styles.loginButtonText}>
+              {loading ? 'SIGNING IN...' : 'SIGN IN'}
+            </Text>
+          </HapticAwesomeButton>
+          <TouchableOpacity
+            style={styles.forgotPassword}
+            onPress={() => navigation.navigate('ForgotPassword')}>
+            <Text style={styles.forgotPasswordText}>FORGOT PASSWORD</Text>
+          </TouchableOpacity>
         </View>
-        <Text style={styles.signInWith}>or sign in with linked account:</Text>
-        <View style={styles.loginContainer}>
-          <HapticTouchableOpacity onPress={startGoogle} style={styles.button}>
-            <View style={styles.innerContainer}>
-              <Image
-                //@ts-ignore
-                style={styles.logo}
-                source={googleLogo}
-              />
-            </View>
-          </HapticTouchableOpacity>
-          <LoginGithub
-            //@ts-ignore
-            color={'primary'}
-            sx={{
-              // width: window.innerWidth > 1000 ? '7vw' : '25vw',
-              justifyContent: 'center',
-              padding: '15px',
-            }}
-            clientId="Ov23liWncdWCkys9HUil"
-            // this redirect URI is for production, testing on dev will not work
-            redirectUri={'gigoapp://callback'}
-            onSuccess={onSuccessGithub}
-            containerHeight={windowHeight * 1.80} // Pass the height
-            containerWidth={windowWidth} // Pass the width
-            onFailure={onFailureGithub}>
-            <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <SvgXml xml={githubLogo} width={imageWidth} height={imageWidth} />
-            </View>
-          </LoginGithub>
+
+        <View style={styles.socialLoginContainer}>
+          <Text style={styles.socialLoginTitle}>or sign in with:</Text>
+          <View style={styles.socialButtons}>
+            <TouchableOpacity style={styles.socialButton} onPress={startGoogle}>
+              <Image source={googleLogo} style={{width: 40, height: 40}} />
+              <Text style={styles.socialButtonText}>Google</Text>
+            </TouchableOpacity>
+            <LoginGithub
+              clientId="Ov23liWncdWCkys9HUil"
+              redirectUri={'gigoapp://callback'}
+              onSuccess={onSuccessGithub}
+              onFailure={onFailureGithub}
+              containerHeight={windowHeight * 1.8}
+              containerWidth={windowWidth}
+              buttonStyle={styles.socialButton}>
+              <SvgXml xml={githubLogo} width={40} height={40} />
+              <Text style={styles.socialButtonText}>Github</Text>
+            </LoginGithub>
+          </View>
+          <Text style={styles.termsText}>
+            By signing in to Gigo, you agree to our Terms and Privacy Policy.
+          </Text>
         </View>
       </View>
     );
   };
 
   return (
-    <KeyboardAvoidingView // Wrap your content with KeyboardAvoidingView
+    <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}>
-      <Image source={require('../img/loginJungle.png')} />
-      {external ? renderExternal() : renderLogin()}
+      <ScrollView contentContainerStyle={{flexGrow: 1}}>
+        {external || true ? renderExternal() : renderLogin()}
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };

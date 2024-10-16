@@ -6,3 +6,4 @@ When writing new functions, classes, structs, etc. include header comments in th
 Write all comments in lower case. The only things that should be upper case are programming symbols, they should preserve the case of the symbol name
 When writing react code, make sure to write beautiful, modern, and intuitive app designs that have beautiful styling. User experience is paramount.
 If you are editing large blocks of code and a block of code remains unchanged, make sure to leave it as is do not replace it with a comment.
+We use yarn as our package manager. When suggesting package manager commands, use yarn.

@@ -57,6 +57,7 @@ const App = () => {
 
     return unsubscribe;
   }, []);
+  
   useEffect(() => {
     InAppPurchases.init();
     InAppPurchases.setupListeners();

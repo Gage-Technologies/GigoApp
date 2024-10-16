@@ -6,7 +6,12 @@ import {useDispatch, useSelector} from 'react-redux';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import Config from 'react-native-config';
 
-import {initialAuthStateUpdate, initialState, selectAuthState, updateAuthState} from '../reducers/auth';
+import {
+  initialAuthStateUpdate,
+  initialState,
+  selectAuthState,
+  updateAuthState,
+} from '../reducers/auth';
 import SettingsMenu from '../components/accountSettings/SettingsMenu';
 import UserTab from '../components/accountSettings/UserTab';
 import MembershipTab from '../components/accountSettings/MembershipTab';
@@ -363,7 +368,7 @@ const AccountSettings = () => {
       await clearReducers();
       await AsyncStorage.clear();
       await new Promise(resolve => setTimeout(resolve, 300));
-      navigation.navigate('Login');
+      navigation.navigate('Intro');
     } catch (error) {
       console.error('Logout error:', error);
       Alert.alert('Error', 'Failed to logout. Please try again.');
@@ -434,11 +439,7 @@ const AccountSettings = () => {
     }
   };
 
-  return (
-    <PaperProvider>
-      <View style={styles.mainContainer}>{renderContent()}</View>
-    </PaperProvider>
-  );
+  return <View style={styles.mainContainer}>{renderContent()}</View>;
 };
 
 const styles = StyleSheet.create({

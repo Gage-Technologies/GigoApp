@@ -18,6 +18,7 @@ interface LoginGithubProps {
   containerWidth: number; // Width when expanded
   initialHeight: number; // Initial height before expanding
   initialWidth: number; // Initial width before expanding
+  buttonStyle?: any;
 }
 
 interface LoginGithubState {
@@ -124,6 +125,7 @@ class LoginGithub extends Component<LoginGithubProps, LoginGithubState> {
       initialWidth,
       containerHeight,
       containerWidth,
+      buttonStyle,
     } = this.props;
     const {showWebView, url, isExpanded} = this.state;
 
@@ -131,22 +133,20 @@ class LoginGithub extends Component<LoginGithubProps, LoginGithubState> {
       ? [styles.container, {height: containerHeight, width: containerWidth}]
       : [styles.container, {height: initialHeight, width: initialWidth}];
 
-    return (
+    return showWebView ? (
       <View style={containerStyle}>
-        {showWebView ? (
-          <WebView
-            source={{uri: url}}
-            style={styles.webView}
-            onNavigationStateChange={this.handleNavigationStateChange}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-          />
-        ) : (
-          <HapticTouchableOpacity onPress={this.onBtnClick} style={styles.button}>
-            {children || <Text style={styles.buttonText}>{buttonText}</Text>}
-          </HapticTouchableOpacity>
-        )}
+        <WebView
+          source={{uri: url}}
+          style={styles.webView}
+          onNavigationStateChange={this.handleNavigationStateChange}
+          javaScriptEnabled={true}
+          domStorageEnabled={true}
+        />
       </View>
+    ) : (
+      <HapticTouchableOpacity onPress={this.onBtnClick} style={buttonStyle}>
+        {children || <Text style={styles.buttonText}>{buttonText}</Text>}
+      </HapticTouchableOpacity>
     );
   }
 
@@ -173,11 +173,6 @@ const styles = StyleSheet.create({
   },
   webView: {
     flex: 1, // Make the WebView take up the full available space
-  },
-  button: {
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   buttonText: {
     color: 'white',

@@ -16,7 +16,8 @@
       android:windowSoftInputMode="adjustResize"
       android:hardwareAccelerated="true"
       android:exported="true"
-      android:theme="@style/BootTheme">
+      android:theme="@style/BootTheme"
+      android:screenOrientation="portrait">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />

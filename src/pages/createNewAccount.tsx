@@ -255,6 +255,7 @@ const CreateNewAccount = () => {
     // @ts-ignore
     setExternalToken(usr);
     setExternalLogin('Google');
+    setLoading(false)
   };
 
   const onSuccessGithubCreate = async (gh: {code: string}) => {
@@ -444,7 +445,7 @@ const CreateNewAccount = () => {
     setLoading(true);
     let token = await getFcmToken();
 
-    if (password !== confirmPass || password.length < 5) {
+    if (password.length < 5) {
       Alert.alert('Error', 'Passwords do not match or too short');
       setLoading(false);
       return;
@@ -1044,8 +1045,8 @@ const CreateNewAccount = () => {
                 redirectUri={'gigoapp://callback'}
                 onSuccess={onSuccessGithubCreate}
                 onFailure={onFailureGithub}
-                containerHeight={windowHeight * 1.8}
-                containerWidth={windowWidth}
+                containerHeight={windowHeight}
+                containerWidth={windowWidth * .5}
                 buttonStyle={styles.socialButton}>
                 <SvgXml xml={githubLogo} width={40} height={40} />
                 <Text style={styles.socialButtonText}>Github</Text>

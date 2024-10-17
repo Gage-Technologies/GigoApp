@@ -198,7 +198,7 @@ const Login = () => {
         return;
       }
 
-      if (auth.user !== undefined) {
+      if (res.user !== undefined) {
         let authState = {
           ...initialAuthStateUpdate, // Define this according to your auth state structure
           authenticated: true,

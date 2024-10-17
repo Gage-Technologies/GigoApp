@@ -1,5 +1,12 @@
 import React, {Component} from 'react';
-import {View, Text, Linking, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  Linking,
+  StyleSheet,
+  ScrollView,
+  InteractionManager,
+} from 'react-native';
 import HapticTouchableOpacity from '../../Buttons/HapticTouchableOpacity';
 import {WebView} from 'react-native-webview';
 import {toQuery} from './utils';
@@ -28,6 +35,7 @@ interface LoginGithubState {
 }
 
 class LoginGithub extends Component<LoginGithubProps, LoginGithubState> {
+  scrollViewRef = React.createRef<ScrollView>();
   static defaultProps: Partial<LoginGithubProps> = {
     buttonText: 'Sign in with GitHub',
     scope: 'user:email',
@@ -109,12 +117,24 @@ class LoginGithub extends Component<LoginGithubProps, LoginGithubState> {
       response_type: 'code',
     });
     const url = `https://github.com/login/oauth/authorize?${query}`;
+    console.log('here i am');
 
-    this.setState({
-      showWebView: true,
-      url,
-      isExpanded: true, // Expand the view when the button is clicked
-    });
+    this.setState(
+      {
+        showWebView: true,
+        url,
+        isExpanded: true, // Expand the view when the button is clicked
+      },
+      () => {
+        // Ensure layout has finished rendering using InteractionManager
+        InteractionManager.runAfterInteractions(() => {
+          if (this.scrollViewRef.current) {
+            // Wait for the content to be fully rendered
+            this.scrollViewRef.current.scrollToEnd({animated: true});
+          }
+        });
+      },
+    );
   };
 
   render() {
@@ -134,15 +154,27 @@ class LoginGithub extends Component<LoginGithubProps, LoginGithubState> {
       : [styles.container, {height: initialHeight, width: initialWidth}];
 
     return showWebView ? (
-      <View style={containerStyle}>
-        <WebView
-          source={{uri: url}}
-          style={styles.webView}
-          onNavigationStateChange={this.handleNavigationStateChange}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-        />
-      </View>
+      <ScrollView
+        ref={this.scrollViewRef}
+        style={{flex: 1}}
+        contentContainerStyle={{flexGrow: 1}}
+        onContentSizeChange={(contentWidth, contentHeight) => {
+          console.log('Content size changed:', contentHeight);
+          if (this.scrollViewRef.current) {
+            // Scroll to bottom when content size changes
+            this.scrollViewRef.current.scrollToEnd({animated: true});
+          }
+        }}>
+        <View style={containerStyle}>
+          <WebView
+            source={{uri: url}}
+            style={styles.webView}
+            onNavigationStateChange={this.handleNavigationStateChange}
+            javaScriptEnabled={true}
+            domStorageEnabled={true}
+          />
+        </View>
+      </ScrollView>
     ) : (
       <HapticTouchableOpacity onPress={this.onBtnClick} style={buttonStyle}>
         {children || <Text style={styles.buttonText}>{buttonText}</Text>}

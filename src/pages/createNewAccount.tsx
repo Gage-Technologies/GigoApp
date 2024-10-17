@@ -1014,7 +1014,14 @@ const CreateNewAccount = () => {
             // @ts-ignore
             textFontFamily={theme.fonts.medium.fontFamily}
             style={styles.createButton}
-            onPress={validateUser}
+            onPress={async () => {  // Wrap logic in an async arrow function
+              let ok = await validateUser();  // Asynchronously validate the user
+              if (ok) {
+                debouncedAccountCreation();  // Perform account creation if validation is successful
+              } else {
+                Alert.alert("Not a valid user", "Please use a valid email address");
+              }
+            }}
             disabled={loading}>
             <Text style={styles.createButtonText}>
               {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}

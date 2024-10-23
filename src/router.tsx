@@ -3,7 +3,7 @@ import {
   NavigationContainer,
   NavigationContainerRef,
 } from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createStackNavigator} from '@react-navigation/stack';
 import {View, StyleSheet} from 'react-native';
 import Login from './pages/login';
 import ForgotPassword from './pages/forgotPassword';
@@ -24,7 +24,7 @@ import {useSelector} from 'react-redux';
 import {selectBottomBarVisible} from './reducers/appSettings.ts';
 import Intro from './pages/intro.tsx';
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 const AppRouter = () => {
   const navigationRef = useRef<NavigationContainerRef<any>>(null);
@@ -50,64 +50,22 @@ const AppRouter = () => {
       <View style={styles.container}>
         <ConditionalTopBar currentRouteName={currentRouteName} />
         <Stack.Navigator
-          initialRouteName={authState.authenticated ? 'JourneyMain' : 'Intro'}>
-          <Stack.Screen
-            name="Intro"
-            component={Intro}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Login"
-            component={Login}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="SignUp"
-            component={CreateNewAccount}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="AccountSettings"
-            component={AccountSettings}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="JourneyMain"
-            component={JourneyMain}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="AboutJourney"
-            component={AboutJourney}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Stats"
-            component={Stats}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Detour"
-            component={Detour}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Byte"
-            // @ts-ignore
-            component={Byte}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="ForgotPassword"
-            component={ForgotPassword}
-            options={{headerShown: false}}
-          />
-          <Stack.Screen
-            name="Quiz"
-            // @ts-ignore
-            component={QuizPage}
-            options={{headerShown: false}}
-          />
+          initialRouteName={authState.authenticated ? 'JourneyMain' : 'Intro'}
+          screenOptions={{
+            headerShown: false,
+            cardStyle: {backgroundColor: '#1c1c1a'},
+          }}>
+          <Stack.Screen name="Intro" component={Intro} />
+          <Stack.Screen name="Login" component={Login} />
+          <Stack.Screen name="SignUp" component={CreateNewAccount} />
+          <Stack.Screen name="AccountSettings" component={AccountSettings} />
+          <Stack.Screen name="JourneyMain" component={JourneyMain} />
+          <Stack.Screen name="AboutJourney" component={AboutJourney} />
+          <Stack.Screen name="Stats" component={Stats} />
+          <Stack.Screen name="Detour" component={Detour} />
+          <Stack.Screen name="Byte" component={Byte} />
+          <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
+          <Stack.Screen name="Quiz" component={QuizPage} />
         </Stack.Navigator>
         <ConditionalBottomBar currentRouteName={currentRouteName} />
       </View>

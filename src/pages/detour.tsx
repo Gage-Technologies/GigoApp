@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   View,
   Text,
@@ -7,15 +7,16 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  Animated,
 } from 'react-native';
-import { useTheme, IconButton } from 'react-native-paper';
+import {useTheme, IconButton} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import Config from 'react-native-config';
-import { debounce } from 'lodash';
+import {debounce} from 'lodash';
 import DetourCard from '../components/DetourCard';
 import JourneyDetourPopup from '../components/JourneyDetourPopup';
-import { Unit } from '../models/Journey';
-import { useRoute } from '@react-navigation/native';
+import {Unit} from '../models/Journey';
+import {useRoute} from '@react-navigation/native';
 
 interface JourneyGroups {
   [key: string]: Unit[];
@@ -28,14 +29,16 @@ const Detour = () => {
   const [searchPending, setSearchPending] = useState(false);
   const [journeyGroups, setJourneyGroups] = useState<JourneyGroups>({});
   const [loading, setLoading] = useState(false);
-  const [groupStates, setGroupStates] = useState<{ [key: string]: any }>({});
+  const [groupStates, setGroupStates] = useState<{[key: string]: any}>({});
 
-  // state to manage popup visibility and selected unit
   const [isPopupVisible, setPopupVisible] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState(null);
 
   const route = useRoute();
   const initialSearchQuery = route.params?.searchQuery || '';
+
+  // animated values for header and search bar
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (initialSearchQuery) {
@@ -80,7 +83,6 @@ const Detour = () => {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const searchJourneyUnitsDebounced = useCallback(
     debounce(searchJourneyUnits, 800),
     [],
@@ -132,7 +134,7 @@ const Detour = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({ group_id: unitId }),
+          body: JSON.stringify({group_id: unitId}),
         },
       );
 
@@ -174,7 +176,6 @@ const Detour = () => {
   };
 
   const handleCardPress = (unit: Unit | React.SetStateAction<null>) => {
-    // @ts-ignore
     setSelectedUnit(unit);
     setPopupVisible(true);
   };
@@ -185,51 +186,38 @@ const Detour = () => {
   };
 
   const renderJourneyGroups = () => {
-    // @ts-ignore
     return (
       <View style={styles.journeyGroupsContainer}>
-        {Object.entries(journeyGroups).map(
-          ([
-            category,
-            {
-              //@ts-ignore
-              Units,
-              //@ts-ignore
-              GroupID,
-            },
-          ]) => (
-            <View key={category} style={styles.categoryContainer}>
-              <View style={styles.categoryHeader}>
-                <Text style={styles.categoryTitle}>{category}</Text>
-                {Units.length === 4 && (
-                  <IconButton
-                    icon={groupStates[GroupID]?.showAll ? 'chevron-up' : 'chevron-down'}
-                    onPress={() => handleShowAllToggle(GroupID)}
-                  />
-                )}
-              </View>
-              <View style={styles.unitsContainer}>
-                {(groupStates[GroupID]?.showAll
-                  ? groupStates[GroupID]?.units || Units
-                  : Units.slice(0, 4)
-                ).map((unit: Unit | React.SetStateAction<null>) => (
-                  <View
-                    key={
-                      //@ts-ignore
-                      unit.id
-                    }
-                    style={styles.unitItem}>
-                    <DetourCard
-                      //@ts-ignore
-                      data={unit}
-                      onPress={() => handleCardPress(unit)}
-                    />
-                  </View>
-                ))}
-              </View>
+        {Object.entries(journeyGroups).map(([category, {Units, GroupID}]) => (
+          <View key={category} style={styles.categoryContainer}>
+            <View style={styles.categoryHeader}>
+              <Text style={styles.categoryTitle}>{category}</Text>
+              {Units.length === 4 && (
+                <IconButton
+                  icon={
+                    groupStates[GroupID]?.showAll
+                      ? 'chevron-up'
+                      : 'chevron-down'
+                  }
+                  onPress={() => handleShowAllToggle(GroupID)}
+                />
+              )}
             </View>
-          ),
-        )}
+            <View style={styles.unitsContainer}>
+              {(groupStates[GroupID]?.showAll
+                ? groupStates[GroupID]?.units || Units
+                : Units.slice(0, 4)
+              ).map((unit: Unit | React.SetStateAction<null>) => (
+                <View key={unit.id} style={styles.unitItem}>
+                  <DetourCard
+                    data={unit}
+                    onPress={() => handleCardPress(unit)}
+                  />
+                </View>
+              ))}
+            </View>
+          </View>
+        ))}
       </View>
     );
   };
@@ -237,33 +225,24 @@ const Detour = () => {
   const renderSearchContent = () => {
     return (
       <View style={styles.searchContentContainer}>
-        {searchPending ? (
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-        ) : (
-          <View style={styles.unitsContainer}>
-            {searchUnits.map(unit => (
-              <View
-                key={
-                  //@ts-ignore
-                  unit.id
-                }
-                style={styles.unitItem}>
-                <DetourCard
-                  //@ts-ignore
-                  data={unit}
-                  onPress={() => handleCardPress(unit)}
-                />
-              </View>
-            ))}
-          </View>
-        )}
+        <View style={styles.unitsContainer}>
+          {searchUnits.map(unit => (
+            <View key={unit.id} style={styles.unitItem}>
+              <DetourCard data={unit} onPress={() => handleCardPress(unit)} />
+            </View>
+          ))}
+        </View>
       </View>
     );
   };
 
   const renderContent = () => {
     if (loading) {
-      return <ActivityIndicator size="large" color={theme.colors.primary} />;
+      return (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+        </View>
+      );
     }
 
     return searchText === '' ? renderJourneyGroups() : renderSearchContent();
@@ -280,6 +259,16 @@ const Detour = () => {
       paddingBottom: 10,
       paddingHorizontal: 20,
       backgroundColor: theme.colors.primary,
+      transform: [
+        {
+          translateY: scrollY.interpolate({
+            inputRange: [0, 100],
+            outputRange: [0, -100],
+            extrapolate: 'clamp',
+          }),
+        },
+      ],
+      zIndex: 1, // ensure header is above other content
     },
     titleText: {
       fontSize: 32,
@@ -294,8 +283,12 @@ const Detour = () => {
       marginTop: 4,
     },
     searchBarContainer: {
-      marginTop: 20,
-      marginBottom: 10,
+      marginTop: scrollY.interpolate({
+        inputRange: [0, 100],
+        outputRange: [100, 16],
+        extrapolate: 'clamp',
+      }),
+      marginBottom: 4,
       marginHorizontal: 20,
       borderRadius: 25,
       backgroundColor: theme.colors.surface,
@@ -304,9 +297,14 @@ const Detour = () => {
       paddingHorizontal: 15,
       elevation: 5,
       shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
+      shadowOffset: {width: 0, height: 2},
       shadowOpacity: 0.1,
       shadowRadius: 4,
+      position: 'absolute',
+      top: 0,
+      borderColor: theme.colors.primary,
+      borderWidth: 1,
+      zIndex: 2, // ensure search bar is above other content
     },
     searchBar: {
       flex: 1,
@@ -317,7 +315,7 @@ const Detour = () => {
     },
     content: {
       flexGrow: 1,
-      paddingTop: 10,
+      paddingTop: 60, // ensure content starts below the search bar
       paddingHorizontal: 20,
       paddingBottom: 70,
     },
@@ -353,31 +351,47 @@ const Detour = () => {
     searchContentContainer: {
       alignItems: 'center',
       width: '100%',
+      paddingTop: 10,
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <Animated.View style={styles.header}>
         <Text style={styles.titleText}>Detour</Text>
         <Text style={styles.subtitleText}>Discover new journeys</Text>
-        <View style={styles.searchBarContainer}>
-          <TextInput
-            style={styles.searchBar}
-            placeholder="Search journeys..."
-            placeholderTextColor={theme.colors.placeholder}
-            value={searchText}
-            onChangeText={handleSearchTextChange}
-          />
+      </Animated.View>
+      <Animated.View style={styles.searchBarContainer}>
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Search journeys..."
+          placeholderTextColor={theme.colors.placeholder}
+          value={searchText}
+          onChangeText={handleSearchTextChange}
+        />
+        {searchPending ? (
+          <ActivityIndicator size="small" color={theme.colors.primary} />
+        ) : (
           <IconButton
             icon="magnify"
             color={theme.colors.primary}
             size={24}
             onPress={() => searchJourneyUnits(searchText)}
           />
-        </View>
-      </View>
-      <ScrollView contentContainerStyle={styles.content}>
+        )}
+      </Animated.View>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        onScroll={Animated.event(
+          [{nativeEvent: {contentOffset: {y: scrollY}}}],
+          {useNativeDriver: false},
+        )}
+        scrollEventThrottle={16}>
         {renderContent()}
       </ScrollView>
       {selectedUnit && (

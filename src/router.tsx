@@ -54,6 +54,11 @@ const AppRouter = () => {
           screenOptions={{
             headerShown: false,
             cardStyle: {backgroundColor: '#1c1c1a'},
+            cardStyleInterpolator: ({current: {progress}}) => ({
+              cardStyle: {
+                opacity: progress,
+              },
+            }),
           }}>
           <Stack.Screen name="Intro" component={Intro} />
           <Stack.Screen name="Login" component={Login} />

@@ -85,7 +85,7 @@ const ProgressionBox: React.FC<ProgressionBoxProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 8,
+    borderRadius: 16,
     borderWidth: 1,
     width: '100%',
     height: '85%',
@@ -103,13 +103,13 @@ const styles = StyleSheet.create({
   },
   progressBarContainer: {
     height: 16,
-    borderRadius: 4,
+    borderRadius: 8,
     overflow: 'hidden',
   },
   progressBarOutline: {
     height: '100%',
     borderWidth: 2,
-    borderRadius: 4,
+    borderRadius: 8,
     overflow: 'hidden',
   },
   progressBar: {

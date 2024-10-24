@@ -54,6 +54,9 @@ const StatBox: React.FC<StatBoxProps> = ({
       const seconds = parseFloat(value);
       return isNaN(seconds) ? 'N/A' : formatTime(seconds);
     }
+    if (title === 'Completion vs Failure') {
+      return parseFloat(value).toFixed(2);
+    }
     return value;
   };
 
@@ -94,7 +97,7 @@ const StatBox: React.FC<StatBoxProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 5,
+    borderRadius: 16,
     borderWidth: 1,
     width: '100%',
     height: '90%',

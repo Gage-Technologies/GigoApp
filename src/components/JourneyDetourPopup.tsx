@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useCallback} from 'react';
+import React, {useState, useEffect, useCallback, useRef, useMemo} from 'react';
 import {
   Modal,
   View,
@@ -8,7 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import HapticTouchableOpacity from './Buttons/HapticTouchableOpacity';
-import {IconButton, useTheme, Button} from 'react-native-paper';
+import {IconButton, useTheme} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FastImage from 'react-native-fast-image';
 import Config from 'react-native-config';
@@ -16,11 +16,14 @@ import JourneyUnitCard from './JourneyUnitCard';
 import UnitSelector from './UnitSelector';
 import {useNavigation} from '@react-navigation/native';
 import {useSelector, useDispatch} from 'react-redux';
+import {BottomSheetModal, BottomSheetModalProvider, BottomSheetScrollView} from '@gorhom/bottom-sheet';
+import { theme } from '../theme';
 
 interface JourneyDetourPopupProps {
   open: boolean;
   onClose: () => void;
   unit: any;
+  style?: StyleSheet;
 }
 
 const CloseIcon = () => <Icon name="close" size={24} color="#fff" />;
@@ -29,6 +32,7 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
   open,
   onClose,
   unit,
+  style,
 }) => {
   const [showFullDescription, setShowFullDescription] = useState(false);
   const [stage, setStage] = useState(1);
@@ -41,17 +45,33 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
   const userId = useSelector(state => state.auth.id);
 
   const toggleDescription = () => setShowFullDescription(!showFullDescription);
-  const displayedDescription = showFullDescription
-    ? unit.description
-    : `${unit.description.substring(0, 150)}...`;
+  // const displayedDescription = showFullDescription
+  //   ? unit.description
+  //   : `${unit.description.substring(0, 150)}...`;
+  const displayedDescription = unit.description;
 
+  // ref for the bottom sheet modal component
+  const bottomSheetModalRef = useRef<BottomSheetModal>(null);
+
+  // defines the snap points for bottom sheet modal
+  const snapPoints = useMemo(() => ['50%', '100%'], []);
+
+  // effect to control the visibility of the bottom sheet modal
   useEffect(() => {
     if (open) {
+      // present the bottom sheet modal
+      bottomSheetModalRef.current?.present();
       getUnitMap(unit._id);
+    } else {
+      // dismiss the bottom sheet modal
+      bottomSheetModalRef.current?.dismiss();
     }
-  }, [open]);
+  }, [open, unit._id]);
 
-  
+  // handles changes in the sheet position
+  const handleSheetChanges = useCallback((index: number) => {
+    console.log('handleSheetChanges', index);
+  }, []);
 
   const getUnitMap = async (unitId: string) => {
     try {
@@ -158,20 +178,18 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
       <Text style={[styles.description, {color: theme.colors.text}]}>
         {displayedDescription}
       </Text>
-      {unit.description.length > 150 && (
+      {/* {unit.description.length > 150 && (
         <HapticTouchableOpacity onPress={toggleDescription}>
           <Text style={[styles.readMore, {color: theme.colors.primary}]}>
             {showFullDescription ? 'Read Less' : 'Read More'}
           </Text>
         </HapticTouchableOpacity>
-      )}
-      <Button
-        mode="contained"
+      )} */}
+      <HapticTouchableOpacity
         onPress={handleContinue}
-        style={styles.continueButton}
-        labelStyle={styles.continueButtonLabel}>
-        Continue
-      </Button>
+        style={styles.continueButton}>
+        <Text style={styles.continueButtonLabel}>Continue</Text>
+      </HapticTouchableOpacity>
     </ScrollView>
   );
 
@@ -197,7 +215,7 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
           <View style={styles.explanationTextWrapper}>
             <Text
               style={[styles.explanationText, {color: theme.colors.text}]}
-              numberOfLines={showFullExplanation ? undefined : 1}>
+              numberOfLines={showFullExplanation ? undefined : 2}>
               This Detour is part of a larger Journey. Select the point that you
               would like to start your Detour at. If you are unfamiliar with the
               concept, we would recommend starting this detour at the beginning
@@ -243,13 +261,11 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
             </View>
           </View>
         </View>
-        <Button
-          mode="contained"
+        <HapticTouchableOpacity
           onPress={takeDetour}
-          style={styles.continueButton}
-          labelStyle={styles.continueButtonLabel}>
-          Take Detour
-        </Button>
+          style={styles.continueButton}>
+          <Text style={styles.continueButtonLabel}>Take Detour</Text>
+        </HapticTouchableOpacity>
       </ScrollView>
     );
   };
@@ -272,11 +288,6 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
               </View>
             )}
           </View>
-          <IconButton
-            icon={CloseIcon}
-            onPress={() => setStage(2)}
-            style={styles.closeButton}
-          />
         </View>
         <FastImage
           source={{uri: `${Config.API_URL}/static/junit/t/${selectedUnit._id}`}}
@@ -285,48 +296,48 @@ const JourneyDetourPopup: React.FC<JourneyDetourPopupProps> = ({
           resizeMode={FastImage.resizeMode.cover}
         />
         <Text style={[styles.description, {color: theme.colors.text}]}>
-          {showFullDescription
-            ? selectedUnit.description
-            : `${selectedUnit.description.substring(0, 150)}...`}
+          {selectedUnit.description}
         </Text>
-        {selectedUnit.description.length > 150 && (
-          <HapticTouchableOpacity onPress={toggleDescription}>
-            <Text style={[styles.readMore, {color: theme.colors.primary}]}>
-              {showFullDescription ? 'Read Less' : 'Read More'}
-            </Text>
+        <View style={styles.buttonContainer}>
+          <HapticTouchableOpacity
+            onPress={handleSelectUnit} // start unit
+            style={styles.startUnitButton}>
+            <Text style={styles.continueButtonLabel}>Start Unit</Text>
           </HapticTouchableOpacity>
-        )}
-        <Button
-          mode="contained"
-          onPress={handleSelectUnit}
-          style={styles.continueButton}
-          labelStyle={styles.continueButtonLabel}>
-          Select
-        </Button>
+          <HapticTouchableOpacity
+            onPress={() => setStage(2)} // return to units
+            style={styles.returnToUnitsButton}>
+            <Text style={styles.continueButtonLabel}>Return To Units</Text>
+          </HapticTouchableOpacity>
+        </View>
       </ScrollView>
     );
   };
 
   return (
-    <Modal
-      visible={open}
-      animationType="slide"
-      onRequestClose={onClose}
-      transparent={true}>
-      <View style={styles.modalBackground}>
-        <View
-          style={[
-            styles.modalContainer,
-            {backgroundColor: theme.colors.surface},
-          ]}>
-          {stage === 1
-            ? renderStage1()
-            : stage === 2
-            ? renderStage2()
-            : renderStage3()}
-        </View>
-      </View>
-    </Modal>
+    <BottomSheetModalProvider>
+      <BottomSheetModal
+        ref={bottomSheetModalRef}
+        index={0}
+        snapPoints={snapPoints}
+        style={style}
+        onChange={handleSheetChanges}
+        onDismiss={onClose}
+        backgroundStyle={{backgroundColor: theme.colors.surface}}
+        handleIndicatorStyle={{
+          backgroundColor: theme.colors.text,
+        }}>
+        <BottomSheetScrollView>
+          <View style={styles.modalContainer}>
+            {stage === 1
+              ? renderStage1()
+              : stage === 2
+              ? renderStage2()
+              : renderStage3()}
+          </View>
+        </BottomSheetScrollView>
+      </BottomSheetModal>
+    </BottomSheetModalProvider>
   );
 };
 
@@ -340,8 +351,7 @@ const styles = StyleSheet.create({
   modalContainer: {
     borderRadius: 20,
     padding: 20,
-    width: '90%',
-    maxHeight: '90%',
+    width: '100%',
   },
   header: {
     flexDirection: 'row',
@@ -377,9 +387,40 @@ const styles = StyleSheet.create({
   continueButton: {
     marginTop: 20,
     paddingVertical: 8,
+    height: 50,
+    borderRadius: 20,
+    padding: 10,
+    margin: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.primary,
+  },
+  returnToUnitsButton: {
+    marginTop: 20,
+    paddingVertical: 8,
+    height: 50,
+    borderRadius: 20,
+    padding: 10,
+    margin: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FF0000',
+  },
+  startUnitButton: {
+    marginTop: 20,
+    paddingVertical: 8,
+    height: 50,
+    borderRadius: 20,
+    padding: 10,
+    margin: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: theme.colors.primary,
   },
   continueButtonLabel: {
-    fontSize: 16,
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
   },
   unitMapContainer: {
     marginBottom: 20,
@@ -394,6 +435,7 @@ const styles = StyleSheet.create({
   },
   unitMapContent: {
     flexDirection: 'row',
+    width: '100%',
   },
   unitSelectorContainer: {
     width: 30,
@@ -441,6 +483,21 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  buttonContainer: {
+    flexDirection: 'column',
+    // justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  returnButton: {
+    flex: 1,
+    marginRight: 10,
+  },
+  startButton: {
+    flex: 1,
+  },
+  buttonLabel: {
+    fontSize: 16,
   },
 });
 

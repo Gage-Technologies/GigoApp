@@ -1,4 +1,10 @@
-import React, {useState, useEffect, useRef, useCallback, memo, useMemo} from 'react';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  memo,
+} from 'react';
 import {
   ScrollView,
   View,
@@ -6,7 +12,6 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  InteractionManager, // import InteractionManager
 } from 'react-native';
 import HapticTouchableOpacity from '../components/Buttons/HapticTouchableOpacity';
 import {Text, useTheme} from 'react-native-paper';
@@ -31,14 +36,12 @@ import {
 } from '../reducers/auth';
 import {useDispatch, useSelector} from 'react-redux';
 import {setBottomBarVisible} from '../reducers/appSettings';
-import debounce from 'lodash/debounce';
 
 const JourneyMain = () => {
   const [initialized, setInitialized] = useState(false);
   const [units, setUnits] = useState<Unit[]>([]);
   const [activeJourney, setActiveJourney] = useState<boolean | null>(null);
   const [showHandout, setShowHandout] = useState<number | null>(null);
-  const [openDetourPop, setOpenDetourPop] = useState(false);
   const [showXpPopup, setShowXpPopup] = useState(false);
   const [showEmptyJourney, setShowEmptyJourney] = useState(false);
   const [filteredUnits, setFilteredUnits] = useState<Unit[]>([]);
@@ -137,7 +140,7 @@ const JourneyMain = () => {
       });
 
       if (!response.ok) {
-        console.log("response was not ok: ", response)
+        console.log('response was not ok: ', response);
         return;
       }
 
@@ -181,6 +184,12 @@ const JourneyMain = () => {
 
       let res = await response.json();
 
+      console.log(
+        '--- user map response ---',
+        JSON.stringify(res, null, 2),
+        '--- end of user map response ---',
+      );
+
       const fetchedUnits = await Promise.all(
         res.user_map.units.map(async (unit: {_id: any}) => {
           const response = await fetch(
@@ -221,20 +230,25 @@ const JourneyMain = () => {
         }),
       );
 
+      console.log(
+        '--- fetched units ---',
+        JSON.stringify(fetchedUnits, null, 2),
+        '--- end of fetched units ---',
+      );
+
       // Set nextUnit if fetchedUnits has more than 1 unit
-      if (fetchedUnits.length > 1) {
+      if (fetchedUnits.length > 1 && !loadMore) {
         const nextUnit = fetchedUnits[fetchedUnits.length - 1];
+        console.log(
+          '--- next unit name ---',
+          nextUnit.name,
+          '--- end of next unit name ---',
+        );
         setNextUnit(nextUnit);
-        // Slice off the last unit from the fetched units, as in the original logic
-        const slicedUnits = fetchedUnits.slice(0, -1);
-        setUnits(prevUnits =>
-          loadMore ? [...slicedUnits, ...prevUnits] : slicedUnits,
-        );
-      } else {
-        setUnits(prevUnits =>
-          loadMore ? [...fetchedUnits, ...prevUnits] : fetchedUnits,
-        );
       }
+      setUnits(prevUnits =>
+        loadMore ? [...fetchedUnits, ...prevUnits] : fetchedUnits,
+      );
 
       if (fetchedUnits.length < 5) {
         setHasMore(false);

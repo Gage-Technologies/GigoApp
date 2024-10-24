@@ -17,6 +17,8 @@ import DetourCard from '../components/DetourCard';
 import JourneyDetourPopup from '../components/JourneyDetourPopup';
 import {Unit} from '../models/Journey';
 import {useRoute} from '@react-navigation/native';
+import { setBottomBarVisible } from '../reducers/appSettings';
+import { useDispatch } from 'react-redux';
 
 interface JourneyGroups {
   [key: string]: Unit[];
@@ -37,6 +39,8 @@ const Detour = () => {
   const route = useRoute();
   const initialSearchQuery = route.params?.searchQuery || '';
 
+  const dispatch = useDispatch();
+
   // animated values for header and search bar
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -50,6 +54,10 @@ const Detour = () => {
   useEffect(() => {
     getGroups();
   }, []);
+
+  useEffect(() => {
+    dispatch(setBottomBarVisible(!isPopupVisible));
+  }, [isPopupVisible, dispatch]);
 
   const searchJourneyUnits = async (text: string) => {
     setSearchPending(true);
@@ -268,7 +276,6 @@ const Detour = () => {
           }),
         },
       ],
-      zIndex: 1, // ensure header is above other content
     },
     titleText: {
       fontSize: 32,
@@ -304,7 +311,7 @@ const Detour = () => {
       top: 0,
       borderColor: theme.colors.primary,
       borderWidth: 1,
-      zIndex: 2, // ensure search bar is above other content
+      zIndex: 1, // ensure search bar is below the modal
     },
     searchBar: {
       flex: 1,
@@ -358,6 +365,14 @@ const Detour = () => {
       justifyContent: 'center',
       alignItems: 'center',
     },
+    modalOverlay: {
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      zIndex: 2, // ensure modal is above all other components
+    },
   });
 
   return (
@@ -395,11 +410,13 @@ const Detour = () => {
         {renderContent()}
       </ScrollView>
       {selectedUnit && (
-        <JourneyDetourPopup
-          open={isPopupVisible}
-          onClose={handleClosePopup}
-          unit={selectedUnit}
-        />
+        <View style={styles.modalOverlay}>
+          <JourneyDetourPopup
+            open={isPopupVisible}
+            onClose={handleClosePopup}
+            unit={selectedUnit}
+          />
+        </View>
       )}
     </View>
   );

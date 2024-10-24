@@ -112,73 +112,21 @@ const TopBar = () => {
 
   return (
     <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: theme.colors.surface,
-          borderBottomColor: theme.colors.primary + '80',
-          borderBottomWidth: 2,
-        },
-      ]}>
-      {/*<View style={styles.leftSection}>*/}
-      {/*  <Menu*/}
-      {/*    visible={visible}*/}
-      {/*    onDismiss={closeMenu}*/}
-      {/*    contentStyle={{backgroundColor: theme.colors.surface}}*/}
-      {/*    anchor={*/}
-      {/*      <HapticTouchableOpacity style={styles.languageSelector} onPress={openMenu}>*/}
-      {/*        {renderLogo(*/}
-      {/*          programmingLanguages.find(lang => lang.name === selectedLanguage)*/}
-      {/*            ?.icon,*/}
-      {/*        )}*/}
-      {/*        <Icon*/}
-      {/*          name="chevron-down"*/}
-      {/*          size={24}*/}
-      {/*          color={theme.colors.onSurface}*/}
-      {/*        />*/}
-      {/*      </HapticTouchableOpacity>*/}
-      {/*    }*/}
-      {/*    style={{marginTop: 40}} // Adjust this value as needed*/}
-      {/*  >*/}
-      {/*    {programmingLanguages.map(lang => (*/}
-      {/*      <Menu.Item*/}
-      {/*        key={lang.name}*/}
-      {/*        onPress={() => {*/}
-      {/*          setSelectedLanguage(lang.name);*/}
-      {/*          closeMenu();*/}
-      {/*          console.log('Setting new language:', lang.name);*/}
-      {/*        }}*/}
-      {/*        title={*/}
-      {/*          <View style={styles.menuItemContent}>*/}
-      {/*            {renderLogo(lang.icon)}*/}
-      {/*            <Text*/}
-      {/*              style={[*/}
-      {/*                styles.menuItemText,*/}
-      {/*                {color: theme.colors.onSurface},*/}
-      {/*              ]}>*/}
-      {/*              {lang.name}*/}
-      {/*            </Text>*/}
-      {/*          </View>*/}
-      {/*        }*/}
-      {/*      />*/}
-      {/*    ))}*/}
-      {/*  </Menu>*/}
-      {/*</View>*/}
+      style={
+        styles.container}>
 
       <View style={styles.centerSection}>
         <HapticTouchableOpacity
-          style={[
-            styles.membershipContainer,
-            {backgroundColor: theme.colors.primary + '20'},
-          ]}
+          style={
+            styles.membershipContainer}
           onPress={openProPopup}>
-          <Icon name="crown" size={20} color={theme.colors.primary} />
+          <Icon name="crown" size={20} color={theme.colors.onPrimary} />
           {membership !== 0 ? (
-            <Text style={[styles.membershipText, {color: theme.colors.primary}]}>
+            <Text style={styles.membershipText}>
               Pro Level: {membershipString}
             </Text>
           ) : (
-            <Text style={[styles.membershipText, {color: theme.colors.primary}]}>
+            <Text style={styles.membershipText}>
               Go Pro
             </Text>
           )}
@@ -215,9 +163,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 60,
     paddingHorizontal: 16,
+    backgroundColor: '#1C1C1E', // Dark neutral
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.1)',
-    elevation: 4,
+    borderBottomColor: '#333333', // Subtle border for sleek look
   },
   leftSection: {
     flex: 1,
@@ -225,11 +173,13 @@ const styles = StyleSheet.create({
   },
   centerSection: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   rightSection: {
-    flex: 1,
-    alignItems: 'flex-end',
+    flex: 0.5, // Take less space in the right section to allow centerSection to shift left
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
   },
   languageSelector: {
     flexDirection: 'row',
@@ -248,8 +198,10 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   statsText: {
-    fontSize: 16,
+    fontSize: 18,
     marginLeft: 8,
+    color: '#FFFFFF', // White text for dark background
+    fontWeight: 'bold',
   },
   menuItemContent: {
     flexDirection: 'row',
@@ -262,14 +214,17 @@ const styles = StyleSheet.create({
   membershipContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 6,
-    borderRadius: 16,
+    borderRadius: 18,
+    backgroundColor: '#2C2C2E', // Slightly lighter dark gray
+    borderWidth: 1,
+    borderColor: '#444444', // Subtle border
   },
   membershipText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 6,
+    marginLeft: 8,
   },
 });
 
